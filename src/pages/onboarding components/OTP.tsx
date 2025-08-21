@@ -1,26 +1,30 @@
-import { useState, useRef, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import Modal from './Modal';
-import AuthService from '../services/auth.service';
+import { useState, useRef, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import Modal from "../../components/Modal";
+import AuthService from "../../services/auth.service";
 
-const OTP = ({ email, signupData, onSuccess }) => {
-  const [otp, setOtp] = useState(['', '', '', '', '', '']);
+const OTP = () => {
+  const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [showModal, setShowModal] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [verificationResponse, setVerificationResponse] = useState(null);
   const navigate = useNavigate();
-  
+
+  // Get email from URL parameters
+  const query = new URLSearchParams(window.location.search);
+  const email = query.get("email") || "";
+
   const inputRefs = [
-    useRef(null),
-    useRef(null),
-    useRef(null),
-    useRef(null),
-    useRef(null),
-    useRef(null),
+    useRef<HTMLInputElement>(null),
+    useRef<HTMLInputElement>(null),
+    useRef<HTMLInputElement>(null),
+    useRef<HTMLInputElement>(null),
+    useRef<HTMLInputElement>(null),
+    useRef<HTMLInputElement>(null),
   ];
 
-  const handleChange = (index, value) => {
+  const handleChange = (index: number, value: string) => {
     // Only allow numbers
     if (!/^\d*$/.test(value)) return;
 
@@ -29,20 +33,21 @@ const OTP = ({ email, signupData, onSuccess }) => {
     setOtp(newOtp);
 
     // Move to next input if value is entered
-    if (value !== '' && index < 5) {
-      inputRefs[index + 1].current.focus();
+    if (value !== "" && index < 5) {
+      inputRefs[index + 1].current?.focus();
     }
 
     // If all digits are filled, trigger verify
-    if (value !== '' && index === 5) {
-      handleVerify(newOtp.join(''));
+    if (value !== "" && index === 5) {
+      handleVerify(newOtp.join(""));
     }
   };
 
-  const handleVerify = async (otpString) => {
+  const handleVerify = async (otpString: string) => {
     setIsLoading(true);
     try {
-      const response = await AuthService.verifyOTP(signupData, otpString);
+      // Use email from URL params for verification
+      const response = await AuthService.verifyOTP({ email }, otpString);
       setIsSuccess(response.success);
       setShowModal(true);
       setVerificationResponse(response);
@@ -57,26 +62,27 @@ const OTP = ({ email, signupData, onSuccess }) => {
   const handleModalClose = () => {
     setShowModal(false);
     if (isSuccess) {
-      onSuccess?.(verificationResponse);
+      // Navigate to dashboard or appropriate page after successful verification
+      navigate("/dashboard");
     } else {
       // Reset OTP inputs
-      setOtp(['', '', '', '', '', '']);
-      inputRefs[0].current.focus();
+      setOtp(["", "", "", "", "", ""]);
+      inputRefs[0].current?.focus();
     }
   };
 
-  const handleKeyDown = (index, e) => {
+  const handleKeyDown = (index: number, e: React.KeyboardEvent) => {
     // Move to previous input on backspace if current input is empty
-    if (e.key === 'Backspace' && otp[index] === '' && index > 0) {
-      inputRefs[index - 1].current.focus();
+    if (e.key === "Backspace" && otp[index] === "" && index > 0) {
+      inputRefs[index - 1].current?.focus();
     }
   };
 
-  const handlePaste = (e) => {
+  const handlePaste = (e: React.ClipboardEvent) => {
     e.preventDefault();
-    const pastedData = e.clipboardData.getData('text');
-    const pastedOtp = pastedData.slice(0, 6).split('');
-    
+    const pastedData = e.clipboardData.getData("text");
+    const pastedOtp = pastedData.slice(0, 6).split("");
+
     if (!/^\d*$/.test(pastedData)) return;
 
     const newOtp = [...otp];
@@ -89,18 +95,19 @@ const OTP = ({ email, signupData, onSuccess }) => {
 
     // Focus last filled input or first empty input
     const lastIndex = Math.min(pastedOtp.length - 1, 5);
-    inputRefs[lastIndex].current.focus();
+    inputRefs[lastIndex].current?.focus();
 
     // If all digits are filled, verify OTP
     if (pastedOtp.length === 6) {
-      handleVerify(newOtp.join(''));
+      handleVerify(newOtp.join(""));
     }
   };
 
   const handleResend = async () => {
     setIsLoading(true);
     try {
-      await AuthService.resendOTP(signupData);
+      // Use email from URL params for resending OTP
+      await AuthService.resendOTP({ email });
       // Show success message
       setShowModal(true);
       setIsSuccess(true);
@@ -114,21 +121,23 @@ const OTP = ({ email, signupData, onSuccess }) => {
 
   // Focus first input on mount
   useEffect(() => {
-    inputRefs[0].current.focus();
+    inputRefs[0].current?.focus();
   }, []);
 
   return (
     <>
-      <div className="bg-white rounded-lg shadow-lg p-8 w-full max-w-md">
-        <div className="text-center mb-8">
-          <h2 className="text-3xl font-bold text-gray-900 mb-4">OTP Code</h2>
-          <p className="text-gray-600 text-sm">
-            Please enter your OTP code we've sent to{' '}
+      <div className="bg-white rounded-3xl shadow-lg p-10 w-full max-w-xl">
+        <div className="mb-6">
+          <h2 className="text-3xl font-semibold text-textprimary mb-2">
+            OTP Code
+          </h2>
+          <p className="text-black text-sm">
+            Please enter your OTP code we've sent to{" "}
             <span className="font-medium text-gray-900">{email}</span>
           </p>
         </div>
 
-        <div className="flex justify-center gap-3 mb-8">
+        <div className="flex justify-center gap-6 mb-8">
           {otp.map((digit, index) => (
             <input
               key={index}
@@ -140,20 +149,20 @@ const OTP = ({ email, signupData, onSuccess }) => {
               onPaste={handlePaste}
               ref={inputRefs[index]}
               disabled={isLoading}
-              className="w-12 h-12 text-center text-2xl font-bold border-2 border-gray-300 rounded-xl focus:border-teal-500 focus:ring-2 focus:ring-teal-500 focus:outline-none transition-colors duration-200 disabled:bg-gray-100 disabled:cursor-not-allowed"
+              className="w-16 h-16 flex-1 text-center text-2xl font-bold border-1 border-gray-300 rounded-lg focus:border-teal-500 focus:ring-1 focus:ring-teal-500 focus:outline-none transition-colors duration-200 disabled:bg-gray-100 disabled:cursor-not-allowed"
             />
           ))}
         </div>
 
         <div className="text-center">
           <p className="text-gray-600 text-sm">
-            Didn't receive the code?{' '}
+            If you didn’t get the code{" "}
             <button
               onClick={handleResend}
               disabled={isLoading}
-              className="text-teal-600 hover:text-teal-700 font-medium focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+              className="text-teal-600 hover:text-bgprimary font-medium focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Click here to resend
+              Click Here
             </button>
           </p>
         </div>
