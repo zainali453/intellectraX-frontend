@@ -1,18 +1,19 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import BioQualifications from "../components/teacherOnboarding/BioQualification";
 import ClassSubject from "../components/teacherOnboarding/ClassSubject";
 import AvailabilitySchedule from "../components/teacherOnboarding/AvailabilitySchedule";
 import PricingDetails from "../components/teacherOnboarding/PricingDetails";
-import AuthService from "../services/auth.service";
+import { authService } from "../services/auth.service";
 import { getStepContent, isStepValid } from "../utils/utils";
 import { useUser } from "../context/UserContext";
+import { onboardingService } from "../services/onboarding.service";
+import LoadingSpinner from "../components/LoadingSpinner";
 
 // Define interfaces for better type safety
 interface BioData {
-  profileImage: string;
-  governmentIdFront: string;
-  governmentIdBack: string;
+  profilePic: string;
+  governmentId: string;
   degreeLinks: string[];
   certificateLinks: string[];
   bio: string;
@@ -45,10 +46,9 @@ interface PricingData {
 }
 
 interface OnboardingData {
-  userId: string;
-  profilePicture: string;
-  governmentIdFront: string;
-  governmentIdBack: string;
+  profilePic: string;
+  bio: string;
+  governmentId: string;
   degreeLinks: string[];
   certificateLinks: string[];
   subjects: string[];
@@ -81,27 +81,9 @@ interface PricingDetailsRef {
 
 const Onboarding = () => {
   const navigate = useNavigate();
-  const { setOnboardingStatus } = useUser();
+  const { setOnboardingStatus, user } = useUser();
 
-  // Get user data from localStorage
-  const [user] = useState(() => {
-    const userData = localStorage.getItem("user");
-    return userData ? JSON.parse(userData) : null;
-  });
-
-  // Redirect if no user or invalid role
-  React.useEffect(() => {
-    // if (!user || !user.role || user.role?.toLowerCase() !== "teacher") {
-    //   navigate("/signup");
-    //   return;
-    // }
-    // if (user.onboarding) {
-    //   navigate("/verification-pending");
-    //   return;
-    // }
-  }, [user, navigate]);
-
-  const [currentStep, setCurrentStep] = useState(4);
+  const [currentStep, setCurrentStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -113,10 +95,9 @@ const Onboarding = () => {
 
   // State for all component data
   const [onboardingData, setOnboardingData] = useState<OnboardingData>({
-    userId: crypto.randomUUID(),
-    profilePicture: "",
-    governmentIdFront: "",
-    governmentIdBack: "",
+    profilePic: "",
+    bio: "",
+    governmentId: "",
     degreeLinks: [],
     certificateLinks: [],
     subjects: [],
@@ -124,6 +105,24 @@ const Onboarding = () => {
     pricingDetails: [{ subject: "", price: 0 }],
     cardDetails: { cardHolder: "", cardNumber: "", expiryDate: "", cvv: "" },
   });
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        const response = await onboardingService.getTeacherOnBoardingData();
+        if (response.data) {
+          const data = response.data;
+          setOnboardingData((prev) => ({ ...prev, ...data }));
+        }
+      } catch (error) {
+        console.error("Error fetching onboarding data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
 
   const updateUserOnboardingStatus = () => {
     const updatedUser = { ...user, onboarding: true };
@@ -149,29 +148,32 @@ const Onboarding = () => {
         },
       };
 
-      const response = await AuthService.completeOnboarding(
-        user.email,
-        formData,
-        user.role
-      );
+      // const response = await authService.completeOnboarding(user.email);
 
-      if (response.success) {
-        if (
-          response.message === "Teacher profile already exists" ||
-          response.user.onboarding === true
-        ) {
-          updateUserOnboardingStatus();
-          navigate("/verification-pending");
-        } else {
-          setError("Onboarding completion not confirmed. Please try again.");
-        }
-      } else if (response.message !== "Teacher profile already exists") {
-        throw new Error(response.message || "Failed to complete onboarding");
-      }
+      // if (response.success) {
+      //   if (
+      //     response.message === "Teacher profile already exists" ||
+      //     response.onboarding === true
+      //   ) {
+      //     updateUserOnboardingStatus();
+      //     navigate("/verification-pending");
+      //   } else {
+      //     setError("Onboarding completion not confirmed. Please try again.");
+      //   }
+      // } else if (response.message !== "Teacher profile already exists") {
+      //   throw new Error(response.message || "Failed to complete onboarding");
+      // }
     } catch (error) {
-      if (error.message !== "Teacher profile already exists") {
+      if (
+        typeof error === "object" &&
+        error !== null &&
+        "message" in error &&
+        typeof (error as { message?: unknown }).message === "string" &&
+        (error as { message: string }).message !==
+          "Teacher profile already exists"
+      ) {
         setError(
-          error.message ||
+          (error as { message: string }).message ||
             "There was an error submitting your information. Please try again."
         );
       }
@@ -182,7 +184,6 @@ const Onboarding = () => {
 
   const handleNext = async () => {
     setError("");
-    navigate("/pricenegotiation");
 
     try {
       switch (currentStep) {
@@ -191,9 +192,8 @@ const Onboarding = () => {
             const currentData = await bioRef.current.getData();
             setOnboardingData((prev) => ({
               ...prev,
-              profilePicture: currentData.profileImage,
-              governmentIdFront: currentData.governmentIdFront,
-              governmentIdBack: currentData.governmentIdBack,
+              profilePicture: currentData.profilePic,
+              governmentId: currentData.governmentId,
               degreeLinks: currentData.degreeLinks || [],
               certificateLinks: currentData.certificateLinks || [],
               bio: currentData.bio,
@@ -226,7 +226,6 @@ const Onboarding = () => {
           }
           break;
       }
-
       if (isStepValid(onboardingData, currentStep, "teacher")) {
         if (currentStep === 4) {
           await handleFinish();
@@ -235,6 +234,7 @@ const Onboarding = () => {
         }
       } else {
         setError("Please fill in all required fields before proceeding.");
+        window.scrollTo({ top: 0, behavior: "smooth" });
       }
     } catch (error) {
       setError(
@@ -274,14 +274,18 @@ const Onboarding = () => {
       <div className="flex-1 overflow-hidden flex flex-col min-h-0">
         <div className="flex-1 overflow-y-auto">
           <div className="h-full">
-            {currentStep === 1 && (
+            {loading && (
+              <div className="flex items-center justify-center h-full min-h-120">
+                <LoadingSpinner size={"lg"} />
+              </div>
+            )}
+            {currentStep === 1 && !loading && (
               <BioQualifications
-                ref={bioRef}
-                // data={onboardingData}
+                data={onboardingData}
                 onChange={setOnboardingData}
               />
             )}
-            {currentStep === 2 && (
+            {currentStep === 2 && !loading && (
               <ClassSubject
                 ref={subjectsRef}
                 onChange={(subjects: StudyLevel[]) =>
@@ -292,7 +296,7 @@ const Onboarding = () => {
                 }
               />
             )}
-            {currentStep === 3 && (
+            {currentStep === 3 && !loading && (
               <AvailabilitySchedule
                 ref={availabilityRef}
                 slots={onboardingData.availability}
@@ -301,7 +305,7 @@ const Onboarding = () => {
                 }
               />
             )}
-            {currentStep === 4 && (
+            {currentStep === 4 && !loading && (
               <PricingDetails
                 onDataChange={(pricingDetails: any) =>
                   setOnboardingData((prev) => ({ ...prev, pricingDetails }))

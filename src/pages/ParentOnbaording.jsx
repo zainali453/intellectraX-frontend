@@ -18,17 +18,17 @@ const ParentOnboarding = () => {
   });
 
   // Redirect if no user or invalid role
-  React.useEffect(() => {
-    if (!user || !user.role || user.role?.toLowerCase() !== "parent") {
-      navigate("/signup");
-      return;
-    }
+  // React.useEffect(() => {
+  //   if (!user || !user.role || user.role?.toLowerCase() !== "parent") {
+  //     navigate("/signup");
+  //     return;
+  //   }
 
-    if (user.onboarding) {
-      navigate("/verification-pending");
-      return;
-    }
-  }, [user, navigate]);
+  //   if (user.onboarding) {
+  //     navigate("/verification-pending");
+  //     return;
+  //   }
+  // }, [user, navigate]);
 
   const [currentStep, setCurrentStep] = useState(1);
   const [loading, setLoading] = useState(false);

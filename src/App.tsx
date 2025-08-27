@@ -1,44 +1,16 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import SignIn from "./pages/Signin";
-import DashboardLayout from "./pages/Dashboard";
-import ProtectedRoute from "./components/ProtectedRoute";
-import AuthGuard from "./components/AuthGuard";
-import TeacherOnboarding from "./pages/TeacherOnboarding";
-import StudentOnboarding from "./pages/StudentsOnboarding";
-import ParentOnboarding from "./pages/ParentOnbaording";
-import Onboarding from "./pages/Onboarding";
-import VerificationPending from "./pages/VerificationPending";
 import { UserProvider } from "./context/UserContext";
 import Landing from "./pages/Landing";
-import JWTExpiredHandler from "./components/JWTExpiredHandler";
-import MainLayout from "./layouts/MainLayout";
 import AuthLayout from "./layouts/AuthLayout";
+import AuthGuard from "./layouts/AuthGuard";
 
-// Page Components
-import DashMain from "./pages/dashboard pages/DashMain";
-import Verifications from "./pages/dashboard pages/Verification";
-import ViewDetails from "./components/ViewDetails";
-import ViewDetailsActor from "./components/ViewDetailsActor";
-import ProfileView from "./pages/dashboard pages/ProfileView";
-import Signup from "./pages/Signup";
-
-// Role-based Route Components
-import {
-  ClassesRoute,
-  StudentsRoute,
-  TeachersRoute,
-  ParentsRoute,
-  SubjectsRoute,
-  AssignmentsRoute,
-  QuizzesRoute,
-  SystemLogsRoute,
-  EarningsRoute,
-  SupportTicketsRoute,
-} from "./routing";
 import RegistrationForm from "./pages/onboarding components/RegistrationForm";
 import OTP from "./pages/onboarding components/OTP";
 import RegistrationSuccess from "./components/teacherOnboarding/RegistrationSuccess";
 import PriceNegotiation from "./components/teacherOnboarding/PriceNegotation";
+import Onboarding from "./pages/Onboarding";
+import Signup from "./pages/Signup";
 
 function App() {
   return (
@@ -72,7 +44,7 @@ function App() {
           <Route
             path="/otp"
             element={
-              <AuthGuard requireAuth={false}>
+              <AuthGuard requireAuth={true}>
                 <OTP />
               </AuthGuard>
             }
@@ -90,7 +62,7 @@ function App() {
           <Route
             path="/onboarding"
             element={
-              <AuthGuard requireAuth={false}>
+              <AuthGuard requireAuth={true}>
                 <Onboarding />
               </AuthGuard>
             }
@@ -98,7 +70,7 @@ function App() {
           <Route
             path="/success"
             element={
-              <AuthGuard requireAuth={false}>
+              <AuthGuard requireAuth={true}>
                 <RegistrationSuccess />
               </AuthGuard>
             }
@@ -111,6 +83,7 @@ function App() {
               </AuthGuard>
             }
           />
+
           {/* <Route
             path="/verification-pending"
             element={
@@ -124,8 +97,6 @@ function App() {
         {/* Fallback */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
-      {/* Global JWT Expiration Handler */}
-      <JWTExpiredHandler />
     </UserProvider>
   );
 }

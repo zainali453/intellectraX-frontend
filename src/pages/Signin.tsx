@@ -1,13 +1,13 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import AuthService from "../services/auth.service";
+import { authService } from "../services/auth.service";
 import { useUser } from "../context/UserContext";
 import InputField from "../components/InputField";
 import PasswordInput from "../components/PasswordInput";
 
 export default function SignIn() {
   const navigate = useNavigate();
-  const { updateUser, user } = useUser();
+  const { updateUserFromCookies, user } = useUser();
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -29,86 +29,22 @@ export default function SignIn() {
     setError("");
 
     try {
-      console.log("🚀 [Signin] Starting login process...");
-      const response = await AuthService.login(
-        formData.email,
-        formData.password
-      );
-      console.log("📥 [Signin] Login response:", response);
-
-      if (!response.token) {
-        throw new Error("No authentication token received");
-      }
-
-      console.log("🔄 [Signin] About to update user context with:", {
-        email: response.user.email,
-        role: response.role,
-        token: response.token,
-        isAuthenticated: true,
-        onboarding: response.onboarding,
-        verified: response.verified,
-        picture: response.picture,
+      await authService.login({
+        email: formData.email,
+        password: formData.password,
       });
 
-      // Update user context with all user data including token
-      updateUser({
-        email: response.user.email,
-        role: response.role,
-        token: response.token,
-        isAuthenticated: true,
-        onboarding: response.onboarding,
-        verified: response.verified,
-        picture: response.picture,
-      });
+      updateUserFromCookies();
 
-      console.log("✅ [Signin] User context updated, checking user state...");
-      console.log("📊 [Signin] Current user state after update:", user);
-
-      // Handle different user states after login
-      if (!response.onboarding && response.role?.toLowerCase() === "teacher") {
-        console.log(
-          "🎯 [Signin] Teacher not onboarded, redirecting to onboarding"
-        );
-        navigate("/onboarding");
-      } else if (
-        response.onboarding &&
-        response.verified !== "verified" &&
-        response.role?.toLowerCase() === "teacher"
-      ) {
-        console.log(
-          "🎯 [Signin] Teacher onboarded but not verified, redirecting to verification pending"
-        );
-        navigate("/verification-pending");
-      } else if (
-        response.onboarding &&
-        (response.verified === "verified" ||
-          response.role?.toLowerCase() === "student")
-      ) {
-        console.log(
-          "🎯 [Signin] User verified and onboarded (or student), redirecting to dashboard"
-        );
-        navigate("/dashboard");
-      } else {
-        console.log("🎯 [Signin] Default case, redirecting to dashboard");
-        navigate("/dashboard");
-      }
-    } catch (error) {
+      navigate("/onboarding");
+    } catch (error: any) {
       console.error("❌ [Signin] Login failed:", error);
-      if (error.message === "User not found") {
-        setError("No account found with this email. Please sign up first.");
-      } else if (error.message === "No authentication token received") {
-        setError("Authentication failed. Please try again.");
-      } else {
-        setError(error.message || "Login failed. Please try again.");
-      }
+      setError(error.message || "Login failed. Please try again.");
     } finally {
       setLoading(false);
+      setFormData({ email: "", password: "" });
     }
   };
-
-  const inputClass =
-    "mt-1 w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500";
-  const labelClass = "block text-sm font-medium text-gray-700";
 
   return (
     <div className="bg-white rounded-3xl shadow-lg p-10 w-full max-w-3xl">

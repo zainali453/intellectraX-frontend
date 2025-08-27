@@ -9,7 +9,7 @@ import {
   Users,
   BookOpen,
 } from "lucide-react";
-import authService from "../services/auth.service";
+import { authService } from "../services/auth.service";
 
 interface TeacherDetailsPageProps {
   email?: string;

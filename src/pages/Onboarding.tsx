@@ -7,13 +7,8 @@ import ParentOnboarding from "./ParentOnbaording";
 const Onboarding = () => {
   const { user } = useUser();
 
-  // Get the user's role and convert to lowercase for comparison
-  const userRole = user?.role?.toLowerCase();
-
-  console.log("Onboarding component - User role:", userRole);
-
   // Render the appropriate onboarding component based on role
-  switch ("teacher") {
+  switch (user.role) {
     case "teacher":
       return <TeacherOnboarding />;
     case "student":
@@ -22,7 +17,7 @@ const Onboarding = () => {
       return <ParentOnboarding />;
     default:
       // Fallback for unknown roles or missing role
-      console.error("Unknown or missing user role:", userRole);
+      console.error("Unknown or missing user role:", user.role);
       return (
         <div className="flex items-center justify-center h-screen">
           <div className="text-center">

@@ -151,7 +151,7 @@ export const studentColumns = [
 export const teacherColumns = [
   {
     name: "Profile",
-    selector: (row) => row.profilepicture,
+    selector: (row) => row.profilePicture,
     cell: ProfileCell,
     center: true,
     maxWidth: "80px",
@@ -378,8 +378,8 @@ export function isStepValid(onboardingData, currentStep, role = "teacher") {
   if (role?.toLowerCase() === "teacher" || role?.toLowerCase() === "parent") {
     switch (currentStep) {
       case 1: {
-        const hasProfilePicture = Boolean(onboardingData.profilePicture);
-        const hasGovernmentId = Boolean(onboardingData.governmentIdFront);
+        const hasProfilePicture = Boolean(onboardingData.profilePic);
+        const hasGovernmentId = Boolean(onboardingData.governmentId);
         const hasCertificates =
           onboardingData.certificateLinks &&
           onboardingData.certificateLinks.length > 0;

@@ -1,17 +1,18 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import intellectraxLogo from "../assets/IntellectraX.png";
 import { Bell, LogOut } from "lucide-react";
-import AuthService from "../services/auth.service";
 import { useUser } from "../context/UserContext";
 import logo from "../assets/logo.png";
+import profile from "../assets/icons/user.png";
 
 export default function Topbar() {
   const navigate = useNavigate();
   const [showModal, setShowModal] = useState(false);
   const { user, logout } = useUser();
   const [profileData, setProfileData] = useState(null);
-  const isAuthenticated = Boolean(user?.token);
+  const isAuthenticated = Boolean(user?.isAuthenticated);
+  const modalRef = useRef<HTMLDivElement>(null);
 
   const handleLogoClick = () => {
     navigate("/dashboard");
@@ -29,6 +30,26 @@ export default function Topbar() {
       setShowModal(false);
     }
   }, [isAuthenticated]);
+
+  // Close modal when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        modalRef.current &&
+        !modalRef.current.contains(event.target as Node)
+      ) {
+        setShowModal(false);
+      }
+    };
+
+    if (showModal) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [showModal]);
 
   return (
     <header className="bg-white px-6 py-2 flex items-center justify-between shadow-sm sticky top-0 z-50">
@@ -50,34 +71,42 @@ export default function Topbar() {
           <div className="relative">
             <button
               onClick={() => setShowModal(!showModal)}
-              className="w-10 h-10 rounded-full overflow-hidden border-2 border-gray-200 hover:border-gray-300"
+              className="w-11 h-11 cursor-pointer rounded-full overflow-hidden border-1 border-gray-200 hover:border-gray-300"
             >
               <img
-                src={user?.picture || logo || "https://via.placeholder.com/150"}
+                src={user?.profilePic || logo}
                 alt="Profile"
-                className="w-full h-full object-cover"
+                className={
+                  "w-full h-full " +
+                  (user?.profilePic ? "object-cover" : "object-contain ")
+                }
               />
             </button>
 
             {showModal && (
-              <div className="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-lg border border-gray-100 py-2 z-[2]">
+              <div
+                ref={modalRef}
+                className="absolute right-0 mt-2 w-auto bg-white rounded-lg shadow-lg border border-gray-100 py-2 z-[2]"
+              >
                 <div className="px-4 py-2 flex items-center gap-3 border-b border-gray-100">
-                  <div className="w-12 h-12 rounded-full overflow-hidden">
-                    <img
-                      src={
-                        user?.picture ||
-                        profileData?.profileImage ||
-                        "https://via.placeholder.com/150"
-                      }
-                      alt="Profile"
-                      className="w-full h-full object-cover"
-                    />
+                  <div className="w-12 h-12 rounded-full overflow-hidden min-w-12">
+                    {user.profilePic ? (
+                      <img
+                        src={user?.profilePic}
+                        alt="Profile"
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <img
+                        src={profile}
+                        alt="Profile"
+                        className="w-9 h-9 object-cover mt-1"
+                      />
+                    )}
                   </div>
                   <div className="flex-1">
                     <p className="font-medium text-gray-800">
-                      {profileData?.fullName ||
-                        user?.email?.split("@")[0] ||
-                        "User"}
+                      {profileData || user?.email?.split("@")[0] || "User"}
                     </p>
                     <p className="text-sm text-gray-500">
                       {user?.email || "No email"}
@@ -87,7 +116,7 @@ export default function Topbar() {
 
                 <button
                   onClick={handleLogout}
-                  className="w-full px-4 py-2 flex items-center gap-2 text-red-600 hover:bg-gray-50"
+                  className="w-full px-4 cursor-pointer py-2 flex items-center gap-2 text-red-600 hover:bg-gray-50"
                 >
                   <LogOut size={18} strokeWidth={1.5} />
                   <span>Logout</span>

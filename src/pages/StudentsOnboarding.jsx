@@ -18,17 +18,17 @@ const StudentOnboarding = () => {
   });
 
   // Redirect if no user or invalid role
-  React.useEffect(() => {
-    if (!User || !User.role || User.role?.toLowerCase() !== "student") {
-      navigate("/signup");
-      return;
-    }
+  // React.useEffect(() => {
+  //   if (!User || !User.role || User.role?.toLowerCase() !== "student") {
+  //     navigate("/signup");
+  //     return;
+  //   }
 
-    if (User.onboarding) {
-      navigate("/dashboard");
-      return;
-    }
-  }, [User, navigate]);
+  //   if (User.onboarding) {
+  //     navigate("/dashboard");
+  //     return;
+  //   }
+  // }, [User, navigate]);
 
   const [currentStep, setCurrentStep] = useState(1);
   const [loading, setLoading] = useState(false);
@@ -99,7 +99,7 @@ const StudentOnboarding = () => {
             ...user,
             onboarding: response.user.onboarding,
             verified: response.user.verified,
-            profilepic: response.user.profilepic,
+            profilePic: response.user.profilePic,
           };
           localStorage.setItem("user", JSON.stringify(updatedUser));
           updateUser(updatedUser); // update context

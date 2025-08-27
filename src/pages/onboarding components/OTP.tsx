@@ -1,19 +1,63 @@
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Modal from "../../components/Modal";
-import AuthService from "../../services/auth.service";
+import { authService } from "../../services/auth.service";
+import { cookieUtils } from "../../utils/cookieUtils";
+import {
+  getEmailFromToken,
+  getVerificationStatusFromToken,
+} from "../../utils/jwtUtils";
+import { useUser } from "../../context/UserContext";
+
+// Define AuthResponse type if not imported from elsewhere
+type AuthResponse = {
+  success: boolean;
+  // Add other fields as needed
+};
 
 const OTP = () => {
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [showModal, setShowModal] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [verificationResponse, setVerificationResponse] = useState(null);
+  const { updateUserFromCookies } = useUser();
   const navigate = useNavigate();
 
-  // Get email from URL parameters
-  const query = new URLSearchParams(window.location.search);
-  const email = query.get("email") || "";
+  // Get email from token first, then fall back to URL parameter
+  const token = cookieUtils.get("auth_token");
+
+  let email = "";
+
+  // Check token and redirect if necessary
+  useEffect(() => {
+    if (token) {
+      const verificationStatus = getVerificationStatusFromToken(token);
+      if (verificationStatus === "verified") {
+        navigate("/dashboard");
+        return;
+      }
+    }
+
+    if (!email) {
+      const query = new URLSearchParams(window.location.search);
+      const emailFromUrl = query.get("email");
+      if (!emailFromUrl) {
+        navigate("/signup");
+        return;
+      }
+    }
+  }, [token, email, navigate]);
+
+  if (token) {
+    const emailFromToken = getEmailFromToken(token);
+    email = emailFromToken || "";
+  }
+
+  // If no email from token, try URL parameter as fallback
+  if (!email) {
+    const query = new URLSearchParams(window.location.search);
+    email = query.get("email") || "";
+  }
 
   const inputRefs = [
     useRef<HTMLInputElement>(null),
@@ -46,11 +90,13 @@ const OTP = () => {
   const handleVerify = async (otpString: string) => {
     setIsLoading(true);
     try {
-      // Use email from URL params for verification
-      const response = await AuthService.verifyOTP({ email }, otpString);
+      // Use email from token for verification
+      const response = await authService.verifyOTP({ email }, otpString);
+
+      if (response.success) updateUserFromCookies();
+
       setIsSuccess(response.success);
       setShowModal(true);
-      setVerificationResponse(response);
     } catch (error) {
       setIsSuccess(false);
       setShowModal(true);
@@ -106,8 +152,8 @@ const OTP = () => {
   const handleResend = async () => {
     setIsLoading(true);
     try {
-      // Use email from URL params for resending OTP
-      await AuthService.resendOTP({ email });
+      // Use email from token first, then URL params for resending OTP
+      await authService.resendOTP({ email });
       // Show success message
       setShowModal(true);
       setIsSuccess(true);

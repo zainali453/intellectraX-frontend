@@ -1,11 +1,14 @@
-import React, { useState, useRef } from "react";
-import AuthService from "../../services/auth.service";
+import React, { useState } from "react";
 import InputField from "../../components/InputField";
 import DatePicker from "../../components/DatePicker";
 import SelectField from "../../components/SelectField";
 import PasswordInput from "../../components/PasswordInput";
 import ModernLoading from "../../components/ModernLoading";
 import { useNavigate } from "react-router-dom";
+import { authService, SignupRequest } from "../../services/auth.service";
+import { cookieUtils } from "../../utils/cookieUtils";
+import { getEmailFromToken } from "../../utils/jwtUtils";
+import { useUser } from "../../context/UserContext";
 
 type UserRole = "student" | "teacher" | "parent";
 
@@ -36,19 +39,21 @@ const details: Details = {
 const RegistrationForm = () => {
   const navigate = useNavigate();
 
+  const { updateUserFromCookies } = useUser();
+
   // get the query from the URL
   const query = new URLSearchParams(window.location.search);
   const role: UserRole =
     typeof query.get("role") === "string"
       ? (query.get("role") as UserRole)
-      : (query.get("role")![0] as UserRole);
+      : (query.get("role")?.[0] as UserRole);
 
   const [formData, setFormData] = useState({
     email: "",
     fullName: "",
     mobileNumber: "",
-    dateOfBirth: null as Date | null,
     location: "",
+    dateOfBirth: null as Date | null,
     role: "student",
     gender: "",
     password: "",
@@ -85,53 +90,66 @@ const RegistrationForm = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    setIsLoading(true);
     setError("");
 
-    // Show loading for 2 seconds then navigate to OTP page with email
-    setTimeout(() => {
-      setIsLoading(false);
-      navigate(`/otp?email=${encodeURIComponent(formData.email)}`);
-    }, 2000);
-
-    // navigate("/otp");
-    // setError("");
-    // setSuccess(false);
+    setSuccess(false);
 
     // // Validation
-    // if (formData.password !== formData.confirmPassword) {
-    //   setError("Passwords do not match");
-    //   return;
-    // }
+    if (formData.password !== formData.confirmPassword) {
+      setError("Passwords do not match");
+      setIsLoading(false);
+      return;
+    }
+    if (formData.password.length < 6) {
+      setError("Password must be at least 6 characters long");
+      setIsLoading(false);
+      return;
+    }
 
-    // if (!formData.dateOfBirth) {
-    //   setError("Please select your date of birth");
-    //   return;
-    // }
+    try {
+      // Format the data for the API
+      const submitData = {
+        ...formData,
+        dateOfBirth: formData.dateOfBirth
+          ? formData.dateOfBirth.toISOString().split("T")[0]
+          : "",
+        role: role,
+      };
 
-    // try {
-    //   // Format the data for the API
-    //   const submitData = {
-    //     ...formData,
-    //     dateOfBirth: formData.dateOfBirth.toISOString().split("T")[0], // Convert to YYYY-MM-DD format
-    //     role: role, // Use the role from URL
-    //   };
+      // Remove confirmPassword before sending to API
+      const { confirmPassword, ...apiData } = submitData;
+      setIsLoading(true);
 
-    //   // Remove confirmPassword before sending to API
-    //   const { confirmPassword, ...apiData } = submitData;
+      const response = await authService.signup(apiData as SignupRequest);
 
-    //   const response = await AuthService.signup(apiData);
-
-    //   if (response.message === "Email already exists") {
-    //     setError("Email already exists. Please sign in instead.");
-    //     return;
-    //   }
-
-    //   setSuccess(true);
-    //   setError("");
-    // } catch (error: any) {
-    //   setError(error.message || "Registration failed. Please try again.");
-    // }
+      if (response.message === "Email already exists") {
+        setError("Email already exists. Please sign in instead.");
+        setIsLoading(false);
+        return;
+      }
+      updateUserFromCookies();
+      setSuccess(true);
+      setError("");
+      navigate("/otp");
+    } catch (error: any) {
+      if (
+        error.message ===
+        "A verification is already pending for this email. Please check your email or wait for it to expire."
+      ) {
+        // Get email from token if available, otherwise use form email
+        const token = cookieUtils.get("auth_token");
+        const emailFromToken = token ? getEmailFromToken(token) : null;
+        if (emailFromToken) navigate(`/otp`);
+        else {
+          setError(
+            "Please continue the verification process on the machine where you initiated registration."
+          );
+        }
+      } else {
+        setError(error.message || "Registration failed. Please try again.");
+      }
+    }
+    setIsLoading(false);
   };
   if (details[role] === undefined) {
     return <div className=" text-5xl">Invalid user role</div>;
@@ -272,9 +290,6 @@ const RegistrationForm = () => {
           {/* Sign Up Button */}
           <button
             type="submit"
-            onClick={() => {
-              navigate("/onboarding");
-            }}
             disabled={isLoading}
             className={`w-full py-2 px-4 rounded-3xl font-medium transition-colors duration-200 ${
               isLoading
