@@ -5,9 +5,12 @@ const COOKIE_CONFIG = {
   // Secure cookies only in production with HTTPS
   secure: import.meta.env.VITE_APP_PROD === "true",
   // SameSite policy for CSRF protection
-  sameSite: "Lax" as const,
+  sameSite:
+    import.meta.env.VITE_APP_PROD === "true"
+      ? ("none" as const)
+      : ("lax" as const),
   // Cookie expiration (7 days for long-term, 10 minutes for verification)
-  expires: 7,
+  maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days in milliseconds
   // Cookie path
   path: "/",
   // Domain (you can set this for cross-subdomain cookies)
