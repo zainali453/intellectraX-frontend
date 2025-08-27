@@ -1,12 +1,9 @@
-import React, { useState, useRef, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useRef, useEffect } from "react";
 import BioQualifications from "../components/teacherOnboarding/BioQualification";
 import ClassSubject from "../components/teacherOnboarding/ClassSubject";
 import AvailabilitySchedule from "../components/teacherOnboarding/AvailabilitySchedule";
 import PricingDetails from "../components/teacherOnboarding/PricingDetails";
-import { authService } from "../services/auth.service";
 import { getStepContent, isStepValid } from "../utils/utils";
-import { useUser } from "../context/UserContext";
 import { onboardingService } from "../services/onboarding.service";
 import LoadingSpinner from "../components/LoadingSpinner";
 
@@ -80,9 +77,6 @@ interface PricingDetailsRef {
 }
 
 const Onboarding = () => {
-  const navigate = useNavigate();
-  const { setOnboardingStatus, user } = useUser();
-
   const [currentStep, setCurrentStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -124,62 +118,9 @@ const Onboarding = () => {
     fetchData();
   }, []);
 
-  const updateUserOnboardingStatus = () => {
-    const updatedUser = { ...user, onboarding: true };
-    localStorage.setItem("user", JSON.stringify(updatedUser));
-    // Also update the UserContext
-    setOnboardingStatus(true);
-  };
-
   const handleFinish = async () => {
     setLoading(true);
     setError("");
-
-    try {
-      if (!user?.email) {
-        throw new Error("User email is not set. Please sign up again.");
-      }
-
-      const formData = {
-        ...onboardingData,
-        cardDetails: {
-          ...onboardingData.cardDetails,
-          cardNumber: onboardingData.cardDetails.cardNumber.replace(/\s/g, ""),
-        },
-      };
-
-      // const response = await authService.completeOnboarding(user.email);
-
-      // if (response.success) {
-      //   if (
-      //     response.message === "Teacher profile already exists" ||
-      //     response.onboarding === true
-      //   ) {
-      //     updateUserOnboardingStatus();
-      //     navigate("/verification-pending");
-      //   } else {
-      //     setError("Onboarding completion not confirmed. Please try again.");
-      //   }
-      // } else if (response.message !== "Teacher profile already exists") {
-      //   throw new Error(response.message || "Failed to complete onboarding");
-      // }
-    } catch (error) {
-      if (
-        typeof error === "object" &&
-        error !== null &&
-        "message" in error &&
-        typeof (error as { message?: unknown }).message === "string" &&
-        (error as { message: string }).message !==
-          "Teacher profile already exists"
-      ) {
-        setError(
-          (error as { message: string }).message ||
-            "There was an error submitting your information. Please try again."
-        );
-      }
-    } finally {
-      setLoading(false);
-    }
   };
 
   const handleNext = async () => {

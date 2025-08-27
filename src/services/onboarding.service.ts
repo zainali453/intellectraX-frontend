@@ -111,6 +111,17 @@ class OnboardingService {
       );
     }
   }
+  async getServerHealth() {
+    try {
+      const response = await apiClient.get<OnboardingDataResponse>("health");
+      return response.data;
+    } catch (error: any) {
+      console.error("Error fetching onboarding data:", error);
+      throw new Error(
+        error.response?.data?.message || "Failed to fetch onboarding data"
+      );
+    }
+  }
 }
 
 // Create and export a singleton instance
