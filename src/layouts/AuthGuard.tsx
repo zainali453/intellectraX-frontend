@@ -69,18 +69,16 @@ const AuthGuard = ({ children, requireAuth = true }: AuthGuardProps) => {
     return <>{children}</>;
   }
 
-  // If user is verified but trying to access OTP page, redirect to onboarding
-  if (verificationStatus === "verified" && isOnOTPPage) {
-    return <Navigate to="/onboarding" replace />;
-  }
-
-  // If user is verified and trying to access signup/signin, redirect to onboarding
-  if (verificationStatus === "verified" && (isOnSignupPage || isOnSigninPage)) {
-    return <Navigate to="/onboarding" replace />;
-  }
-
-  // If user is verified and trying to access main page, redirect to onboarding
-  if (verificationStatus === "verified" && location.pathname === "/") {
+  // If user is verified and trying to access signup/signin/otp/home, redirect to onboarding
+  if (
+    verificationStatus === "verified" &&
+    (isOnSignupPage ||
+      isOnSigninPage ||
+      isOnOTPPage ||
+      location.pathname === "/")
+  ) {
+    if (user.onboarding && user.isAuthenticated && user.verified === "verified")
+      return <Navigate to="/success" replace />;
     return <Navigate to="/onboarding" replace />;
   }
 

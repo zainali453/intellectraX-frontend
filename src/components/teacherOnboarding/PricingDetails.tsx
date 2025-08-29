@@ -6,101 +6,89 @@ import React, {
 } from "react";
 import InputField from "../InputField";
 
-interface FormData {
-  firstName: string;
-  lastName: string;
-  sortCode: string;
-  accountNumber: string;
+interface PricingDetailsType {
+  pricingFName: string;
+  pricingLName: string;
+  pricingSortCode: string;
+  pricingAccountNumber: string;
 }
-
 interface PricingDetailsProps {
-  onDataChange?: (data: FormData) => void;
+  onChange: (data: PricingDetailsType) => void;
+  data: PricingDetailsType;
 }
 
-interface PricingDetailsRef {
-  getData: () => FormData;
-}
+const PricingDetails = ({ onChange, data }: PricingDetailsProps) => {
+  const [formData, setFormData] = useState<PricingDetailsType>({
+    pricingFName: data.pricingFName,
+    pricingLName: data.pricingLName,
+    pricingSortCode: data.pricingSortCode,
+    pricingAccountNumber: data.pricingAccountNumber,
+  });
 
-const PricingDetails = forwardRef<PricingDetailsRef, PricingDetailsProps>(
-  (props, ref) => {
-    const [formData, setFormData] = useState<FormData>({
-      firstName: "",
-      lastName: "",
-      sortCode: "",
-      accountNumber: "",
-    });
+  const handleInputChange = (
+    field: keyof PricingDetailsType,
+    value: string
+  ) => {
+    const updatedData = { ...formData, [field]: value };
+    setFormData(updatedData);
+    onChange(updatedData);
+  };
 
-    const handleInputChange = (field: keyof FormData, value: string) => {
-      const updatedData = { ...formData, [field]: value };
-      setFormData(updatedData);
+  // Format sort code with dashes
+  const handleSortCodeChange = (value: string) => {
+    // Remove all non-digits
+    const digits = value.replace(/\D/g, "");
+    // Format as XX-XX-XX
+    const formatted = digits.replace(/(\d{2})(\d{2})(\d{2})/, "$1-$2-$3");
+    handleInputChange("pricingSortCode", formatted);
+  };
 
-      // Send data to parent if callback is provided
-      if (props.onDataChange) {
-        props.onDataChange(updatedData);
-      }
-    };
+  // Format account number to only allow digits
+  const handleAccountNumberChange = (value: string) => {
+    // Remove all non-digits and limit to 8 digits
+    const digits = value.replace(/\D/g, "").slice(0, 8);
+    handleInputChange("pricingAccountNumber", digits);
+  };
 
-    // Expose methods to parent component
-    useImperativeHandle(ref, () => ({
-      getData: () => formData,
-    }));
+  return (
+    <div className="space-y-6 mt-8 px-1">
+      <InputField
+        label="First Name"
+        name="firstName"
+        value={formData.pricingFName}
+        onChange={(e) => handleInputChange("pricingFName", e.target.value)}
+        placeholder="Enter first name"
+        required
+      />
 
-    // Format sort code with dashes
-    const handleSortCodeChange = (value: string) => {
-      // Remove all non-digits
-      const digits = value.replace(/\D/g, "");
-      // Format as XX-XX-XX
-      const formatted = digits.replace(/(\d{2})(\d{2})(\d{2})/, "$1-$2-$3");
-      handleInputChange("sortCode", formatted);
-    };
+      <InputField
+        label="Last Name"
+        name="lastName"
+        value={formData.pricingLName}
+        onChange={(e) => handleInputChange("pricingLName", e.target.value)}
+        placeholder="Enter last name"
+        required
+      />
 
-    // Format account number to only allow digits
-    const handleAccountNumberChange = (value: string) => {
-      // Remove all non-digits and limit to 8 digits
-      const digits = value.replace(/\D/g, "").slice(0, 8);
-      handleInputChange("accountNumber", digits);
-    };
+      <InputField
+        label="Sort Code"
+        name="sortCode"
+        value={formData.pricingSortCode}
+        onChange={(e) => handleSortCodeChange(e.target.value)}
+        placeholder="XX-XX-XX"
+        required
+      />
 
-    return (
-      <div className="space-y-6 mt-8 px-1">
-        <InputField
-          label="First Name"
-          name="firstName"
-          value={formData.firstName}
-          onChange={(e) => handleInputChange("firstName", e.target.value)}
-          placeholder="Enter first name"
-          required
-        />
-
-        <InputField
-          label="Last Name"
-          name="lastName"
-          value={formData.lastName}
-          onChange={(e) => handleInputChange("lastName", e.target.value)}
-          placeholder="Enter last name"
-          required
-        />
-
-        <InputField
-          label="Sort Code"
-          name="sortCode"
-          value={formData.sortCode}
-          onChange={(e) => handleSortCodeChange(e.target.value)}
-          placeholder="XX-XX-XX"
-          required
-        />
-
-        <InputField
-          label="Account Number"
-          name="accountNumber"
-          value={formData.accountNumber}
-          onChange={(e) => handleAccountNumberChange(e.target.value)}
-          placeholder="Enter 8-digit account"
-          required
-        />
-      </div>
-    );
-  }
-);
+      <InputField
+        label="Account Number"
+        name="accountNumber"
+        value={formData.pricingAccountNumber}
+        onChange={(e) => handleAccountNumberChange(e.target.value)}
+        placeholder="Enter 8-digit account"
+        required
+      />
+    </div>
+  );
+};
 
 export default PricingDetails;

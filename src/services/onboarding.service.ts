@@ -11,33 +11,38 @@ interface UploadResponse {
   };
 }
 
-interface RemoveResponse {
+interface SuccessResponse {
   success: boolean;
   message: string;
 }
 
 interface AvailabilitySlot {
   day: string;
-  startTime: string;
-  endTime: string;
+  times: { startTime: string; endTime: string }[];
 }
+
+interface Subject {
+  subject: string;
+  price: number;
+}
+
+type TeacherClasses = {
+  level: string;
+  subjects: Subject[];
+};
 
 interface OnboardingData {
   profilePic: string;
   bio: string;
-  governmentIdFront: string;
-  governmentIdBack: string;
+  governmentId: string;
   degreeLinks: string[];
   certificateLinks: string[];
-  subjects: string[];
+  classes: TeacherClasses[];
   availability: AvailabilitySlot[];
-  pricingDetails: Array<{ subject?: string; price: number }>;
-  cardDetails: {
-    cardHolder: string;
-    cardNumber: string;
-    expiryDate: string;
-    cvv: string;
-  };
+  pricingFName: string;
+  pricingLName: string;
+  pricingSortCode: string;
+  pricingAccountNumber: string;
 }
 
 interface OnboardingDataResponse {
@@ -48,7 +53,7 @@ interface OnboardingDataResponse {
 
 interface OnboardingService {
   upload(formData: FormData, query: string): Promise<UploadResponse>;
-  removeUpload(fileUrl: string, fileType: string): Promise<RemoveResponse>;
+  removeUpload(fileUrl: string, fileType: string): Promise<SuccessResponse>;
 }
 
 // Onboarding Service Class
@@ -65,13 +70,6 @@ class OnboardingService {
         }
       );
 
-      if (response.data.data?.fileUrl && query === "profilePic") {
-        const currentCookies = cookieUtils.getJSON(COOKIE_NAMES.USER_DATA);
-        currentCookies.profilePic = response.data.data.fileUrl;
-
-        cookieUtils.set(COOKIE_NAMES.USER_DATA, JSON.stringify(currentCookies));
-      }
-
       return response.data;
     } catch (error: any) {
       console.error("Upload error:", error);
@@ -82,9 +80,9 @@ class OnboardingService {
   async removeUpload(
     fileUrl: string,
     fileType: string
-  ): Promise<RemoveResponse> {
+  ): Promise<SuccessResponse> {
     try {
-      const response = await apiClient.post<RemoveResponse>(
+      const response = await apiClient.post<SuccessResponse>(
         `public/remove-document?remove=${fileType}`,
         {
           fileUrl: fileUrl,
@@ -114,6 +112,20 @@ class OnboardingService {
   async getServerHealth() {
     try {
       const response = await apiClient.get<OnboardingDataResponse>("health");
+      return response.data;
+    } catch (error: any) {
+      console.error("Error fetching onboarding data:", error);
+      throw new Error(
+        error.response?.data?.message || "Failed to fetch onboarding data"
+      );
+    }
+  }
+  async saveTeacherOnBoardingData(data: OnboardingData, query?: string) {
+    try {
+      const response = await apiClient.post<SuccessResponse>(
+        "teacher/onboarding" + (query ? `?completed=${query}` : ""),
+        data
+      );
       return response.data;
     } catch (error: any) {
       console.error("Error fetching onboarding data:", error);

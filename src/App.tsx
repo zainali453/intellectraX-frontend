@@ -78,7 +78,7 @@ function App() {
           <Route
             path="/pricenegotiation"
             element={
-              <AuthGuard requireAuth={false}>
+              <AuthGuard requireAuth={true}>
                 <PriceNegotiation />
               </AuthGuard>
             }

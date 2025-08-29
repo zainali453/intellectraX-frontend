@@ -17,6 +17,7 @@ export interface User {
   onboarding: boolean;
   verified: string | null;
   profilePic: string | null;
+  step: number | null;
 }
 
 // Context interface
@@ -50,6 +51,7 @@ export const UserProvider = ({ children }: UserProviderProps) => {
       verified: userData?.verified || null,
       profilePic: userData?.profilePic || null,
       fullName: userData?.fullName || null,
+      step: userData?.step || 1,
     };
     return initialUser;
   });
@@ -124,6 +126,7 @@ export const UserProvider = ({ children }: UserProviderProps) => {
       verified: null,
       profilePic: null,
       fullName: null,
+      step: null,
     };
     setUser(clearedUser);
   };

@@ -6,20 +6,14 @@ import PricingDetails from "../components/teacherOnboarding/PricingDetails";
 import { getStepContent, isStepValid } from "../utils/utils";
 import { onboardingService } from "../services/onboarding.service";
 import LoadingSpinner from "../components/LoadingSpinner";
+import { useUser } from "../context/UserContext";
+import { useNavigate } from "react-router-dom";
 
 // Define interfaces for better type safety
-interface BioData {
-  profilePic: string;
-  governmentId: string;
-  degreeLinks: string[];
-  certificateLinks: string[];
-  bio: string;
-}
 
 interface AvailabilitySlot {
   day: string;
-  startTime: string;
-  endTime: string;
+  times: { startTime: string; endTime: string }[];
 }
 
 interface Subject {
@@ -27,65 +21,42 @@ interface Subject {
   price: number;
 }
 
-interface StudyLevel {
+type TeacherClasses = {
   level: string;
   subjects: Subject[];
-}
-
-interface PricingData {
-  pricingDetails: Array<{ subject?: string; price: number; id?: number }>;
-  cardDetails: {
-    cardHolder: string;
-    cardNumber: string;
-    expiryDate: string;
-    cvv: string;
-  };
-}
-
+};
 interface OnboardingData {
   profilePic: string;
   bio: string;
   governmentId: string;
   degreeLinks: string[];
   certificateLinks: string[];
-  subjects: string[];
+  classes: TeacherClasses[];
   availability: AvailabilitySlot[];
-  pricingDetails: Array<{ subject?: string; price: number }>;
-  cardDetails: {
-    cardHolder: string;
-    cardNumber: string;
-    expiryDate: string;
-    cvv: string;
-  };
+  pricingFName: string;
+  pricingLName: string;
+  pricingSortCode: string;
+  pricingAccountNumber: string;
 }
-
-// Component ref interfaces
-interface BioQualificationsRef {
-  getData: () => Promise<BioData>;
-}
-
-interface SubjectsRef {
-  getData: () => Promise<string[]>;
+interface PricingDetailsType {
+  pricingFName: string;
+  pricingLName: string;
+  pricingSortCode: string;
+  pricingAccountNumber: string;
 }
 
 interface AvailabilityScheduleRef {
   getData: () => AvailabilitySlot[];
 }
 
-interface PricingDetailsRef {
-  getData: () => PricingData;
-}
-
 const Onboarding = () => {
-  const [currentStep, setCurrentStep] = useState(1);
+  const { updateUserFromCookies, user } = useUser();
+  const navigate = useNavigate();
+  if (user.onboarding) navigate("success");
+  const prevStep = localStorage.getItem("onboardingStep") || "1";
+  const [currentStep, setCurrentStep] = useState(parseInt(prevStep));
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-
-  // Refs to access component data
-  const bioRef = useRef<BioQualificationsRef>(null);
-  const subjectsRef = useRef<SubjectsRef>(null);
-  const availabilityRef = useRef<AvailabilityScheduleRef>(null);
-  const pricingRef = useRef<PricingDetailsRef>(null);
 
   // State for all component data
   const [onboardingData, setOnboardingData] = useState<OnboardingData>({
@@ -94,10 +65,14 @@ const Onboarding = () => {
     governmentId: "",
     degreeLinks: [],
     certificateLinks: [],
-    subjects: [],
-    availability: [{ day: "Monday", startTime: "09:00", endTime: "17:00" }],
-    pricingDetails: [{ subject: "", price: 0 }],
-    cardDetails: { cardHolder: "", cardNumber: "", expiryDate: "", cvv: "" },
+    classes: [],
+    availability: [
+      { day: "Monday", times: [{ startTime: "09:00", endTime: "17:00" }] },
+    ],
+    pricingFName: "",
+    pricingLName: "",
+    pricingSortCode: "",
+    pricingAccountNumber: "",
   });
 
   useEffect(() => {
@@ -118,66 +93,41 @@ const Onboarding = () => {
     fetchData();
   }, []);
 
-  const handleFinish = async () => {
-    setLoading(true);
-    setError("");
+  const handleSave = async (query?: string) => {
+    try {
+      setLoading(true);
+      await onboardingService.saveTeacherOnBoardingData(onboardingData, query);
+    } catch (error) {
+      console.error("Error saving onboarding data:", error);
+      setError("Error While Saving Data");
+    } finally {
+      setLoading(false);
+    }
   };
-
   const handleNext = async () => {
     setError("");
 
     try {
-      switch (currentStep) {
-        case 1:
-          if (bioRef.current?.getData) {
-            const currentData = await bioRef.current.getData();
-            setOnboardingData((prev) => ({
-              ...prev,
-              profilePicture: currentData.profilePic,
-              governmentId: currentData.governmentId,
-              degreeLinks: currentData.degreeLinks || [],
-              certificateLinks: currentData.certificateLinks || [],
-              bio: currentData.bio,
-            }));
-          }
-          break;
-        case 2:
-          if (subjectsRef.current?.getData) {
-            const currentData = await subjectsRef.current.getData();
-            setOnboardingData((prev) => ({ ...prev, subjects: currentData }));
-          }
-          break;
-        case 3:
-          if (availabilityRef.current?.getData) {
-            const currentData = availabilityRef.current.getData();
-            setOnboardingData((prev) => ({
-              ...prev,
-              availability: currentData,
-            }));
-          }
-          break;
-        case 4:
-          if (pricingRef.current?.getData) {
-            const currentData = pricingRef.current.getData();
-            setOnboardingData((prev) => ({
-              ...prev,
-              pricingDetails: currentData.pricingDetails,
-              cardDetails: currentData.cardDetails,
-            }));
-          }
-          break;
-      }
       if (isStepValid(onboardingData, currentStep, "teacher")) {
+        const tempStep = currentStep;
         if (currentStep === 4) {
-          await handleFinish();
+          await handleSave("true");
+          updateUserFromCookies();
+          navigate("/success");
         } else {
+          if (currentStep > 1) await handleSave();
           setCurrentStep((prev) => prev + 1);
         }
+        localStorage.setItem(
+          "onboardingStep",
+          (tempStep + 1 > 4 ? 4 : tempStep + 1).toString()
+        );
       } else {
         setError("Please fill in all required fields before proceeding.");
         window.scrollTo({ top: 0, behavior: "smooth" });
       }
     } catch (error) {
+      console.error("Error during step transition:", error);
       setError(
         "There was an error processing your information. Please try again."
       );
@@ -228,18 +178,14 @@ const Onboarding = () => {
             )}
             {currentStep === 2 && !loading && (
               <ClassSubject
-                ref={subjectsRef}
-                onChange={(subjects: StudyLevel[]) =>
-                  setOnboardingData((prev) => ({
-                    ...prev,
-                    subjects: subjects.map((s) => s.level),
-                  }))
+                initialData={onboardingData.classes}
+                onChange={(classes: TeacherClasses[]) =>
+                  setOnboardingData((prev) => ({ ...prev, classes }))
                 }
               />
             )}
             {currentStep === 3 && !loading && (
               <AvailabilitySchedule
-                ref={availabilityRef}
                 slots={onboardingData.availability}
                 onChange={(availability: AvailabilitySlot[]) =>
                   setOnboardingData((prev) => ({ ...prev, availability }))
@@ -248,8 +194,14 @@ const Onboarding = () => {
             )}
             {currentStep === 4 && !loading && (
               <PricingDetails
-                onDataChange={(pricingDetails: any) =>
-                  setOnboardingData((prev) => ({ ...prev, pricingDetails }))
+                data={{
+                  pricingFName: onboardingData.pricingFName,
+                  pricingLName: onboardingData.pricingLName,
+                  pricingSortCode: onboardingData.pricingSortCode,
+                  pricingAccountNumber: onboardingData.pricingAccountNumber,
+                }}
+                onChange={(pricingDetails: PricingDetailsType) =>
+                  setOnboardingData((prev) => ({ ...prev, ...pricingDetails }))
                 }
               />
             )}
@@ -266,7 +218,7 @@ const Onboarding = () => {
           // }
           className="w-full py-2 sm:py-3 px-4 rounded-3xl font-medium text-sm sm:text-base bg-bgprimary text-white hover:bg-teal-600 transition-colors disabled:opacity-50 cursor-pointer"
         >
-          {loading ? "Processing..." : currentStep === 4 ? "Submit" : "Next"}
+          {loading ? "Processing..." : currentStep === 4 ? "Finish" : "Next"}
         </button>
         {currentStep > 1 && (
           <button

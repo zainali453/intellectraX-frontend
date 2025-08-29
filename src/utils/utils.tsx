@@ -389,9 +389,9 @@ export function isStepValid(onboardingData, currentStep, role = "teacher") {
         return hasProfilePicture && hasGovernmentId && hasQualifications;
       }
       case 2: {
-        const hasSubjects =
-          onboardingData.subjects && onboardingData.subjects.length > 0;
-        return hasSubjects;
+        const hasClasses =
+          onboardingData.classes && onboardingData.classes.length > 0;
+        return hasClasses;
       }
       case 3: {
         const hasAvailability =
@@ -399,21 +399,13 @@ export function isStepValid(onboardingData, currentStep, role = "teacher") {
         return hasAvailability;
       }
       case 4: {
-        const hasValidPrice =
-          onboardingData.pricingDetails &&
-          onboardingData.pricingDetails.some(
-            (detail) => detail.price && Number(detail.price) > 0
-          );
-        const card = onboardingData.cardDetails || {};
-        const hasValidCard =
-          Boolean(card.cardHolder) &&
-          card.cardNumber &&
-          card.cardNumber.replace(/\s/g, "").length === 16 &&
-          card.expiryDate &&
-          card.expiryDate.length === 5 &&
-          card.cvv &&
-          card.cvv.length === 3;
-        return hasValidPrice && hasValidCard;
+        const hasAllRequired =
+          onboardingData.pricingFName &&
+          onboardingData.pricingLName &&
+          onboardingData.pricingSortCode &&
+          onboardingData.pricingAccountNumber;
+
+        return hasAllRequired;
       }
       default:
         return true;
