@@ -144,7 +144,7 @@ const BioQualifications = ({ data, onChange }: BioQualificationsProps) => {
   // Auto-sync when data changes
   useEffect(() => {
     syncWithParent();
-  }, [syncWithParent]);
+  }, [formData]);
 
   // Upload file to server
   const uploadFile = async (

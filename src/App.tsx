@@ -11,6 +11,11 @@ import RegistrationSuccess from "./components/teacherOnboarding/RegistrationSucc
 import PriceNegotiation from "./components/teacherOnboarding/PriceNegotation";
 import Onboarding from "./pages/Onboarding";
 import Signup from "./pages/Signup";
+import MainLayout from "./layouts/MainLayout";
+
+// admin
+import AdminDashboard from "./pages/admin/Dashboard";
+import TeachersVerification from "./pages/admin/Verifications";
 
 function App() {
   return (
@@ -83,15 +88,25 @@ function App() {
               </AuthGuard>
             }
           />
-
-          {/* <Route
-            path="/verification-pending"
-            element={
-              <AuthGuard requireAuth={true}>
-                <VerificationPending />
-              </AuthGuard>
-            }
-          /> */}
+        </Route>
+        <Route
+          path="/admin"
+          element={
+            <AuthGuard requireAuth={true} requireAdmin={true}>
+              <MainLayout />
+            </AuthGuard>
+          }
+        >
+          <Route index element={<AdminDashboard title={"Dashboard"} />} />
+          <Route
+            path="dashboard"
+            element={<AdminDashboard title={"Dashboard"} />}
+          />
+          <Route path="verifications" element={<TeachersVerification />} />
+          <Route path="users" element={<div>Users Component</div>} />
+          <Route path="settings" element={<div>Settings Component</div>} />
+          <Route path="teachers" element={<div>Teachers Component</div>} />
+          <Route path="*" element={<div>404 Not Found</div>} />
         </Route>
 
         {/* Fallback */}

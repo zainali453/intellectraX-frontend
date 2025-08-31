@@ -6,7 +6,7 @@ import { useUser } from "../context/UserContext";
 import logo from "../assets/logo.png";
 import profile from "../assets/icons/user.png";
 
-export default function Topbar() {
+export default function Topbar({ main = false }: { main?: boolean }) {
   const navigate = useNavigate();
   const [showModal, setShowModal] = useState(false);
   const { user, logout } = useUser();
@@ -52,7 +52,12 @@ export default function Topbar() {
   }, [showModal]);
 
   return (
-    <header className="bg-white px-6 py-2 flex items-center justify-between shadow-sm sticky top-0 z-50">
+    <header
+      className={
+        "bg-white px-6 py-2 flex items-center justify-between sticky top-0 z-50" +
+        (main ? "" : " shadow-sm")
+      }
+    >
       <div>
         <img
           src={intellectraxLogo}

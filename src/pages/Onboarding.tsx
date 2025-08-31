@@ -1,11 +1,19 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useUser } from "../context/UserContext";
 import TeacherOnboarding from "./TeacherOnboarding";
 import StudentOnboarding from "./StudentsOnboarding";
 import ParentOnboarding from "./ParentOnbaording";
+import { useNavigate } from "react-router-dom";
 
 const Onboarding = () => {
   const { user } = useUser();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (user.role === "admin") {
+      navigate("/admin/dashboard");
+    }
+  }, [user.role, navigate]);
 
   // Render the appropriate onboarding component based on role
   switch (user.role) {
@@ -15,6 +23,8 @@ const Onboarding = () => {
       return <StudentOnboarding />;
     case "parent":
       return <ParentOnboarding />;
+    case "admin":
+      return null;
     default:
       // Fallback for unknown roles or missing role
       console.error("Unknown or missing user role:", user.role);

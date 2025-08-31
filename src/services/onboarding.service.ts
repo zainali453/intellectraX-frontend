@@ -104,6 +104,10 @@ class OnboardingService {
       return response.data;
     } catch (error: any) {
       console.error("Error fetching onboarding data:", error);
+      console.log(error.response);
+      if (error?.response?.data?.message === "Teacher not found") {
+        localStorage.removeItem("onboardingStep");
+      }
       throw new Error(
         error.response?.data?.message || "Failed to fetch onboarding data"
       );

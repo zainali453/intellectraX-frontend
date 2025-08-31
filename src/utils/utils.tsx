@@ -13,22 +13,97 @@ import {
   Settings,
 } from "lucide-react";
 import { useUser } from "../context/UserContext"; // adjust path as needed
+import { IconName } from "../components/CustomIcon";
 
-const adminLinks = [
-  { name: "Dashboard", icon: <LayoutDashboard />, path: "dashboard" },
-  { name: "Verifications", icon: <BadgeCheck />, path: "verifications" },
-  { name: "Subjects", icon: <BookOpen />, path: "subjects" },
-  { name: "Classes", icon: <ClipboardList />, path: "classes" },
-  { name: "Students", icon: <Users />, path: "students" },
-  { name: "Teachers", icon: <User />, path: "teachers" },
-  { name: "Parents", icon: <User />, path: "parents" },
-  { name: "Assignments", icon: <ClipboardList />, path: "assignments" },
-  { name: "Quizzes", icon: <FileQuestion />, path: "quizzes" },
-  { name: "Messages", icon: <MessageSquare />, path: "messages" },
-  { name: "System Logs", icon: <Activity />, path: "system-logs" },
-  { name: "Earnings", icon: <DollarSign />, path: "earnings" },
-  { name: "Support Tickets", icon: <LifeBuoy />, path: "support-tickets" },
-  { name: "Settings", icon: <Settings />, path: "settings" },
+const adminLinks: {
+  name: string;
+  icon: IconName;
+  path: string;
+  size?: string;
+}[] = [
+  {
+    name: "Dashboard",
+    icon: "dashboard",
+    path: "dashboard",
+    size: "w-[19px] h-5",
+  },
+  {
+    name: "Verifications",
+    icon: "verifications",
+    path: "verifications",
+    size: "w-[19px] h-5",
+  },
+  {
+    name: "Classes",
+    icon: "classes",
+    path: "classes",
+    size: "w-[19px] h-[18px]",
+  },
+  {
+    name: "Students",
+    icon: "students",
+    path: "students",
+    size: "w-[20px] h-[16px]",
+  },
+  {
+    name: "Teachers",
+    icon: "teachers",
+    path: "teachers",
+    size: "w-[21px] h-[17px]",
+  },
+  {
+    name: "Parents",
+    icon: "parents",
+    path: "parents",
+    size: "w-[19px] h-[20px]",
+  },
+  {
+    name: "Assignments",
+    icon: "assignments",
+    path: "assignments",
+    size: "w-[18px] h-[19px]",
+  },
+  {
+    name: "Pairing",
+    icon: "pairing",
+    path: "pairing",
+    size: "w-[17px] h-[19px]",
+  },
+  {
+    name: "Quizzes",
+    icon: "quizzes",
+    path: "quizzes",
+    size: "w-[17px] h-[19px]",
+  },
+  {
+    name: "Messages",
+    icon: "messages",
+    path: "messages",
+    size: "w-[19px] h-[19px]",
+  },
+  {
+    name: "System Logs",
+    icon: "systemLogs",
+    path: "system-logs",
+    size: "w-[17px] h-[19px]",
+  },
+  {
+    name: "Earnings",
+    icon: "earnings",
+    path: "earnings",
+    size: "w-[13px] h-[20px]",
+  },
+  {
+    name: "Support Tickets",
+    icon: "supportTickets",
+    path: "support-tickets",
+    size: "w-[17px] h-[19px]",
+  },
+  {
+    name: "Settings",
+    icon: "settings",
+    path: "settings",
+  },
 ];
 
 const teacherLinks = [
@@ -67,20 +142,19 @@ const parentLinks = [
 
 export default function useSidebarLinks() {
   const { user } = useUser();
-  console.log("User role:", user?.role);
 
-  let sidebarLinks;
-  if (user?.role?.toLowerCase() === "teacher") {
+  let sidebarLinks: any[] = [];
+
+  if (user.role === "teacher") {
     sidebarLinks = teacherLinks;
-  } else if (user?.role?.toLowerCase() === "student") {
+  } else if (user.role === "student") {
     sidebarLinks = studentLinks;
-  } else if (user?.role?.toLowerCase() === "parent") {
+  } else if (user.role === "parent") {
     sidebarLinks = parentLinks;
-  } else {
+  } else if (user.role === "admin") {
     sidebarLinks = adminLinks;
   }
 
-  console.log(sidebarLinks);
   return sidebarLinks;
 }
 
@@ -386,7 +460,10 @@ export function isStepValid(onboardingData, currentStep, role = "teacher") {
         const hasDegrees =
           onboardingData.degreeLinks && onboardingData.degreeLinks.length > 0;
         const hasQualifications = hasCertificates || hasDegrees;
-        return hasProfilePicture && hasGovernmentId && hasQualifications;
+        const hasBio = Boolean(onboardingData.bio);
+        return (
+          hasProfilePicture && hasGovernmentId && hasQualifications && hasBio
+        );
       }
       case 2: {
         const hasClasses =

@@ -84,8 +84,11 @@ const Onboarding = () => {
           const data = response.data;
           setOnboardingData((prev) => ({ ...prev, ...data }));
         }
-      } catch (error) {
+      } catch (error: any) {
         console.error("Error fetching onboarding data:", error);
+        if (error.message === "Teacher not found") {
+          setCurrentStep(1);
+        }
       } finally {
         setLoading(false);
       }
@@ -115,7 +118,7 @@ const Onboarding = () => {
           updateUserFromCookies();
           navigate("/success");
         } else {
-          if (currentStep > 1) await handleSave();
+          await handleSave();
           setCurrentStep((prev) => prev + 1);
         }
         localStorage.setItem(
@@ -135,6 +138,7 @@ const Onboarding = () => {
   };
 
   const handlePrevious = () => {
+    localStorage.setItem("onboardingStep", (currentStep - 1).toString());
     setCurrentStep((prev) => prev - 1);
   };
 
@@ -213,9 +217,7 @@ const Onboarding = () => {
       <div className="space-y-2 sm:space-y-3 mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-gray-200 flex-shrink-0">
         <button
           onClick={handleNext}
-          // disabled={
-          //   loading || !isStepValid(onboardingData, currentStep, "teacher")
-          // }
+          disabled={loading}
           className="w-full py-2 sm:py-3 px-4 rounded-3xl font-medium text-sm sm:text-base bg-bgprimary text-white hover:bg-teal-600 transition-colors disabled:opacity-50 cursor-pointer"
         >
           {loading ? "Processing..." : currentStep === 4 ? "Finish" : "Next"}

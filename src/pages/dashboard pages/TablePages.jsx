@@ -3,7 +3,6 @@ import { useNavigate, useLocation } from "react-router-dom";
 import DataTable from "react-data-table-component";
 import { Search, CalendarDays, Plus, Trash, Edit, Eye } from "lucide-react"; // <-- Add icons
 import DatePicker from "react-datepicker";
-import ProfileView from "./ProfileView";
 import ViewDetailsActor from "../../components/ViewDetailsActor";
 import ViewDetails from "../../components/ViewDetails";
 import "react-datepicker/dist/react-datepicker.css";
@@ -72,11 +71,352 @@ const TablePage = ({
   const [editData, setEditData] = useState(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [teachers, setTeachers] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [totalTeachers, setTotalTeachers] = useState(0);
+
+  // Generate dummy data based on the title
+  const generateDummyData = () => {
+    const titleLower = title.toLowerCase();
+
+    if (titleLower.includes("teacher")) {
+      return [
+        {
+          id: 1,
+          name: "Dr. Sarah Johnson",
+          email: "sarah.johnson@example.com",
+          bio: "Experienced mathematics teacher with 15+ years of teaching experience. Specializes in algebra and calculus for high school students.",
+          degree: "PhD in Mathematics",
+          verified: "verified",
+          date: "January 15, 2024, 10:30 AM",
+          joiningDate: "2024-01-15",
+          profilePicture:
+            "https://images.unsplash.com/photo-1494790108755-2616b85771e3?w=100&h=100&fit=crop&crop=face",
+          subject: "Mathematics",
+          qualifications: ["PhD Mathematics", "Teaching Certificate"],
+        },
+        {
+          id: 2,
+          name: "Mr. James Wilson",
+          email: "james.wilson@example.com",
+          bio: "Passionate English literature teacher who loves helping students discover the beauty of language and storytelling.",
+          degree: "Master's in English Literature",
+          verified: "pending",
+          date: "February 3, 2024, 2:15 PM",
+          joiningDate: "2024-02-03",
+          profilePicture:
+            "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face",
+          subject: "English",
+          qualifications: ["Master's English Literature", "TESOL Certificate"],
+        },
+        {
+          id: 3,
+          name: "Ms. Emily Chen",
+          email: "emily.chen@example.com",
+          bio: "Science enthusiast dedicated to making chemistry and physics accessible and exciting for all students through hands-on experiments.",
+          degree: "Master's in Chemistry",
+          verified: "verified",
+          date: "March 8, 2024, 9:45 AM",
+          joiningDate: "2024-03-08",
+          profilePicture:
+            "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop&crop=face",
+          subject: "Chemistry",
+          qualifications: ["Master's Chemistry", "Lab Safety Certificate"],
+        },
+        {
+          id: 4,
+          name: "Dr. Michael Brown",
+          email: "michael.brown@example.com",
+          bio: "History professor with expertise in world history and social studies. Believes in connecting past events to current affairs.",
+          degree: "PhD in History",
+          verified: "rejected",
+          date: "March 22, 2024, 4:20 PM",
+          joiningDate: "2024-03-22",
+          profilePicture:
+            "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face",
+          subject: "History",
+          qualifications: ["PhD History", "Research Certificate"],
+        },
+        {
+          id: 5,
+          name: "Mrs. Lisa Rodriguez",
+          email: "lisa.rodriguez@example.com",
+          bio: "Biology teacher passionate about environmental science and helping students understand the natural world around them.",
+          degree: "Master's in Biology",
+          verified: "verified",
+          date: "April 5, 2024, 11:00 AM",
+          joiningDate: "2024-04-05",
+          profilePicture:
+            "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100&h=100&fit=crop&crop=face",
+          subject: "Biology",
+          qualifications: [
+            "Master's Biology",
+            "Environmental Science Certificate",
+          ],
+        },
+      ];
+    } else if (titleLower.includes("student")) {
+      return [
+        {
+          id: 1,
+          name: "Alex Thompson",
+          email: "alex.thompson@student.com",
+          parents: "Robert & Mary Thompson",
+          teacher: "Dr. Sarah Johnson",
+          date: "September 1, 2024, 8:00 AM",
+          joiningDate: "2024-09-01",
+          class: "Grade 10",
+          profilePicture:
+            "https://images.unsplash.com/photo-1539571696857-7a4bb0a9e67e?w=100&h=100&fit=crop&crop=face",
+          subject: "Mathematics",
+        },
+        {
+          id: 2,
+          name: "Sophie Martinez",
+          email: "sophie.martinez@student.com",
+          parents: "Carlos & Elena Martinez",
+          teacher: "Mr. James Wilson",
+          date: "September 1, 2024, 8:00 AM",
+          joiningDate: "2024-09-01",
+          class: "Grade 9",
+          profilePicture:
+            "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=100&h=100&fit=crop&crop=face",
+          subject: "English",
+        },
+        {
+          id: 3,
+          name: "David Kim",
+          email: "david.kim@student.com",
+          parents: "Jin & Hye Kim",
+          teacher: "Ms. Emily Chen",
+          date: "September 1, 2024, 8:00 AM",
+          joiningDate: "2024-09-01",
+          class: "Grade 11",
+          profilePicture:
+            "https://images.unsplash.com/photo-1507591064344-4c6ce005b128?w=100&h=100&fit=crop&crop=face",
+          subject: "Chemistry",
+        },
+        {
+          id: 4,
+          name: "Emma Johnson",
+          email: "emma.johnson@student.com",
+          parents: "Paul & Jennifer Johnson",
+          teacher: "Dr. Michael Brown",
+          date: "September 1, 2024, 8:00 AM",
+          joiningDate: "2024-09-01",
+          class: "Grade 10",
+          profilePicture:
+            "https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?w=100&h=100&fit=crop&crop=face",
+          subject: "History",
+        },
+        {
+          id: 5,
+          name: "Ryan Patel",
+          email: "ryan.patel@student.com",
+          parents: "Raj & Priya Patel",
+          teacher: "Mrs. Lisa Rodriguez",
+          date: "September 1, 2024, 8:00 AM",
+          joiningDate: "2024-09-01",
+          class: "Grade 12",
+          profilePicture:
+            "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop&crop=face",
+          subject: "Biology",
+        },
+      ];
+    } else if (titleLower.includes("parent")) {
+      return [
+        {
+          id: 1,
+          parents: "Robert & Mary Thompson",
+          student: "Alex Thompson",
+          date: "September 1, 2024, 8:00 AM",
+          joiningDate: "2024-09-01",
+          class: "Grade 10",
+          status: "Active",
+          email: "robert.thompson@parent.com",
+        },
+        {
+          id: 2,
+          parents: "Carlos & Elena Martinez",
+          student: "Sophie Martinez",
+          date: "September 1, 2024, 8:00 AM",
+          joiningDate: "2024-09-01",
+          class: "Grade 9",
+          status: "Active",
+          email: "carlos.martinez@parent.com",
+        },
+        {
+          id: 3,
+          parents: "Jin & Hye Kim",
+          student: "David Kim",
+          date: "September 1, 2024, 8:00 AM",
+          joiningDate: "2024-09-01",
+          class: "Grade 11",
+          status: "Active",
+          email: "jin.kim@parent.com",
+        },
+      ];
+    } else if (titleLower.includes("class")) {
+      return [
+        {
+          id: 1,
+          class: "Mathematics - Grade 10",
+          student: "Alex Thompson",
+          parents: "Robert & Mary Thompson",
+          teacher: "Dr. Sarah Johnson",
+          date: "August 30, 2025, 2:00 PM",
+          time: "2:00 PM - 3:00 PM",
+          amount: "$45.00",
+          status: "Scheduled",
+          subject: "Mathematics",
+        },
+        {
+          id: 2,
+          class: "English Literature - Grade 9",
+          student: "Sophie Martinez",
+          parents: "Carlos & Elena Martinez",
+          teacher: "Mr. James Wilson",
+          date: "August 30, 2025, 3:00 PM",
+          time: "3:00 PM - 4:00 PM",
+          amount: "$40.00",
+          status: "In Progress",
+          subject: "English",
+        },
+        {
+          id: 3,
+          class: "Chemistry Lab - Grade 11",
+          student: "David Kim",
+          parents: "Jin & Hye Kim",
+          teacher: "Ms. Emily Chen",
+          date: "August 30, 2025, 4:00 PM",
+          time: "4:00 PM - 5:30 PM",
+          amount: "$55.00",
+          status: "Completed",
+          subject: "Chemistry",
+        },
+      ];
+    } else if (titleLower.includes("subject")) {
+      return [
+        {
+          id: 1,
+          name: "Mathematics",
+          date: "January 10, 2024",
+          class: "Grades 9-12",
+          details: "Algebra, Geometry, Calculus, Statistics",
+          subject: "Mathematics",
+        },
+        {
+          id: 2,
+          name: "English",
+          date: "January 10, 2024",
+          class: "Grades 9-12",
+          details: "Literature, Grammar, Writing, Speaking",
+          subject: "English",
+        },
+        {
+          id: 3,
+          name: "Science",
+          date: "January 10, 2024",
+          class: "Grades 9-12",
+          details: "Physics, Chemistry, Biology",
+          subject: "Science",
+        },
+        {
+          id: 4,
+          name: "History",
+          date: "January 10, 2024",
+          class: "Grades 9-12",
+          details: "World History, Ancient Civilizations",
+          subject: "History",
+        },
+      ];
+    } else if (titleLower.includes("assignment")) {
+      return [
+        {
+          id: 1,
+          date: "August 28, 2025, 10:00 AM",
+          details: "Mathematics Homework - Quadratic Equations",
+          assignedTo: "Alex Thompson",
+          teacher: "Dr. Sarah Johnson",
+          subject: "Mathematics",
+          status: "Pending",
+          dueDate: "August 30, 2025",
+        },
+        {
+          id: 2,
+          date: "August 27, 2025, 2:00 PM",
+          details: "English Essay - Shakespeare Analysis",
+          assignedTo: "Sophie Martinez",
+          teacher: "Mr. James Wilson",
+          subject: "English",
+          status: "Submitted",
+          dueDate: "August 29, 2025",
+        },
+        {
+          id: 3,
+          date: "August 26, 2025, 9:00 AM",
+          details: "Chemistry Lab Report - Acid-Base Reactions",
+          assignedTo: "David Kim",
+          teacher: "Ms. Emily Chen",
+          subject: "Chemistry",
+          status: "Graded",
+          dueDate: "August 28, 2025",
+        },
+      ];
+    } else if (titleLower.includes("quiz")) {
+      return [
+        {
+          id: 1,
+          date: "August 29, 2025, 1:00 PM",
+          details: "Biology Quiz - Cell Structure",
+          assignedTo: "Ryan Patel",
+          teacher: "Mrs. Lisa Rodriguez",
+          subject: "Biology",
+          status: "Scheduled",
+          duration: "30 minutes",
+        },
+        {
+          id: 2,
+          date: "August 28, 2025, 11:00 AM",
+          details: "History Quiz - World War II",
+          assignedTo: "Emma Johnson",
+          teacher: "Dr. Michael Brown",
+          subject: "History",
+          status: "Completed",
+          duration: "45 minutes",
+        },
+      ];
+    } else {
+      // Default data for other types (System Logs, Earnings, Support Tickets)
+      return [
+        {
+          id: 1,
+          date: "August 30, 2025, 9:00 AM",
+          details: `${title} entry - Sample data for testing the table design and functionality`,
+        },
+        {
+          id: 2,
+          date: "August 29, 2025, 3:30 PM",
+          details: `${title} entry - Another sample entry to demonstrate table structure`,
+        },
+        {
+          id: 3,
+          date: "August 28, 2025, 2:15 PM",
+          details: `${title} entry - Third sample entry for comprehensive testing`,
+        },
+      ];
+    }
+  };
+
+  // Set dummy data on component mount
+  React.useEffect(() => {
+    const dummyData = generateDummyData();
+    setTeachers(dummyData);
+    setTotalTeachers(dummyData.length);
+    setTotalPages(Math.ceil(dummyData.length / rowsPerPage));
+  }, [title]);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [teacherToDelete, setTeacherToDelete] = useState(null);
   const [resultModal, setResultModal] = useState({
@@ -156,75 +496,75 @@ const TablePage = ({
       await fetchTeachers(currentPage);
     }
   };
-  const fetchTeachers = useCallback(
-    async (page = 1) => {
-      try {
-        setLoading(true);
-        setError("");
+  // const fetchTeachers = useCallback(
+  //   async (page = 1) => {
+  //     try {
+  //       setLoading(true);
+  //       setError("");
 
-        const status = true;
-        console.log("**calling getUser from TablePages**");
-        const response = await AuthService.getUser(
-          status,
-          rowsPerPage,
-          page,
-          title
-        );
+  //       const status = true;
+  //       console.log("**calling getUser from TablePages**");
+  //       const response = await AuthService.getUser(
+  //         status,
+  //         rowsPerPage,
+  //         page,
+  //         title
+  //       );
 
-        if (response.success && response.users) {
-          // Transform the API data to match our table structure
-          const transformedData = response.users.map((user) => ({
-            id: user._id,
-            date: new Date(user.joiningDate).toLocaleDateString("en-US", {
-              year: "numeric",
-              month: "long",
-              day: "numeric",
-              hour: "2-digit",
-              minute: "2-digit",
-            }),
-            name: user.name || "Unknown",
-            email: user.email,
-            bio: user.bio || "No bio provided",
-            govId: user.profilePicture ? "Profile Picture" : "Not provided",
-            degree:
-              user.qualifications && user.qualifications.length > 0
-                ? `${user.qualifications.length} qualification(s)`
-                : "No qualifications",
-            profilePicture: user.profilePicture,
-            qualifications: user.qualifications || [],
-            verified: user.verified,
-            joiningDate: user.joiningDate,
-          }));
+  //       if (response.success && response.users) {
+  //         // Transform the API data to match our table structure
+  //         const transformedData = response.users.map((user) => ({
+  //           id: user._id,
+  //           date: new Date(user.joiningDate).toLocaleDateString("en-US", {
+  //             year: "numeric",
+  //             month: "long",
+  //             day: "numeric",
+  //             hour: "2-digit",
+  //             minute: "2-digit",
+  //           }),
+  //           name: user.name || "Unknown",
+  //           email: user.email,
+  //           bio: user.bio || "No bio provided",
+  //           govId: user.profilePicture ? "Profile Picture" : "Not provided",
+  //           degree:
+  //             user.qualifications && user.qualifications.length > 0
+  //               ? `${user.qualifications.length} qualification(s)`
+  //               : "No qualifications",
+  //           profilePicture: user.profilePicture,
+  //           qualifications: user.qualifications || [],
+  //           verified: user.verified,
+  //           joiningDate: user.joiningDate,
+  //         }));
 
-          setTeachers(transformedData);
-          setTotalPages(
-            response.totalPages ||
-              Math.ceil((response.total || 0) / rowsPerPage)
-          );
-          setTotalTeachers(response.total || 0);
-          console.log("Fetched teachers:", transformedData);
-        } else {
-          setError("Failed to fetch teachers data");
-          setTeachers([]);
-          setTotalPages(0);
-          setTotalTeachers(0);
-        }
-      } catch (error) {
-        console.error("Error fetching teachers:", error);
-        setError(error.message || "Failed to fetch teachers");
-        setTeachers([]);
-        setTotalPages(0);
-        setTotalTeachers(0);
-      } finally {
-        setLoading(false);
-      }
-    },
-    [title, rowsPerPage]
-  );
-  useEffect(() => {
-    console.log("**calling fetchTeacher from useEffect**");
-    fetchTeachers(currentPage);
-  }, [title, currentPage, fetchTeachers]);
+  //         setTeachers(transformedData);
+  //         setTotalPages(
+  //           response.totalPages ||
+  //             Math.ceil((response.total || 0) / rowsPerPage)
+  //         );
+  //         setTotalTeachers(response.total || 0);
+  //         console.log("Fetched teachers:", transformedData);
+  //       } else {
+  //         setError("Failed to fetch teachers data");
+  //         setTeachers([]);
+  //         setTotalPages(0);
+  //         setTotalTeachers(0);
+  //       }
+  //     } catch (error) {
+  //       console.error("Error fetching teachers:", error);
+  //       setError(error.message || "Failed to fetch teachers");
+  //       setTeachers([]);
+  //       setTotalPages(0);
+  //       setTotalTeachers(0);
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   },
+  //   [title, rowsPerPage]
+  // );
+  // useEffect(() => {
+  //   console.log("**calling fetchTeacher from useEffect**");
+  //   fetchTeachers(currentPage);
+  // }, [title, currentPage, fetchTeachers]);
 
   // Reset to first page when title changes (route changes)
   useEffect(() => {
@@ -315,20 +655,25 @@ const TablePage = ({
         const matchesSubject =
           selectedSubject === "" ||
           item.subject === selectedSubject ||
-          item[subjectColumn] === selectedSubject;
+          item[subjectColumn] === selectedSubject ||
+          item.name === selectedSubject ||
+          (item.details &&
+            item.details.toLowerCase().includes(selectedSubject.toLowerCase()));
 
         const matchesGeneric =
           selectedGeneric === "" ||
           item.teacher === selectedGeneric ||
           item.student === selectedGeneric ||
-          item.parent === selectedGeneric;
+          item.parent === selectedGeneric ||
+          item.name === selectedGeneric ||
+          item.parents === selectedGeneric;
 
         // Add date filtering logic here if needed
         const matchesDateRange =
           !startDate ||
           !endDate ||
-          (new Date(item.joiningDate) >= startDate &&
-            new Date(item.joiningDate) <= endDate);
+          (new Date(item.joiningDate || item.date) >= startDate &&
+            new Date(item.joiningDate || item.date) <= endDate);
 
         return (
           matchesSearch && matchesSubject && matchesGeneric && matchesDateRange
@@ -400,7 +745,7 @@ const TablePage = ({
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-teal-600 w-5 h-5" />
                   <input
                     type="text"
-                    placeholder="Search by subject"
+                    placeholder={`Search ${title.toLowerCase()}...`}
                     className="pl-10 pr-4 py-2 border border-gray-300 bg-white rounded-3xl outline-none w-full md:w-[400px] focus:ring-2 focus:ring-teal-500"
                     value={search}
                     onChange={(e) => {
@@ -498,13 +843,17 @@ const TablePage = ({
               progressPending={loading}
               progressComponent={
                 <div className="flex justify-center items-center py-8">
-                  <div className="text-gray-500">Loading teachers...</div>
+                  <div className="text-gray-500">
+                    Loading {title.toLowerCase()}...
+                  </div>
                 </div>
               }
               noDataComponent={
                 <div className="flex justify-center items-center py-8">
                   <div className="text-gray-500">
-                    {error ? `Error: ${error}` : "No teachers found"}
+                    {error
+                      ? `Error: ${error}`
+                      : `No ${title.toLowerCase()} found`}
                   </div>
                 </div>
               }

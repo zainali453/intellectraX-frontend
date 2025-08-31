@@ -10,9 +10,14 @@ import {
 interface AuthGuardProps {
   children: React.ReactNode;
   requireAuth?: boolean;
+  requireAdmin?: boolean;
 }
 
-const AuthGuard = ({ children, requireAuth = true }: AuthGuardProps) => {
+const AuthGuard = ({
+  children,
+  requireAuth = true,
+  requireAdmin = false,
+}: AuthGuardProps) => {
   const { user } = useUser();
   const location = useLocation();
 
@@ -82,6 +87,9 @@ const AuthGuard = ({ children, requireAuth = true }: AuthGuardProps) => {
     return <Navigate to="/onboarding" replace />;
   }
 
+  if (requireAdmin && user.role !== "admin") {
+    return <Navigate to="/" replace />;
+  }
   // Allow access
   return <>{children}</>;
 };
