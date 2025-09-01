@@ -13,7 +13,7 @@ export default function DashboardLayout() {
   const activePath = pathSegments[2] || "";
 
   return (
-    <div className="flex h-full w-full bg-[#FAFAFA]">
+    <div className="flex h-full w-full bg-[#f7f7f7]">
       {/* Sidebar */}
       <aside className="w-66 bg-white flex flex-col h-full">
         <div className="flex-1 overflow-y-auto pt-3 px-3 pb-15 scroll-optimized">

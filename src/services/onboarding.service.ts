@@ -31,6 +31,23 @@ type TeacherClasses = {
   subjects: Subject[];
 };
 
+export interface PriceNegotiationData {
+  level: string;
+  subjects: {
+    subject: string;
+    price: number;
+    adminPrice?: number;
+    acceptedBy?: "admin" | "teacher" | null;
+    accepted: boolean;
+  }[];
+}
+interface getTeacherPriceNegotiationDataResponse {
+  success: boolean;
+  message: string;
+  data?: {
+    classes: PriceNegotiationData[];
+  };
+}
 interface OnboardingData {
   profilePic: string;
   bio: string;
@@ -43,6 +60,14 @@ interface OnboardingData {
   pricingLName: string;
   pricingSortCode: string;
   pricingAccountNumber: string;
+}
+
+interface checkTeacherStatusResponse {
+  success: boolean;
+  message: string;
+  data?: {
+    completed: boolean;
+  };
 }
 
 interface OnboardingDataResponse {
@@ -113,6 +138,31 @@ class OnboardingService {
       );
     }
   }
+
+  async getTeacherPriceNegotiationData() {
+    try {
+      const response =
+        await apiClient.get<getTeacherPriceNegotiationDataResponse>(
+          "teacher/pricenegotiation"
+        );
+      return response.data;
+    } catch (error: any) {
+      console.error("Error fetching onboarding data:", error);
+      throw new Error(
+        error.response?.data?.message || "Failed to fetch onboarding data"
+      );
+    }
+  }
+
+  async checkTeacherStatus() {
+    try {
+      const response = await apiClient.get<checkTeacherStatusResponse>(
+        "teacher/status"
+      );
+      return response.data;
+    } catch (error: any) {}
+  }
+
   async getServerHealth() {
     try {
       const response = await apiClient.get<OnboardingDataResponse>("health");

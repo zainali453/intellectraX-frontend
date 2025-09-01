@@ -1,12 +1,10 @@
 import { useEffect, useState } from "react";
 import { Check, X, AlertCircle } from "lucide-react";
-import { PriceNegotiationData } from "@/services/onboarding.service";
+import { PriceNegotiationData, adminService } from "@/services/admin.service";
+import PriceNegotiationSkeleton from "./PriceNegotiationSkeleton";
 
 type PriceNegotiationProps = {
-  negotiationData: PriceNegotiationData[];
-  setNegotiationData: React.Dispatch<
-    React.SetStateAction<PriceNegotiationData[]>
-  >;
+  teacherId: string;
 };
 
 interface ValidationError {
@@ -15,15 +13,32 @@ interface ValidationError {
   message: string;
 }
 
-const PriceNegotiation = ({
-  negotiationData,
-  setNegotiationData,
-}: PriceNegotiationProps) => {
-  const [loading, setLoading] = useState(false);
+const PriceNegotiation = ({ teacherId }: PriceNegotiationProps) => {
+  const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
-
+  const [negotiationData, setNegotiationData] = useState<
+    PriceNegotiationData[]
+  >([]);
   const [errors, setErrors] = useState<ValidationError[]>([]);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+
+  useEffect(() => {
+    const fetchTeacherPrices = async () => {
+      try {
+        setLoading(true);
+        const response = await adminService.getTeacherPrices(teacherId);
+        if (response.data) {
+          setNegotiationData(response.data.classes);
+        }
+      } catch (error) {
+        console.error("Error fetching teacher prices:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTeacherPrices();
+  }, [teacherId]);
 
   const validateData = (): ValidationError[] => {
     const validationErrors: ValidationError[] = [];
@@ -132,7 +147,7 @@ const PriceNegotiation = ({
 
     try {
       setSubmitting(true);
-      // await adminService.submitPriceNegotiation(teacherId, negotiationData);
+      await adminService.submitPriceNegotiation(teacherId, negotiationData);
       setHasUnsavedChanges(false);
       setErrors([]);
       // You might want to show a success message or redirect
@@ -162,7 +177,7 @@ const PriceNegotiation = ({
 
   // Show loading skeleton while fetching data
   if (loading) {
-    return <div>Loading...</div>;
+    return <PriceNegotiationSkeleton />;
   }
 
   return (

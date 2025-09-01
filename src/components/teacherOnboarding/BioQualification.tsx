@@ -240,6 +240,17 @@ const BioQualifications = ({ data, onChange }: BioQualificationsProps) => {
             : item
         )
       );
+      setFormData((prev) => ({
+        ...prev,
+        [fileType]: [
+          ...(prev[fileType] || []),
+          {
+            file,
+            url: result.fileUrl,
+            fileName: result.fileName || file.name,
+          },
+        ],
+      }));
     } catch (err: any) {
       setError(`Failed to upload ${fileType}: ${err.message}`);
       // Remove failed upload
@@ -274,6 +285,11 @@ const BioQualifications = ({ data, onChange }: BioQualificationsProps) => {
 
       // Remove from local state
       setFiles((prev) => prev.filter((item) => item.id !== fileId));
+
+      setFormData((prev) => ({
+        ...prev,
+        [fileType]: prev[fileType]?.filter((item) => item.id !== fileId),
+      }));
     } catch (err: any) {
       console.error(`Failed to remove ${fileType}:`, err);
       setError(`Failed to remove file: ${err.message}`);

@@ -8,7 +8,7 @@ import AuthGuard from "./layouts/AuthGuard";
 import RegistrationForm from "./pages/onboarding components/RegistrationForm";
 import OTP from "./pages/onboarding components/OTP";
 import RegistrationSuccess from "./components/teacherOnboarding/RegistrationSuccess";
-import PriceNegotiation from "./components/teacherOnboarding/PriceNegotation";
+import PriceNegotiation from "./pages/PriceNegotiation";
 import Onboarding from "./pages/Onboarding";
 import Signup from "./pages/Signup";
 import MainLayout from "./layouts/MainLayout";
@@ -16,6 +16,7 @@ import MainLayout from "./layouts/MainLayout";
 // admin
 import AdminDashboard from "./pages/admin/Dashboard";
 import TeachersVerification from "./pages/admin/Verifications";
+import VerificationsTeacherDetail from "./pages/admin/VerificationsTeacherDetail";
 
 function App() {
   return (
@@ -88,6 +89,14 @@ function App() {
               </AuthGuard>
             }
           />
+          <Route
+            path="/teacher/dashboard"
+            element={
+              <AuthGuard requireAuth={true}>
+                <div>Teacher Dashboard</div>
+              </AuthGuard>
+            }
+          />
         </Route>
         <Route
           path="/admin"
@@ -103,6 +112,10 @@ function App() {
             element={<AdminDashboard title={"Dashboard"} />}
           />
           <Route path="verifications" element={<TeachersVerification />} />
+          <Route
+            path="verifications/teacher/:id"
+            element={<VerificationsTeacherDetail />}
+          />
           <Route path="users" element={<div>Users Component</div>} />
           <Route path="settings" element={<div>Settings Component</div>} />
           <Route path="teachers" element={<div>Teachers Component</div>} />

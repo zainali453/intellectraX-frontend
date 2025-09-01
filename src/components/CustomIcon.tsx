@@ -22,6 +22,7 @@ import systemLogs from "../assets/icons/systemLogs.png";
 import teachers from "../assets/icons/teachers.png";
 import verifications from "../assets/icons/verifications.png";
 import pairing from "../assets/icons/pairing.png";
+import back from "../assets/icons/back.png";
 
 import dashboardActive from "../assets/icons/dashboardActive.png";
 import assignmentsActive from "../assets/icons/assignmentsActive.png";
@@ -61,6 +62,7 @@ const ICONS = {
   teachers,
   verifications,
   pairing,
+  back,
 
   dashboardActive,
   assignmentsActive,

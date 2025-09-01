@@ -109,7 +109,6 @@ const Onboarding = () => {
   };
   const handleNext = async () => {
     setError("");
-
     try {
       if (isStepValid(onboardingData, currentStep, "teacher")) {
         const tempStep = currentStep;

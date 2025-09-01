@@ -1,6 +1,9 @@
-import React from "react";
+import React, { use, useEffect } from "react";
 import { Check } from "lucide-react";
 import CustomIcon from "../CustomIcon";
+import { useUser } from "@/context/UserContext";
+import { onboardingService } from "@/services/onboarding.service";
+import { useNavigate } from "react-router-dom";
 
 interface RegistrationSuccessProps {
   className?: string;
@@ -9,6 +12,22 @@ interface RegistrationSuccessProps {
 const RegistrationSuccess: React.FC<RegistrationSuccessProps> = ({
   className = "",
 }) => {
+  const navigate = useNavigate();
+  const { user, updateUserFromCookies } = useUser();
+  useEffect(() => {
+    const checkTeacherStatus = async () => {
+      const response = await onboardingService.checkTeacherStatus();
+      if (response?.data) {
+        if (response.data.completed) {
+          updateUserFromCookies();
+          navigate("/teacher/dashboard");
+        } else {
+          navigate("/pricenegotiation");
+        }
+      }
+    };
+    if (user.role === "teacher") checkTeacherStatus();
+  }, []);
   return (
     <div className="bg-white rounded-3xl shadow-lg w-full max-w-xl">
       <div

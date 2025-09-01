@@ -176,7 +176,7 @@ const ClassSubject = ({ initialData = [], onChange }: ClassSubjectProps) => {
                   Subject
                 </span>
                 <span className="text-sm font-medium text-gray-600">
-                  Price per hour (£)
+                  Price per hour ($)
                 </span>
               </div>
 

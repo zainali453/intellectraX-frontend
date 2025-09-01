@@ -3,6 +3,7 @@ import CustomHeader from "../../components/CustomHeader";
 import CustomDataTable from "../../components/CustomDataTable";
 import CustomPagination from "../../components/CustomPagination";
 import { adminService, VerificationData } from "../../services/admin.service";
+import { useNavigate } from "react-router-dom";
 
 type TabType = "pending" | "accepted" | "rejected";
 
@@ -18,6 +19,7 @@ const extractFileNameFromUrl = (url: string): string => {
 };
 
 const Verifications = () => {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<TabType>("pending");
   const [searchValue, setSearchValue] = useState("");
   const [dateRange, setDateRange] = useState({ start: "", end: "" });
@@ -39,7 +41,6 @@ const Verifications = () => {
     } catch (error) {
       console.error("Verification failed:", error);
       // Handle error (show toast, alert, etc.)
-    } finally {
       setLoading(false);
     }
   };
@@ -104,7 +105,12 @@ const Verifications = () => {
       title: "Actions",
       render: (value: any, record: VerificationData) => (
         <div className="flex items-center space-x-2">
-          <button className="p-1 text-bgprimary hover:text-teal-600 cursor-pointer">
+          <button
+            className="p-1 text-bgprimary hover:text-teal-600 cursor-pointer"
+            onClick={() =>
+              navigate(`/admin/verifications/teacher/${record._id}`)
+            }
+          >
             <svg
               className="w-6 h-6"
               fill="none"
