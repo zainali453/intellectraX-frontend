@@ -52,7 +52,6 @@ interface AvailabilityScheduleRef {
 const Onboarding = () => {
   const { updateUserFromCookies, user } = useUser();
   const navigate = useNavigate();
-  if (user.onboarding) navigate("success");
   const prevStep = localStorage.getItem("onboardingStep") || "1";
   const [currentStep, setCurrentStep] = useState(parseInt(prevStep));
   const [loading, setLoading] = useState(false);
@@ -93,7 +92,8 @@ const Onboarding = () => {
         setLoading(false);
       }
     };
-    fetchData();
+    if (user.onboarding) navigate("success");
+    if (!user.onboarding) fetchData();
   }, []);
 
   const handleSave = async (query?: string) => {

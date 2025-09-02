@@ -46,6 +46,7 @@ interface getTeacherPriceNegotiationDataResponse {
   message: string;
   data?: {
     classes: PriceNegotiationData[];
+    updatedBy: "admin" | "teacher" | "none";
   };
 }
 interface OnboardingData {
@@ -145,6 +146,22 @@ class OnboardingService {
         await apiClient.get<getTeacherPriceNegotiationDataResponse>(
           "teacher/pricenegotiation"
         );
+      return response.data;
+    } catch (error: any) {
+      console.error("Error fetching onboarding data:", error);
+      throw new Error(
+        error.response?.data?.message || "Failed to fetch onboarding data"
+      );
+    }
+  }
+
+  async saveTeacherPriceNegotiationData(data: PriceNegotiationData[]) {
+    try {
+      const response = await apiClient.post<{
+        success: boolean;
+        message: string;
+        data?: { completed: boolean };
+      }>("teacher/pricenegotiation", { classes: data });
       return response.data;
     } catch (error: any) {
       console.error("Error fetching onboarding data:", error);

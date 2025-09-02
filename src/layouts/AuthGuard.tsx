@@ -76,7 +76,7 @@ const AuthGuard = ({
 
   // If user is verified and trying to access signup/signin/otp/home, redirect to onboarding
   if (
-    verificationStatus === "verified" &&
+    (verificationStatus === "verified" || verificationStatus === "completed") &&
     (isOnSignupPage ||
       isOnSigninPage ||
       isOnOTPPage ||
@@ -84,6 +84,14 @@ const AuthGuard = ({
   ) {
     if (user.onboarding && user.isAuthenticated && user.verified === "verified")
       return <Navigate to="/success" replace />;
+    else if (
+      user.onboarding &&
+      user.isAuthenticated &&
+      user.verified === "completed" &&
+      user.role === "teacher"
+    )
+      return <Navigate to="/teacher/dashboard" replace />;
+
     return <Navigate to="/onboarding" replace />;
   }
 

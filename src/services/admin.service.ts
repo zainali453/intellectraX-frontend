@@ -37,6 +37,13 @@ export interface TeacherData {
       price: number;
     }[];
   }[];
+  finalizedClasses: {
+    level: string;
+    subjects: {
+      subject: string;
+      price: number;
+    }[];
+  }[];
   bio: string;
   availability: {
     day: string;
@@ -72,6 +79,7 @@ interface getTeacherPricesResponse {
   message: string;
   data?: {
     classes: PriceNegotiationData[];
+    updatedBy: "admin" | "teacher" | "none";
   };
 }
 

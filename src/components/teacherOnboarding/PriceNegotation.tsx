@@ -1,8 +1,15 @@
-import { useEffect, useState } from "react";
+import { use, useEffect, useState } from "react";
 import { Check, X, AlertCircle } from "lucide-react";
-import { PriceNegotiationData } from "@/services/onboarding.service";
+import {
+  onboardingService,
+  PriceNegotiationData,
+} from "@/services/onboarding.service";
+import { useUser } from "@/context/UserContext";
+import { useNavigate } from "react-router-dom";
 
 type PriceNegotiationProps = {
+  isTeacherUpdate: boolean;
+  setUpdate: React.Dispatch<React.SetStateAction<boolean>>;
   negotiationData: PriceNegotiationData[];
   setNegotiationData: React.Dispatch<
     React.SetStateAction<PriceNegotiationData[]>
@@ -16,9 +23,13 @@ interface ValidationError {
 }
 
 const PriceNegotiation = ({
+  setUpdate,
+  isTeacherUpdate,
   negotiationData,
   setNegotiationData,
 }: PriceNegotiationProps) => {
+  const { updateUserFromCookies } = useUser();
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
@@ -30,17 +41,8 @@ const PriceNegotiation = ({
 
     negotiationData.forEach((classData, classIndex) => {
       classData.subjects.forEach((subject, subjectIndex) => {
-        // Check if acceptedBy is null
-        if (!subject.acceptedBy) {
-          validationErrors.push({
-            classIndex,
-            subjectIndex,
-            message: "Please accept or reject this subject",
-          });
-        }
-
         // If rejecting, must have adminPrice
-        if (subject.acceptedBy === "admin" && !subject.adminPrice) {
+        if (!subject.adminPrice) {
           validationErrors.push({
             classIndex,
             subjectIndex,
@@ -80,7 +82,8 @@ const PriceNegotiation = ({
     } else if (acceptedBy === "admin") {
       // Reject teacher's price - admin will set their own price
       subject.acceptedBy = "admin";
-      subject.accepted = false;
+      subject.accepted = true;
+      subject.price = subject.adminPrice || subject.price; // Set teacher price to admin price
       // Don't set adminPrice here, let admin input it
     } else {
       // Reset
@@ -102,8 +105,8 @@ const PriceNegotiation = ({
     const subject = updatedData[classIndex].subjects[subjectIndex];
 
     // Only allow admin price change if admin is rejecting teacher's price
-    if (subject.acceptedBy === "admin" || !subject.acceptedBy) {
-      subject.adminPrice = newPrice;
+    if (subject.acceptedBy === "teacher" || !subject.acceptedBy) {
+      subject.price = newPrice;
 
       // Clear validation error for this field
       setErrors((prev) =>
@@ -132,7 +135,17 @@ const PriceNegotiation = ({
 
     try {
       setSubmitting(true);
-      // await adminService.submitPriceNegotiation(teacherId, negotiationData);
+      const response = await onboardingService.saveTeacherPriceNegotiationData(
+        negotiationData
+      );
+      if (response.data) {
+        const { completed } = response.data;
+        if (completed) {
+          updateUserFromCookies();
+          navigate("/teacher/dashboard");
+        } else setUpdate((prev) => !prev);
+      }
+
       setHasUnsavedChanges(false);
       setErrors([]);
       // You might want to show a success message or redirect
@@ -160,9 +173,103 @@ const PriceNegotiation = ({
     return subject?.acceptedBy === "teacher";
   };
 
-  // Show loading skeleton while fetching data
-  if (loading) {
-    return <div>Loading...</div>;
+  // Show message when last update was by teacher (waiting for admin response)
+  if (isTeacherUpdate) {
+    return (
+      <div className="bg-white rounded-xl p-8 w-full max-w-[68%] my-10">
+        <div className="mb-6">
+          <h2 className="text-3xl font-semibold text-textprimary mb-2">
+            Price Negotiation
+          </h2>
+          <p className="text-black text-sm">
+            Review and negotiate pricing for each subject.
+          </p>
+        </div>
+
+        {/* Waiting for teacher response message */}
+        <div className="flex flex-col items-center justify-center py-12">
+          <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-4">
+            <AlertCircle className="w-8 h-8 text-blue-600" />
+          </div>
+          <h3 className="text-xl font-semibold text-gray-900 mb-2">
+            Waiting for Admin Response
+          </h3>
+          <p className="text-gray-600 text-center max-w-md">
+            You have already sent a counter offer to the teacher. Please wait
+            for the admin to respond with their updated pricing before making
+            any further changes.
+          </p>
+        </div>
+
+        {/* Display current negotiation data in read-only mode */}
+        <div className="mt-8 opacity-60">
+          {negotiationData.map((classData, classIndex) => (
+            <div
+              key={classIndex}
+              className="bg-[#F9FAFB] rounded-lg overflow-hidden p-5 border-1 border-[#EAEAEA] mb-6"
+            >
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-gray-900">
+                  {classData.level}
+                </h3>
+              </div>
+
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr>
+                      <th className="pb-3 pl-2 text-left text-sm font-medium text-gray-500">
+                        Subject
+                      </th>
+                      <th className="pb-3 text-right text-sm font-medium text-gray-500">
+                        Your Price ($)
+                      </th>
+                      <th className="pb-3 text-center text-sm font-medium text-gray-500">
+                        Admin Offer ($)
+                      </th>
+                      <th className="pb-3 text-left text-sm font-medium text-gray-500">
+                        Status
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {classData.subjects.map((item, subjectIndex) => (
+                      <tr
+                        key={subjectIndex}
+                        className="border-1 border-[#EAEAEA] bg-gray-50"
+                      >
+                        <td className="py-4 text-base font-medium text-gray-900 pl-4">
+                          {item.subject}
+                        </td>
+                        <td className="py-4 text-center p-2">
+                          <div className="flex justify-end">
+                            <div className="w-25 px-3 py-2 text-base text-right border rounded-md bg-gray-100 border-gray-300 text-gray-700 font-medium">
+                              {item.price?.toFixed(2) || "N/A"}
+                            </div>
+                          </div>
+                        </td>
+                        <td className="py-4 text-center">
+                          <div className="flex justify-center">
+                            <div className="w-25 px-3 py-2 text-base text-right border-2 border-teal-400 rounded-md bg-white text-teal-600 font-medium">
+                              {item.adminPrice?.toFixed(2) || "N/A"}
+                            </div>
+                          </div>
+                        </td>
+                        <td className="py-4 text-left">
+                          <span className="px-3 py-1 text-xs font-medium rounded-full bg-yellow-100 text-yellow-800">
+                            Pending Admin Response
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -176,6 +283,24 @@ const PriceNegotiation = ({
           or set your own.
         </p>
       </div>
+
+      {/* Warning banner when waiting for admin response */}
+      {isTeacherUpdate && (
+        <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+          <div className="flex items-center">
+            <AlertCircle className="w-5 h-5 text-yellow-600 mr-2" />
+            <div>
+              <h4 className="text-yellow-800 font-medium mb-1">
+                Waiting for Admin Response
+              </h4>
+              <p className="text-yellow-700 text-sm">
+                You have already sent a counter offer. The form is disabled
+                until the admin responds.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Error Summary */}
       {errors.length > 0 && (
@@ -227,7 +352,7 @@ const PriceNegotiation = ({
                     Your Price ($)
                   </th>
                   <th className="pb-3 text-center text-sm font-medium text-gray-500">
-                    Teacher Offer ($)
+                    Admin Offer ($)
                   </th>
                   <th className="pb-3 text-left text-sm font-medium text-gray-500">
                     Response
@@ -244,13 +369,7 @@ const PriceNegotiation = ({
                       key={subjectIndex}
                       className={` border-1 ${
                         fieldError ? "border-red-300" : "border-[#EAEAEA]"
-                      } ${
-                        item.acceptedBy === "teacher"
-                          ? "bg-green-50"
-                          : item.acceptedBy === "admin"
-                          ? "bg-red-50"
-                          : "bg-white"
-                      }`}
+                      } ${item.accepted ? "bg-green-50" : "bg-gray-50"}`}
                     >
                       <td className="py-4 text-base font-medium text-gray-900 pl-4">
                         {item.subject}
@@ -264,11 +383,7 @@ const PriceNegotiation = ({
                         <div className="flex justify-end">
                           <input
                             type="text"
-                            value={
-                              item.adminPrice === undefined
-                                ? item.price
-                                : item.adminPrice
-                            }
+                            value={item.price}
                             onChange={(e) =>
                               handlePriceChange(
                                 classIndex,
@@ -276,7 +391,7 @@ const PriceNegotiation = ({
                                 parseFloat(e.target.value) || 0
                               )
                             }
-                            disabled={isLocked || submitting}
+                            disabled={isLocked || submitting || isTeacherUpdate}
                             className={`w-25 px-1 py-2 text-base text-right border rounded-md font-medium focus:outline-none focus:ring-2 focus:ring-bgprimary focus:border-transparent ${
                               isLocked
                                 ? "bg-gray-100 border-gray-300 text-gray-500 cursor-not-allowed"
@@ -290,7 +405,9 @@ const PriceNegotiation = ({
                       <td className="py-4 text-center">
                         <div className="flex justify-center">
                           <div className="w-25 px-3 py-2 text-base text-right border-2 border-teal-400 rounded-md bg-white text-teal-600 font-medium">
-                            {item.price.toFixed(2)}
+                            {item?.adminPrice !== undefined
+                              ? item.adminPrice.toFixed(2)
+                              : "--"}
                           </div>
                         </div>
                       </td>
@@ -301,12 +418,12 @@ const PriceNegotiation = ({
                               handleResponseChange(
                                 classIndex,
                                 subjectIndex,
-                                item.acceptedBy === "teacher" ? null : "teacher"
+                                item.acceptedBy === "admin" ? null : "admin"
                               )
                             }
-                            disabled={submitting}
+                            disabled={isLocked || submitting || isTeacherUpdate}
                             className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${
-                              item.acceptedBy === "teacher"
+                              item.accepted
                                 ? "bg-green-500 text-white"
                                 : "bg-gray-200 text-gray-400 hover:bg-green-100 hover:text-green-600"
                             } ${
@@ -315,26 +432,6 @@ const PriceNegotiation = ({
                             title="Accept teacher's price"
                           >
                             <Check className="w-4 h-4" />
-                          </button>
-                          <button
-                            onClick={() =>
-                              handleResponseChange(
-                                classIndex,
-                                subjectIndex,
-                                item.acceptedBy === "admin" ? null : "admin"
-                              )
-                            }
-                            disabled={submitting}
-                            className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${
-                              item.acceptedBy === "admin"
-                                ? "bg-red-500 text-white"
-                                : "bg-gray-200 text-gray-400 hover:bg-red-100 hover:text-red-600"
-                            } ${
-                              submitting ? "opacity-50 cursor-not-allowed" : ""
-                            }`}
-                            title="Reject teacher's price and set your own"
-                          >
-                            <X className="w-4 h-4" />
                           </button>
                         </div>
                       </td>
@@ -351,7 +448,7 @@ const PriceNegotiation = ({
       <div className="flex flex-col sm:flex-row gap-4 pt-6">
         <button
           onClick={handleSubmit}
-          disabled={submitting || !hasUnsavedChanges}
+          disabled={submitting || !hasUnsavedChanges || isTeacherUpdate}
           className="flex-1 px-6 py-2 bg-bgprimary text-white rounded-full hover:bg-bgprimary/90 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
         >
           {submitting ? (

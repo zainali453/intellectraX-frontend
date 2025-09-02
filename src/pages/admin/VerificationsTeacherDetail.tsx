@@ -421,22 +421,43 @@ const VerificationsTeacherDetail = () => {
                   Study Levels
                 </label>
                 <div className="text-gray-900 text-base">
-                  {teacherData.classes?.map((cls, index) => (
-                    <div key={index} className="mb-3">
-                      <div className="font-medium text-base">{cls.level}</div>
-                      <div className="text-base text-gray-600 mt-1">
-                        {cls.subjects?.map((subj, subIndex) => (
-                          <div
-                            className="flex justify-between px-4"
-                            key={subIndex}
-                          >
-                            <div>{subj.subject}</div>
-                            <div className="font-medium">${subj.price}</div>
+                  {teacherData.userId.verified === "completed"
+                    ? teacherData.finalizedClasses?.map((cls, index) => (
+                        <div key={index} className="mb-3">
+                          <div className="font-medium text-base">
+                            {cls.level}
                           </div>
-                        ))}
-                      </div>
-                    </div>
-                  )) || <div>No study levels available</div>}
+                          <div className="text-base text-gray-600 mt-1">
+                            {cls.subjects?.map((subj, subIndex) => (
+                              <div
+                                className="flex justify-between px-4"
+                                key={subIndex}
+                              >
+                                <div>{subj.subject}</div>
+                                <div className="font-medium">${subj.price}</div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )) || <div>No study levels available</div>
+                    : teacherData.classes?.map((cls, index) => (
+                        <div key={index} className="mb-3">
+                          <div className="font-medium text-base">
+                            {cls.level}
+                          </div>
+                          <div className="text-base text-gray-600 mt-1">
+                            {cls.subjects?.map((subj, subIndex) => (
+                              <div
+                                className="flex justify-between px-4"
+                                key={subIndex}
+                              >
+                                <div>{subj.subject}</div>
+                                <div className="font-medium">${subj.price}</div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )) || <div>No study levels available</div>}
                 </div>
               </div>
 
