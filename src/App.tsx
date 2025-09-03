@@ -8,6 +8,7 @@ import AuthGuard from "./layouts/AuthGuard";
 import RegistrationForm from "./pages/onboarding components/RegistrationForm";
 import OTP from "./pages/onboarding components/OTP";
 import RegistrationSuccess from "./components/teacherOnboarding/RegistrationSuccess";
+import StudentRegistrationSuccess from "./components/studentOnboarding/RegistrationSuccess";
 import PriceNegotiation from "./pages/PriceNegotiation";
 import Onboarding from "./pages/Onboarding";
 import Signup from "./pages/Signup";
@@ -82,6 +83,14 @@ function App() {
             }
           />
           <Route
+            path="/studentsuccess"
+            element={
+              <AuthGuard requireAuth={true}>
+                <StudentRegistrationSuccess />
+              </AuthGuard>
+            }
+          />
+          <Route
             path="/pricenegotiation"
             element={
               <AuthGuard requireAuth={true}>
@@ -94,6 +103,14 @@ function App() {
             element={
               <AuthGuard requireAuth={true}>
                 <div>Teacher Dashboard</div>
+              </AuthGuard>
+            }
+          />
+          <Route
+            path="/student/dashboard"
+            element={
+              <AuthGuard requireAuth={true}>
+                <div>Student Dashboard</div>
               </AuthGuard>
             }
           />
@@ -116,6 +133,7 @@ function App() {
             path="verifications/teacher/:id"
             element={<VerificationsTeacherDetail />}
           />
+          <Route path="pairing" element={<div>Pairing Component</div>} />
           <Route path="users" element={<div>Users Component</div>} />
           <Route path="settings" element={<div>Settings Component</div>} />
           <Route path="teachers" element={<div>Teachers Component</div>} />

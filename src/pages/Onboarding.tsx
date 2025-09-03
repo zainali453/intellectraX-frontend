@@ -13,6 +13,17 @@ const Onboarding = () => {
     if (user.role === "admin") {
       navigate("/admin/dashboard");
     }
+    if (
+      (user.role === "teacher" || user.role === "student") &&
+      user.verified === "completed" &&
+      user.onboarding
+    ) {
+      if (user.role === "student") {
+        navigate("/student/dashboard");
+      } else if (user.role === "teacher") {
+        navigate("/teacher/dashboard");
+      }
+    }
   }, [user.role, navigate]);
 
   // Render the appropriate onboarding component based on role

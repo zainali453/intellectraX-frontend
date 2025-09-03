@@ -158,6 +158,39 @@ export default function useSidebarLinks() {
   return sidebarLinks;
 }
 
+export const pricingPlans = [
+  {
+    id: "basic",
+    title: "Basic Plan",
+    credits: "5 Credits",
+    price: 29,
+  },
+  {
+    id: "standard",
+    title: "Standard Plan",
+    credits: "10 Credits",
+    price: 49,
+  },
+  {
+    id: "premium",
+    title: "Premium Plan",
+    credits: "20 Credits",
+    price: 79,
+  },
+  {
+    id: "advanced",
+    title: "Advanced Plan",
+    credits: "30 Credits",
+    price: 99,
+  },
+  {
+    id: "elite",
+    title: "Elite Plan",
+    credits: "Unlimited Credits",
+    price: 129,
+  },
+];
+
 // Dummy table columns (for TablePage, etc.)
 export const subjectsColumns = [
   { name: "Subject Name", selector: (row) => row.name },
@@ -395,12 +428,12 @@ export function getStepContent(step, role = "teacher") {
         return {
           title: "Availability Schedule",
           description:
-            "Set your weekly teaching schedule. Add at least one time slot.",
+            "Please provide your availability and preferred teaching schedule.",
         };
       case 4:
         return {
-          title: "Pricing Details",
-          description: "Set your session pricing and payment information.",
+          title: "Bank Details",
+          description: "Enter your session rate and bank details for payment.",
         };
       default:
         return {
@@ -412,27 +445,26 @@ export function getStepContent(step, role = "teacher") {
     switch (step) {
       case 1:
         return {
-          title: "Class & Subject Selection",
+          title: "Level of Study",
           description:
-            "Select your class level and subjects you want to learn.",
+            "Please provide the following information to set up your Student Portal account.",
         };
       case 2:
         return {
-          title: "Learning Goals",
+          title: "Class & Subjects",
           description:
-            "Tell us about your learning goals and what you want to achieve.",
+            "Please provide the following information to set up your Student Portal account.",
         };
       case 3:
         return {
-          title: "Availability Schedule",
+          title: "Parent Account",
           description:
-            "Set your weekly learning schedule. Add at least one time slot.",
+            "Enter parent details to invite them via email or invitation code.",
         };
       case 4:
         return {
-          title: "Parents Account",
-          description:
-            "Enter parents details to invite them via email or invitation code.",
+          title: "Payment",
+          description: "Please Proceed to Payment of your selected plan.",
         };
       default:
         return {
@@ -490,30 +522,16 @@ export function isStepValid(onboardingData, currentStep, role = "teacher") {
   } else if (role?.toLowerCase() === "student") {
     switch (currentStep) {
       case 1: {
-        const hasClass = Boolean(onboardingData.className);
-        const hasSubjects =
-          onboardingData.subjects && onboardingData.subjects.length > 0;
-        return hasClass && hasSubjects;
+        return onboardingData.level && onboardingData.plan;
       }
       case 2: {
-        const hasLearningGoals =
-          Boolean(onboardingData.learningGoals) &&
-          onboardingData.learningGoals.trim().length > 0;
-        return hasLearningGoals;
+        return onboardingData.subjects && onboardingData.subjects.length > 0;
       }
       case 3: {
-        const hasAvailability =
-          onboardingData.availability && onboardingData.availability.length > 0;
-        return hasAvailability;
+        return onboardingData.parentEmail && onboardingData.parentContactNumber;
       }
       case 4: {
-        const hasParentEmail =
-          Boolean(onboardingData.parentEmail) &&
-          onboardingData.parentEmail.trim().length > 0;
-        const hasParentContact =
-          Boolean(onboardingData.parentContact) &&
-          onboardingData.parentContact.trim().length > 0;
-        return hasParentEmail && hasParentContact;
+        return true;
       }
       default:
         return true;

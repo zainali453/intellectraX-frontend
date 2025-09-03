@@ -82,15 +82,23 @@ const AuthGuard = ({
       isOnOTPPage ||
       location.pathname === "/")
   ) {
-    if (user.onboarding && user.isAuthenticated && user.verified === "verified")
-      return <Navigate to="/success" replace />;
-    else if (
+    if (
       user.onboarding &&
       user.isAuthenticated &&
-      user.verified === "completed" &&
-      user.role === "teacher"
-    )
-      return <Navigate to="/teacher/dashboard" replace />;
+      user.verified === "verified"
+    ) {
+      return <Navigate to="/success" replace />;
+    } else if (
+      user.onboarding &&
+      user.isAuthenticated &&
+      user.verified === "completed"
+    ) {
+      if (user.role === "student") {
+        return <Navigate to="/student/dashboard" replace />;
+      } else if (user.role === "teacher") {
+        return <Navigate to="/teacher/dashboard" replace />;
+      }
+    }
 
     return <Navigate to="/onboarding" replace />;
   }

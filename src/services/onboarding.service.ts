@@ -49,7 +49,7 @@ interface getTeacherPriceNegotiationDataResponse {
     updatedBy: "admin" | "teacher" | "none";
   };
 }
-interface OnboardingData {
+interface TeacherOnboardingData {
   profilePic: string;
   bio: string;
   governmentId: string;
@@ -63,6 +63,14 @@ interface OnboardingData {
   pricingAccountNumber: string;
 }
 
+interface StudentOnboardingData {
+  level: string;
+  plan: string;
+  subjects: string[];
+  parentEmail: string;
+  parentContactNumber: string;
+}
+
 interface checkTeacherStatusResponse {
   success: boolean;
   message: string;
@@ -71,10 +79,16 @@ interface checkTeacherStatusResponse {
   };
 }
 
-interface OnboardingDataResponse {
+interface TeacherOnboardingDataResponse {
   success: boolean;
   message: string;
-  data?: OnboardingData;
+  data?: TeacherOnboardingData;
+}
+
+interface StudentOnboardingDataResponse {
+  success: boolean;
+  message: string;
+  data?: StudentOnboardingData;
 }
 
 interface OnboardingService {
@@ -124,7 +138,7 @@ class OnboardingService {
 
   async getTeacherOnBoardingData() {
     try {
-      const response = await apiClient.get<OnboardingDataResponse>(
+      const response = await apiClient.get<TeacherOnboardingDataResponse>(
         "teacher/onboarding"
       );
       return response.data;
@@ -133,6 +147,24 @@ class OnboardingService {
       console.log(error.response);
       if (error?.response?.data?.message === "Teacher not found") {
         localStorage.removeItem("onboardingStep");
+      }
+      throw new Error(
+        error.response?.data?.message || "Failed to fetch onboarding data"
+      );
+    }
+  }
+
+  async getStudentOnBoardingData() {
+    try {
+      const response = await apiClient.get<StudentOnboardingDataResponse>(
+        "student/onboarding"
+      );
+      return response.data;
+    } catch (error: any) {
+      console.error("Error fetching onboarding data:", error);
+      console.log(error.response);
+      if (error?.response?.data?.message === "Student not found") {
+        localStorage.removeItem("studentonboardingStep");
       }
       throw new Error(
         error.response?.data?.message || "Failed to fetch onboarding data"
@@ -180,9 +212,12 @@ class OnboardingService {
     } catch (error: any) {}
   }
 
-  async getServerHealth() {
+  async saveTeacherOnBoardingData(data: TeacherOnboardingData, query?: string) {
     try {
-      const response = await apiClient.get<OnboardingDataResponse>("health");
+      const response = await apiClient.post<SuccessResponse>(
+        "teacher/onboarding" + (query ? `?completed=${query}` : ""),
+        data
+      );
       return response.data;
     } catch (error: any) {
       console.error("Error fetching onboarding data:", error);
@@ -191,10 +226,11 @@ class OnboardingService {
       );
     }
   }
-  async saveTeacherOnBoardingData(data: OnboardingData, query?: string) {
+
+  async saveStudentOnBoardingData(data: StudentOnboardingData, query?: string) {
     try {
       const response = await apiClient.post<SuccessResponse>(
-        "teacher/onboarding" + (query ? `?completed=${query}` : ""),
+        "student/onboarding" + (query ? `?completed=${query}` : ""),
         data
       );
       return response.data;
