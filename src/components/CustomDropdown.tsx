@@ -121,12 +121,12 @@ const CustomDropdown: React.FC<CustomDropdownProps> = ({
                   ${
                     option.disabled
                       ? "text-gray-400 cursor-not-allowed bg-gray-50"
-                      : "text-gray-900 hover:bg-gray-50"
+                      : "text-gray-900"
                   }
                   ${
                     value === option.value
-                      ? "bg-bgprimary text-white hover:bg-bgprimary"
-                      : ""
+                      ? "bg-bgprimary text-white hover:bg-teal-600 "
+                      : " hover:bg-gray-100"
                   }
                 `}
               >

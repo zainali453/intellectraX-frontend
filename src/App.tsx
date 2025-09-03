@@ -18,6 +18,7 @@ import MainLayout from "./layouts/MainLayout";
 import AdminDashboard from "./pages/admin/Dashboard";
 import TeachersVerification from "./pages/admin/Verifications";
 import VerificationsTeacherDetail from "./pages/admin/VerificationsTeacherDetail";
+import StudentPairing from "./pages/admin/StudentPairing";
 
 function App() {
   return (
@@ -133,7 +134,7 @@ function App() {
             path="verifications/teacher/:id"
             element={<VerificationsTeacherDetail />}
           />
-          <Route path="pairing" element={<div>Pairing Component</div>} />
+          <Route path="pairing" element={<StudentPairing />} />
           <Route path="users" element={<div>Users Component</div>} />
           <Route path="settings" element={<div>Settings Component</div>} />
           <Route path="teachers" element={<div>Teachers Component</div>} />

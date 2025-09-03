@@ -168,5 +168,67 @@ class AdminService {
       );
     }
   }
+  async getTeacherAndStudentsForPairing() {
+    try {
+      const response = await apiClient.get<{
+        data: {
+          teachers: {
+            id: string;
+            email: string;
+            fullName: string;
+            profilePic: string;
+            customId: string;
+          }[];
+          students: {
+            id: string;
+            email: string;
+            fullName: string;
+            level: string;
+            customId: string;
+          }[];
+        };
+      }>(`admin/pairing/teacherandstudentsforpairing`);
+      return response.data;
+    } catch (error: any) {
+      console.error("Error fetching students:", error);
+      throw new Error(
+        error.response?.data?.message || "Failed to fetch students"
+      );
+    }
+  }
+
+  async getSubjectsByTeacherAndStudent(teacherId: string, studentId: string) {
+    try {
+      const response = await apiClient.get(
+        `admin/pairing/subjects/${teacherId}/${studentId}`
+      );
+      return response.data;
+    } catch (error: any) {
+      console.error("Error fetching subjects:", error);
+      throw new Error(
+        error.response?.data?.message || "Failed to fetch subjects"
+      );
+    }
+  }
+
+  async assignTeacherToStudent(
+    teacherId: string,
+    studentId: string,
+    subject: string
+  ) {
+    try {
+      const response = await apiClient.post(`admin/pairing`, {
+        teacherId,
+        studentId,
+        subject,
+      });
+      return response.data;
+    } catch (error: any) {
+      console.error("Error assigning teacher to student:", error);
+      throw new Error(
+        error.response?.data?.message || "Failed to assign teacher to student"
+      );
+    }
+  }
 }
 export const adminService = new AdminService();
