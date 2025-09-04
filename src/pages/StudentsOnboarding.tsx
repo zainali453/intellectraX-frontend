@@ -62,11 +62,13 @@ const StudentOnboarding = () => {
     try {
       setLoading(true);
       await onboardingService.saveStudentOnBoardingData(onboardingData, query);
+      setLoading(false);
+      return true;
     } catch (error) {
       console.error("Error saving onboarding data:", error);
       setError("Error While Saving Data");
-    } finally {
       setLoading(false);
+      return false;
     }
   };
   const handleNext = async () => {
@@ -75,11 +77,14 @@ const StudentOnboarding = () => {
       if (isStepValid(onboardingData, currentStep, "student")) {
         const tempStep = currentStep;
         if (currentStep === 4) {
-          await handleSave("true");
+          const response = await handleSave("true");
+          if (!response) return;
+
           updateUserFromCookies();
           navigate("/studentsuccess");
         } else {
-          await handleSave();
+          const response = await handleSave();
+          if (!response) return;
           setCurrentStep((prev) => prev + 1);
         }
         localStorage.setItem(
