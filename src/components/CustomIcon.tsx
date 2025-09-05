@@ -23,6 +23,9 @@ import teachers from "../assets/icons/teachers.png";
 import verifications from "../assets/icons/verifications.png";
 import pairing from "../assets/icons/pairing.png";
 import back from "../assets/icons/back.png";
+import bookOpen from "../assets/icons/bookOpen.png";
+import dollar from "../assets/icons/dollar.png";
+import totalUsers from "../assets/icons/totalUsers.png";
 
 import dashboardActive from "../assets/icons/dashboardActive.png";
 import assignmentsActive from "../assets/icons/assignmentsActive.png";
@@ -63,6 +66,9 @@ const ICONS = {
   verifications,
   pairing,
   back,
+  bookOpen,
+  dollar,
+  totalUsers,
 
   dashboardActive,
   assignmentsActive,

@@ -47,7 +47,7 @@ const StudentOnboarding = () => {
         }
       } catch (error: any) {
         console.error("Error fetching onboarding data:", error);
-        if (error.message === "Teacher not found") {
+        if (error.message === "Student not found") {
           setCurrentStep(1);
         }
       } finally {

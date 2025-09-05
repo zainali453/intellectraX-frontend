@@ -14,7 +14,7 @@ const extractFileNameFromUrl = (url: string): string => {
     const fileName = urlParts[urlParts.length - 2];
     return fileName;
   } catch {
-    return "Document";
+    return "No Document";
   }
 };
 
@@ -82,9 +82,14 @@ const Verifications = () => {
       key: "governmentId",
       title: "Government ID",
       render: (value: string) => (
-        <span className="text-bgprimary cursor-pointer hover:underline">
+        <button
+          className="text-bgprimary cursor-pointer hover:underline"
+          onClick={() => {
+            if (value) window.open(value, "_blank");
+          }}
+        >
           {extractFileNameFromUrl(value)}
-        </span>
+        </button>
       ),
     },
     {
@@ -93,9 +98,15 @@ const Verifications = () => {
       render: (value: string[]) => (
         <div className="text-bgprimary cursor-pointer gap-2 flex flex-col">
           {value.map((link) => (
-            <div className="hover:underline" key={link}>
+            <button
+              className="hover:underline"
+              onClick={() => {
+                if (link) window.open(link, "_blank");
+              }}
+              key={link}
+            >
               {extractFileNameFromUrl(link)}
-            </div>
+            </button>
           ))}
         </div>
       ),
