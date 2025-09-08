@@ -61,26 +61,26 @@ export default function Topbar({ main = false }: { main?: boolean }) {
       <div>
         <img
           src={intellectraxLogo}
-          alt="Logo"
-          className="w-48 object-contain cursor-pointer"
+          alt='Logo'
+          className='w-48 object-contain cursor-pointer'
           onClick={handleLogoClick}
         />
       </div>
 
       {isAuthenticated && (
-        <div className="flex items-center gap-4">
-          <button className="text-gray-600 hover:text-gray-800 p-2 rounded-full hover:bg-gray-100">
+        <div className='flex items-center gap-4'>
+          <button className='text-gray-600 hover:text-gray-800 p-2 rounded-full hover:bg-gray-100'>
             <Bell size={20} strokeWidth={1.5} />
           </button>
 
-          <div className="relative">
+          <div className='relative'>
             <button
               onClick={() => setShowModal(!showModal)}
-              className="w-11 h-11 cursor-pointer rounded-full overflow-hidden border-1 border-gray-200 hover:border-gray-300"
+              className='w-11 h-11 cursor-pointer rounded-full overflow-hidden border-1 border-gray-200 hover:border-gray-300'
             >
               <img
                 src={user?.profilePic || logo}
-                alt="Profile"
+                alt='Profile'
                 className={
                   "w-full h-full " +
                   (user?.profilePic ? "object-cover" : "object-contain ")
@@ -91,29 +91,29 @@ export default function Topbar({ main = false }: { main?: boolean }) {
             {showModal && (
               <div
                 ref={modalRef}
-                className="absolute right-0 mt-2 w-auto bg-white rounded-lg shadow-lg border border-gray-100 py-2 z-[2]"
+                className='absolute right-0 mt-2 w-auto bg-white rounded-lg shadow-lg border border-gray-100 py-2 z-[2]'
               >
-                <div className="px-4 py-2 flex items-center gap-3 border-b border-gray-100">
-                  <div className="w-12 h-12 rounded-full overflow-hidden min-w-12">
+                <div className='px-4 py-2 flex items-center gap-3 border-b border-gray-100'>
+                  <div className='w-12 h-12 rounded-full overflow-hidden min-w-12'>
                     {user.profilePic ? (
                       <img
                         src={user?.profilePic}
-                        alt="Profile"
-                        className="w-full h-full object-cover"
+                        alt='Profile'
+                        className='w-full h-full object-cover'
                       />
                     ) : (
                       <img
                         src={profile}
-                        alt="Profile"
-                        className="w-9 h-9 object-cover mt-1"
+                        alt='Profile'
+                        className='w-9 h-9 object-cover mt-1'
                       />
                     )}
                   </div>
-                  <div className="flex-1">
-                    <p className="font-medium text-gray-800">
+                  <div className='flex-1'>
+                    <p className='font-medium text-gray-800'>
                       {profileData || user?.email?.split("@")[0] || "User"}
                     </p>
-                    <p className="text-sm text-gray-500">
+                    <p className='text-sm text-gray-500'>
                       {user?.email || "No email"}
                     </p>
                   </div>
@@ -121,7 +121,7 @@ export default function Topbar({ main = false }: { main?: boolean }) {
 
                 <button
                   onClick={handleLogout}
-                  className="w-full px-4 cursor-pointer py-2 flex items-center gap-2 text-red-600 hover:bg-gray-50"
+                  className='w-full px-4 cursor-pointer py-2 flex items-center gap-2 text-red-600 hover:bg-gray-50'
                 >
                   <LogOut size={18} strokeWidth={1.5} />
                   <span>Logout</span>

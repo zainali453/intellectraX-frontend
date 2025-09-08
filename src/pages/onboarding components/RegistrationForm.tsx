@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import InputField from "../../components/InputField";
 import DatePicker from "../../components/DatePicker";
 import SelectField from "../../components/SelectField";
@@ -39,6 +39,8 @@ const details: Details = {
 const RegistrationForm = () => {
   const navigate = useNavigate();
 
+  const token = cookieUtils.get("auth_token");
+
   const { updateUserFromCookies } = useUser();
 
   // get the query from the URL
@@ -59,6 +61,40 @@ const RegistrationForm = () => {
     password: "",
     confirmPassword: "",
   });
+  const [isFetchingTempDetails, setIsFetchingTempDetails] = useState(false);
+
+  useEffect(() => {
+    if (token) {
+      setIsFetchingTempDetails(true);
+      const fetchTempUserDetails = async () => {
+        try {
+          const tempUserDetails = await authService.getTempUserDetails();
+          console.log("Temporary user details:", tempUserDetails);
+          if (tempUserDetails.data) {
+            setFormData({
+              email: tempUserDetails.data.email || "",
+              fullName: tempUserDetails.data.fullName || "",
+              mobileNumber: tempUserDetails.data.mobileNumber || "",
+              location: tempUserDetails.data.location || "",
+              dateOfBirth: tempUserDetails.data.dateOfBirth
+                ? new Date(tempUserDetails.data.dateOfBirth)
+                : null,
+              role: tempUserDetails.data.role || "student",
+              gender: tempUserDetails.data.gender || "",
+              password: tempUserDetails.data.password || "",
+              confirmPassword: tempUserDetails.data.password || "",
+            });
+          }
+        } catch (error) {
+          console.error("Error fetching temporary user details:", error);
+        }
+        setIsFetchingTempDetails(false);
+      };
+
+      fetchTempUserDetails();
+    }
+  }, [token]);
+
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -120,7 +156,9 @@ const RegistrationForm = () => {
       const { confirmPassword, ...apiData } = submitData;
       setIsLoading(true);
 
-      const response = await authService.signup(apiData as SignupRequest);
+      const response = token
+        ? await authService.updateAndSignup(apiData as SignupRequest)
+        : await authService.signup(apiData as SignupRequest);
 
       if (response.message === "Email already exists") {
         setError("Email already exists. Please sign in instead.");
@@ -152,144 +190,154 @@ const RegistrationForm = () => {
     setIsLoading(false);
   };
   if (details[role] === undefined) {
-    return <div className=" text-5xl">Invalid user role</div>;
+    return <div className=' text-5xl'>Invalid user role</div>;
   }
 
   return (
     <>
       {isLoading && (
         <ModernLoading
-          type="dots"
-          size="xl"
-          color="primary"
-          text="Creating your account..."
+          type='dots'
+          size='xl'
+          color='primary'
+          text='Creating your account...'
+          overlay={true}
+        />
+      )}
+      {isFetchingTempDetails && (
+        <ModernLoading
+          type='dots'
+          size='xl'
+          color='primary'
+          text='Fetching your details...'
           overlay={true}
         />
       )}
 
-      <div className="bg-white rounded-3xl shadow-lg p-10 w-full max-w-3xl">
-        <div className="mb-6">
-          <h2 className="text-3xl font-semibold text-textprimary mb-2">
+      <div className='bg-white rounded-3xl shadow-lg p-10 w-full max-w-3xl'>
+        <div className='mb-6'>
+          <h2 className='text-3xl font-semibold text-textprimary mb-2'>
             {details[role].title || "Register"}
           </h2>
-          <p className="text-black text-sm">
+          <p className='text-black text-sm'>
             {details[role].description ||
               "Please provide the following information to set up your account."}
           </p>
         </div>
         <form onSubmit={handleSubmit}>
           {error && (
-            <div className="bg-red-50 text-red-500 p-3 rounded-md">{error}</div>
+            <div className='bg-red-50 text-red-500 p-3 rounded-md'>{error}</div>
           )}
           {success && (
-            <div className="bg-green-50 text-green-600 p-3 rounded-md">
+            <div className='bg-green-50 text-green-600 p-3 rounded-md'>
               Registration successful! Please check your email for verification
               instructions.
             </div>
           )}
 
           {/* Email and Full Name Row */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-8">
+          <div className='grid grid-cols-1 md:grid-cols-2 gap-8 mt-8'>
             <InputField
-              label="Email Address"
-              type="email"
-              name="email"
+              label='Email Address'
+              type='email'
+              name='email'
               value={formData.email}
               onChange={handleInputChange}
-              placeholder="Enter your email address"
+              placeholder='Enter your email address'
               required
-              autoComplete="email"
+              autoComplete='email'
             />
             <InputField
-              label="Full Name"
-              type="text"
-              name="fullName"
+              label='Full Name'
+              type='text'
+              name='fullName'
               value={formData.fullName}
               onChange={handleInputChange}
-              placeholder="Enter your full name"
+              placeholder='Enter your full name'
               required
-              autoComplete="name"
+              autoComplete='name'
             />
           </div>
 
           {/* Mobile Number and Date of Birth Row */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className='grid grid-cols-1 md:grid-cols-2 gap-8'>
             <InputField
-              label="Mobile Number"
-              type="tel"
-              name="mobileNumber"
+              label='Mobile Number'
+              type='tel'
+              name='mobileNumber'
               value={formData.mobileNumber}
               onChange={handleInputChange}
-              placeholder="Enter your mobile number"
+              placeholder='Enter your mobile number'
               required
-              autoComplete="tel"
+              autoComplete='tel'
             />
             <DatePicker
-              label="Date of Birth"
-              name="dateOfBirth"
+              label='Date of Birth'
+              name='dateOfBirth'
               value={formData.dateOfBirth}
               onChange={handleDateChange}
-              placeholder="Select your date of birth"
+              placeholder='Select your date of birth'
               required
               maxDate={new Date()}
               showYearDropdown
               showMonthDropdown
-              dateFormat="MM/dd/yyyy"
+              dateFormat='MM/dd/yyyy'
             />
           </div>
 
           {/* Location and Gender Row */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className='grid grid-cols-1 md:grid-cols-2 gap-8'>
             <InputField
               label={
                 <>
-                  Location <span className="text-gray-400">(Optional)</span>
+                  Location <span className='text-gray-400'>(Optional)</span>
                 </>
               }
-              type="text"
-              name="location"
+              type='text'
+              name='location'
               value={formData.location}
               onChange={handleInputChange}
-              placeholder="Enter your location"
-              endIconName="location"
+              placeholder='Enter your location'
+              endIconName='location'
             />
             <SelectField
-              label="Gender"
-              name="gender"
+              label='Gender'
+              name='gender'
               value={formData.gender}
               onChange={handleInputChange}
-              placeholder="Select your gender"
+              placeholder='Select your gender'
               options={genderOptions}
               required
             />
           </div>
 
           {/* Password and Confirm Password Row */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+          <div className='grid grid-cols-1 md:grid-cols-2 gap-8 mb-8'>
             <PasswordInput
-              label="Password"
-              name="password"
+              label='Password'
+              name='password'
               value={formData.password}
               onChange={handleInputChange}
-              placeholder="Create a strong password"
+              placeholder='Create a strong password'
               required
-              autoComplete="new-password"
+              autoComplete='new-password'
               showStrengthIndicator
             />
             <PasswordInput
-              label="Confirm Password"
-              name="confirmPassword"
+              label='Confirm Password'
+              name='confirmPassword'
               value={formData.confirmPassword}
               onChange={handleInputChange}
-              placeholder="Confirm your password"
+              placeholder='Confirm your password'
               required
-              autoComplete="new-password"
+              autoComplete='new-password'
+              showStrengthIndicator
             />
           </div>
 
           {/* Sign Up Button */}
           <button
-            type="submit"
+            type='submit'
             disabled={isLoading}
             className={`w-full py-2 px-4 rounded-3xl font-medium transition-colors duration-200 ${
               isLoading
@@ -301,12 +349,12 @@ const RegistrationForm = () => {
           </button>
 
           {/* Sign In Link */}
-          <div className="text-center mt-4">
-            <p className="text-gray-600">
+          <div className='text-center mt-4'>
+            <p className='text-gray-600'>
               Already have an account?{" "}
               <a
-                href="/signin"
-                className="text-bgprimary hover:text-teal-600 font-medium"
+                href='/signin'
+                className='text-bgprimary hover:text-teal-600 font-medium'
               >
                 Sign In
               </a>

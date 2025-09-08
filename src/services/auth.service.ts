@@ -151,6 +151,32 @@ class AuthService {
       throw new Error(error.response?.data?.message || "Signup failed");
     }
   }
+  /**
+   * Update user details and register (for users coming from temp state)
+   */
+  async updateAndSignup(userData: SignupRequest): Promise<AuthResponse> {
+    try {
+      const response = await apiClient.post<AuthResponse>(
+        "public/update-and-signup",
+        userData
+      );
+
+      // If signup is successful and returns a token (for pending verification)
+      if (response.data.success && response.data.data?.token) {
+        // Store the temporary token for verification period
+        cookieUtils.setAuth(
+          response.data.data.token,
+          response.data.data.user,
+          response.data.data.refreshToken
+        );
+      }
+
+      return response.data;
+    } catch (error: any) {
+      console.error("Signup error:", error);
+      throw new Error(error.response?.data?.message || "Signup failed");
+    }
+  }
 
   /**
    * Resend verification code
@@ -165,6 +191,18 @@ class AuthService {
       console.error("Resend verification error:", error);
       throw new Error(
         error.response?.data?.message || "Failed to resend verification code"
+      );
+    }
+  }
+
+  async getTempUserDetails(): Promise<any> {
+    try {
+      const response = await apiClient.get("public/temp-user-details");
+      return response.data;
+    } catch (error: any) {
+      console.error("Get temporary user details error:", error);
+      throw new Error(
+        error.response?.data?.message || "Failed to get temporary user details"
       );
     }
   }

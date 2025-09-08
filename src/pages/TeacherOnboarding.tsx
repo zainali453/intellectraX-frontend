@@ -1,3 +1,5 @@
+/** @format */
+
 import { useState, useRef, useEffect } from "react";
 import BioQualifications from "../components/teacherOnboarding/BioQualification";
 import ClassSubject from "../components/teacherOnboarding/ClassSubject";
@@ -130,7 +132,15 @@ const Onboarding = () => {
           (tempStep + 1 > 4 ? 4 : tempStep + 1).toString()
         );
       } else {
-        setError("Please fill in all required fields before proceeding.");
+        if (
+          currentStep === 2 &&
+          onboardingData.classes?.some((cls) =>
+            cls.subjects?.some((sub) => sub.price === 0)
+          )
+        ) {
+          setError("Please set a price for each subject you teach.");
+        } else
+          setError("Please fill in all required fields before proceeding.");
         window.scrollTo({ top: 0, behavior: "smooth" });
       }
     } catch (error) {
@@ -149,32 +159,32 @@ const Onboarding = () => {
   const { title, description } = getStepContent(currentStep, "teacher");
 
   return (
-    <div className="bg-white rounded-3xl shadow-lg p-10 w-full max-w-3xl my-10">
-      <div className="mb-1">
-        <div className="flex justify-between items-center">
-          <h2 className="text-3xl font-semibold text-textprimary mb-2">
+    <div className='bg-white rounded-3xl shadow-lg p-10 w-full max-w-3xl my-10'>
+      <div className='mb-1'>
+        <div className='flex justify-between items-center'>
+          <h2 className='text-3xl font-semibold text-textprimary mb-2'>
             {title}
           </h2>
-          <span className="text-xs sm:text-sm text-bgprimary font-semibold">
+          <span className='text-xs sm:text-sm text-bgprimary font-semibold'>
             Step {currentStep} of 4
           </span>
         </div>
 
-        <p className="text-black text-sm">{description}</p>
+        <p className='text-black text-sm'>{description}</p>
       </div>
 
       {error && (
-        <div className="mb-3 sm:mb-4 p-2 sm:p-3 bg-red-50 text-red-500 rounded-md text-xs sm:text-sm flex-shrink-0">
+        <div className='mb-3 sm:mb-4 p-2 sm:p-3 bg-red-50 text-red-500 rounded-md text-xs sm:text-sm flex-shrink-0'>
           {error}
         </div>
       )}
 
       {/* Content */}
-      <div className="flex-1 overflow-hidden flex flex-col min-h-0">
-        <div className="flex-1 overflow-y-auto">
-          <div className="h-full">
+      <div className='flex-1 overflow-hidden flex flex-col min-h-0'>
+        <div className='flex-1 overflow-y-auto'>
+          <div className='h-full'>
             {loading && (
-              <div className="flex items-center justify-center h-full min-h-120">
+              <div className='flex items-center justify-center h-full min-h-120'>
                 <LoadingSpinner size={"lg"} />
               </div>
             )}
@@ -218,11 +228,11 @@ const Onboarding = () => {
       </div>
 
       {/* Navigation Buttons */}
-      <div className="space-y-2 sm:space-y-3 mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-gray-200 flex-shrink-0">
+      <div className='space-y-2 sm:space-y-3 mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-gray-200 flex-shrink-0'>
         <button
           onClick={handleNext}
           disabled={loading}
-          className="w-full py-2 sm:py-3 px-4 rounded-3xl font-medium text-sm sm:text-base bg-bgprimary text-white hover:bg-teal-600 transition-colors disabled:opacity-50 cursor-pointer"
+          className='w-full py-2 sm:py-3 px-4 rounded-3xl font-medium text-sm sm:text-base bg-bgprimary text-white hover:bg-teal-600 transition-colors disabled:opacity-50 cursor-pointer'
         >
           {loading ? "Processing..." : currentStep === 4 ? "Finish" : "Next"}
         </button>
@@ -230,7 +240,7 @@ const Onboarding = () => {
           <button
             onClick={handlePrevious}
             disabled={loading}
-            className="w-full py-2 cursor-pointer sm:py-3 px-4 rounded-3xl font-medium text-sm sm:text-base border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50"
+            className='w-full py-2 cursor-pointer sm:py-3 px-4 rounded-3xl font-medium text-sm sm:text-base border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50'
           >
             Back to Previous Step
           </button>

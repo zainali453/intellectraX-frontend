@@ -1,3 +1,5 @@
+/** @format */
+
 import { Navigate, useLocation } from "react-router-dom";
 import { useUser } from "../context/UserContext";
 import { authService } from "../services/auth.service";
@@ -32,7 +34,7 @@ const AuthGuard = ({
       getVerificationStatusFromToken(token) !== "pending")
   ) {
     if (requireAuth) {
-      return <Navigate to="/signin" replace />;
+      return <Navigate to='/signin' replace />;
     }
     return <>{children}</>;
   }
@@ -41,7 +43,7 @@ const AuthGuard = ({
   if (isTokenExpired(token)) {
     cookieUtils.clearAuth();
     if (requireAuth) {
-      return <Navigate to="/signin" replace />;
+      return <Navigate to='/signin' replace />;
     }
     return <>{children}</>;
   }
@@ -54,20 +56,14 @@ const AuthGuard = ({
 
   // Current page check
   const isOnOTPPage = location.pathname === "/otp";
-  const isOnSignupPage =
-    location.pathname === "/signup" || location.pathname === "/register";
+  const isOnSignupPage = location.pathname === "/register";
   const isOnSigninPage = location.pathname === "/signin";
 
   // If user is unverified
   if (isUnverified) {
-    // If user is on signup/signin pages, redirect to OTP
-    if (isOnSignupPage || isOnSigninPage) {
-      return <Navigate to={`/otp`} replace />;
-    }
-
-    // If not on OTP page, redirect to OTP
-    if (!isOnOTPPage) {
-      return <Navigate to={`/otp`} replace />;
+    // the unverified user should only access otp page and signup page
+    if (!isOnOTPPage && !isOnSignupPage) {
+      return <Navigate to='/otp' replace />;
     }
 
     // Allow access to OTP page
@@ -87,24 +83,24 @@ const AuthGuard = ({
       user.isAuthenticated &&
       user.verified === "verified"
     ) {
-      return <Navigate to="/success" replace />;
+      return <Navigate to='/success' replace />;
     } else if (
       user.onboarding &&
       user.isAuthenticated &&
       user.verified === "completed"
     ) {
       if (user.role === "student") {
-        return <Navigate to="/student/dashboard" replace />;
+        return <Navigate to='/student/dashboard' replace />;
       } else if (user.role === "teacher") {
-        return <Navigate to="/teacher/dashboard" replace />;
+        return <Navigate to='/teacher/dashboard' replace />;
       }
     }
 
-    return <Navigate to="/onboarding" replace />;
+    return <Navigate to='/onboarding' replace />;
   }
 
   if (requireAdmin && user.role !== "admin") {
-    return <Navigate to="/" replace />;
+    return <Navigate to='/' replace />;
   }
   // Allow access
   return <>{children}</>;

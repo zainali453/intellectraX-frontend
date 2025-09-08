@@ -1,3 +1,5 @@
+/** @format */
+
 import {
   LayoutDashboard,
   BadgeCheck,
@@ -212,7 +214,7 @@ export const classColumns = [
 
 // Memoized ProfileCell for use in DataTable columns
 export const ProfileCell = (row) => (
-  <div className="flex items-center justify-center">
+  <div className='flex items-center justify-center'>
     <img
       src={
         row.profilePicture ||
@@ -220,7 +222,7 @@ export const ProfileCell = (row) => (
           (row.name ? row.name.charAt(0) : "?")
       }
       alt={row.name}
-      className="w-10 h-10 rounded-full object-cover border-2 border-gray-200"
+      className='w-10 h-10 rounded-full object-cover border-2 border-gray-200'
       onError={(e) => {
         e.target.src =
           "https://via.placeholder.com/40x40/f0f0f0/999999?text=" +
@@ -280,8 +282,8 @@ export const teacherColumns = [
     name: "Bio",
     selector: (row) => row.bio,
     cell: (row) => (
-      <div className="py-2" title={row.bio}>
-        <div className="line-clamp-2 text-sm text-gray-600">
+      <div className='py-2' title={row.bio}>
+        <div className='line-clamp-2 text-sm text-gray-600'>
           {row.bio || "No bio provided"}
         </div>
       </div>
@@ -500,6 +502,10 @@ export function isStepValid(onboardingData, currentStep, role = "teacher") {
       case 2: {
         const hasClasses =
           onboardingData.classes && onboardingData.classes.length > 0;
+        const hasZeroPrice = onboardingData.classes?.some((cls) =>
+          cls.subjects?.some((sub) => sub.price === 0)
+        );
+        if (hasZeroPrice) return false;
         return hasClasses;
       }
       case 3: {

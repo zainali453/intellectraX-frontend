@@ -5,9 +5,11 @@ import { authService } from "../../services/auth.service";
 import { cookieUtils } from "../../utils/cookieUtils";
 import {
   getEmailFromToken,
+  getRoleFromToken,
   getVerificationStatusFromToken,
 } from "../../utils/jwtUtils";
 import { useUser } from "../../context/UserContext";
+import CustomIcon from "@/components/CustomIcon";
 
 // Define AuthResponse type if not imported from elsewhere
 type AuthResponse = {
@@ -27,6 +29,7 @@ const OTP = () => {
   const token = cookieUtils.get("auth_token");
 
   let email = "";
+  let role = "";
 
   // Check token and redirect if necessary
   useEffect(() => {
@@ -51,6 +54,8 @@ const OTP = () => {
   if (token) {
     const emailFromToken = getEmailFromToken(token);
     email = emailFromToken || "";
+    const roleFromToken = getRoleFromToken(token);
+    role = roleFromToken || "";
   }
 
   // If no email from token, try URL parameter as fallback
@@ -172,22 +177,27 @@ const OTP = () => {
 
   return (
     <>
-      <div className="bg-white rounded-3xl shadow-lg p-10 w-full max-w-xl">
-        <div className="mb-6">
-          <h2 className="text-3xl font-semibold text-textprimary mb-2">
-            OTP Code
-          </h2>
-          <p className="text-black text-sm">
+      <div className='bg-white rounded-3xl shadow-lg p-10 w-full max-w-xl'>
+        <div className='mb-6'>
+          <div className='flex flex-row items-end gap-4'>
+            <button onClick={() => navigate("/register?role=" + role)}>
+              <CustomIcon name='back' className='w-5 h-5 text-gray-600 mb-4' />
+            </button>
+            <h2 className='text-3xl font-semibold text-textprimary mb-2'>
+              OTP Code
+            </h2>
+          </div>
+          <p className='text-black text-sm'>
             Please enter your OTP code we've sent to{" "}
-            <span className="font-medium text-gray-900">{email}</span>
+            <span className='font-medium text-gray-900'>{email}</span>
           </p>
         </div>
 
-        <div className="flex justify-center gap-6 mb-8">
+        <div className='flex justify-center gap-6 mb-8'>
           {otp.map((digit, index) => (
             <input
               key={index}
-              type="text"
+              type='text'
               maxLength={1}
               value={digit}
               onChange={(e) => handleChange(index, e.target.value)}
@@ -195,18 +205,18 @@ const OTP = () => {
               onPaste={handlePaste}
               ref={inputRefs[index]}
               disabled={isLoading}
-              className="w-16 h-16 flex-1 text-center text-2xl font-bold border-1 border-gray-300 rounded-lg focus:border-teal-500 focus:ring-1 focus:ring-teal-500 focus:outline-none transition-colors duration-200 disabled:bg-gray-100 disabled:cursor-not-allowed"
+              className='w-16 h-16 flex-1 text-center text-2xl font-bold border-1 border-gray-300 rounded-lg focus:border-teal-500 focus:ring-1 focus:ring-teal-500 focus:outline-none transition-colors duration-200 disabled:bg-gray-100 disabled:cursor-not-allowed'
             />
           ))}
         </div>
 
-        <div className="text-center">
-          <p className="text-gray-600 text-sm">
+        <div className='text-center'>
+          <p className='text-gray-600 text-sm'>
             If you didn’t get the code{" "}
             <button
               onClick={handleResend}
               disabled={isLoading}
-              className="text-teal-600 hover:text-bgprimary font-medium focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+              className='text-teal-600 hover:text-bgprimary font-medium focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed'
             >
               Click Here
             </button>
@@ -223,7 +233,7 @@ const OTP = () => {
             ? "Your account has been verified successfully."
             : "The OTP you entered is incorrect. Please try again."
         }
-        buttonText="OK"
+        buttonText='OK'
         status={isSuccess ? "success" : "error"}
       />
     </>
