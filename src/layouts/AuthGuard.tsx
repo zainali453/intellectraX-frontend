@@ -13,15 +13,21 @@ interface AuthGuardProps {
   children: React.ReactNode;
   requireAuth?: boolean;
   requireAdmin?: boolean;
+  requireTeacher?: boolean;
+  requireStudent?: boolean;
 }
 
 const AuthGuard = ({
   children,
   requireAuth = true,
   requireAdmin = false,
+  requireTeacher = false,
+  requireStudent = false,
 }: AuthGuardProps) => {
   const { user } = useUser();
   const location = useLocation();
+
+  console.log(location.pathname);
 
   // Get token from cookies
   const token = cookieUtils.get(COOKIE_NAMES.AUTH_TOKEN);
@@ -102,6 +108,13 @@ const AuthGuard = ({
   if (requireAdmin && user.role !== "admin") {
     return <Navigate to='/' replace />;
   }
+  if (requireTeacher && user.role !== "teacher") {
+    return <Navigate to='/' replace />;
+  }
+  if (requireStudent && user.role !== "student") {
+    return <Navigate to='/' replace />;
+  }
+
   // Allow access
   return <>{children}</>;
 };

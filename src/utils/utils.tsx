@@ -2,16 +2,12 @@
 
 import {
   LayoutDashboard,
-  BadgeCheck,
-  BookOpen,
   Users,
-  User,
   ClipboardList,
   FileQuestion,
   MessageSquare,
   Activity,
   DollarSign,
-  LifeBuoy,
   Settings,
 } from "lucide-react";
 import { useUser } from "../context/UserContext"; // adjust path as needed
@@ -108,27 +104,132 @@ const adminLinks: {
   },
 ];
 
-const teacherLinks = [
-  { name: "Dashboard", icon: <LayoutDashboard />, path: "dashboard" },
-  { name: "Classes", icon: <ClipboardList />, path: "classes" },
-  { name: "Students", icon: <Users />, path: "students" },
-  { name: "Assignments", icon: <ClipboardList />, path: "assignments" },
-  { name: "Quizzes", icon: <FileQuestion />, path: "quizzes" },
-  { name: "Messages", icon: <MessageSquare />, path: "messages" },
-  { name: "Audio/Video Call", icon: <Activity />, path: "setup-call" },
-  { name: "Earnings", icon: <DollarSign />, path: "earnings" },
-  { name: "Settings", icon: <Settings />, path: "settings" },
+const teacherLinks: {
+  name: string;
+  icon: IconName;
+  path: string;
+  size?: string;
+}[] = [
+  {
+    name: "Dashboard",
+    icon: "dashboard",
+    path: "dashboard",
+    size: "w-[19px] h-5",
+  },
+  {
+    name: "Classes",
+    icon: "classes",
+    path: "classes",
+    size: "w-[19px] h-[18px]",
+  },
+  {
+    name: "Students",
+    icon: "students",
+    path: "students",
+    size: "w-[21px] h-[16px]",
+  },
+  {
+    name: "Assignments",
+    icon: "assignments",
+    path: "assignments",
+    size: "w-[18px] h-[19px]",
+  },
+  {
+    name: "Quizzes",
+    icon: "quizzes",
+    path: "quizzes",
+    size: "w-[17px] h-[19px]",
+  },
+  {
+    name: "Messages",
+    icon: "messages",
+    path: "messages",
+    size: "w-[19px] h-[19px]",
+  },
+  {
+    name: "Audio/Video Call",
+    icon: "audioVideo",
+    path: "messages",
+    size: "w-[21px] h-[15px]",
+  },
+  {
+    name: "Earnings",
+    icon: "earnings",
+    path: "earnings",
+    size: "w-[13px] h-[20px]",
+  },
+  {
+    name: "Settings",
+    icon: "settings",
+    path: "settings",
+  },
 ];
 
-const studentLinks = [
-  { name: "Dashboard", icon: <LayoutDashboard />, path: "dashboard" },
-  { name: "Classes", icon: <ClipboardList />, path: "classes" },
-  { name: "Teacher", icon: <Users />, path: "teachers" },
-  { name: "Assignments", icon: <ClipboardList />, path: "assignments" },
-  { name: "Quizzes", icon: <FileQuestion />, path: "quizzes" },
-  { name: "Messages", icon: <MessageSquare />, path: "messages" },
-  { name: "Audio/Video Call", icon: <Activity />, path: "setup-call" },
-  { name: "Settings", icon: <Settings />, path: "settings" },
+const studentLinks: {
+  name: string;
+  icon: IconName;
+  path: string;
+  size?: string;
+}[] = [
+  {
+    name: "Dashboard",
+    icon: "dashboard",
+    path: "dashboard",
+    size: "w-[19px] h-5",
+  },
+  {
+    name: "Classes",
+    icon: "classes",
+    path: "classes",
+    size: "w-[19px] h-[18px]",
+  },
+  {
+    name: "Teachers",
+    icon: "students",
+    path: "teachers",
+    size: "w-[21px] h-[16px]",
+  },
+  {
+    name: "Assignments",
+    icon: "assignments",
+    path: "assignments",
+    size: "w-[18px] h-[19px]",
+  },
+  {
+    name: "Quizzes",
+    icon: "quizzes",
+    path: "quizzes",
+    size: "w-[17px] h-[19px]",
+  },
+  {
+    name: "Messages",
+    icon: "messages",
+    path: "messages",
+    size: "w-[19px] h-[19px]",
+  },
+  {
+    name: "Audio/Video Call",
+    icon: "audioVideo",
+    path: "calls",
+    size: "w-[21px] h-[15px]",
+  },
+  {
+    name: "Payments",
+    icon: "earnings",
+    path: "earnings",
+    size: "w-[13px] h-[20px]",
+  },
+  {
+    name: "Settings",
+    icon: "settings",
+    path: "settings",
+  },
+  {
+    name: "Subscription Plans",
+    icon: "card",
+    path: "subscription-plans",
+    size: "w-[19px] h-[16px]",
+  },
 ];
 const parentLinks = [
   { name: "Dashboard", icon: <LayoutDashboard />, path: "dashboard" },

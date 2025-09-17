@@ -26,6 +26,9 @@ import back from "../assets/icons/back.png";
 import bookOpen from "../assets/icons/bookOpen.png";
 import dollar from "../assets/icons/dollar.png";
 import totalUsers from "../assets/icons/totalUsers.png";
+import audioVideo from "../assets/icons/audioVideo.png";
+import card from "../assets/icons/card.png";
+import badge from "../assets/icons/badge.png";
 
 import dashboardActive from "../assets/icons/dashboardActive.png";
 import assignmentsActive from "../assets/icons/assignmentsActive.png";
@@ -41,6 +44,8 @@ import systemLogsActive from "../assets/icons/systemLogsActive.png";
 import teachersActive from "../assets/icons/teachersActive.png";
 import verificationsActive from "../assets/icons/verificationsActive.png";
 import pairingActive from "../assets/icons/pairingActive.png";
+import audioVideoActive from "../assets/icons/audioVideoActive.png";
+import cardActive from "../assets/icons/cardActive.png";
 
 const ICONS = {
   openBook,
@@ -69,6 +74,9 @@ const ICONS = {
   bookOpen,
   dollar,
   totalUsers,
+  audioVideo,
+  card,
+  badge,
 
   dashboardActive,
   assignmentsActive,
@@ -84,6 +92,8 @@ const ICONS = {
   teachersActive,
   verificationsActive,
   pairingActive,
+  audioVideoActive,
+  cardActive,
 } as const;
 
 export type IconName = keyof typeof ICONS;

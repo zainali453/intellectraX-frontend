@@ -20,13 +20,23 @@ import TeachersVerification from "./pages/admin/Verifications";
 import VerificationsTeacherDetail from "./pages/admin/VerificationsTeacherDetail";
 import StudentPairing from "./pages/admin/StudentPairing";
 
+// teacher
+import TeacherDashboard from "./pages/teacher/Dashboard";
+import TeacherStudents from "./pages/teacher/Students";
+import TeacherStudentDetails from "./pages/teacher/StudentDetails";
+
+// student
+import StudentDashboard from "./pages/student/Dashboard";
+import StudentTeachers from "./pages/student/Teachers";
+import StudentTeacherDetails from "./pages/student/TeacherDetails";
+
 function App() {
   return (
     <UserProvider>
       <Routes>
         <Route element={<AuthLayout />}>
           <Route
-            path="/"
+            path='/'
             element={
               <AuthGuard requireAuth={false}>
                 <Landing />
@@ -34,7 +44,7 @@ function App() {
             }
           />
           <Route
-            path="/signup"
+            path='/signup'
             element={
               <AuthGuard requireAuth={false}>
                 <Signup />
@@ -42,7 +52,7 @@ function App() {
             }
           />
           <Route
-            path="/register"
+            path='/register'
             element={
               <AuthGuard requireAuth={false}>
                 <RegistrationForm />
@@ -50,7 +60,7 @@ function App() {
             }
           />
           <Route
-            path="/otp"
+            path='/otp'
             element={
               <AuthGuard requireAuth={true}>
                 <OTP />
@@ -59,7 +69,7 @@ function App() {
           />
 
           <Route
-            path="/signin"
+            path='/signin'
             element={
               <AuthGuard requireAuth={false}>
                 <SignIn />
@@ -68,7 +78,7 @@ function App() {
           />
 
           <Route
-            path="/onboarding"
+            path='/onboarding'
             element={
               <AuthGuard requireAuth={true}>
                 <Onboarding />
@@ -76,7 +86,7 @@ function App() {
             }
           />
           <Route
-            path="/success"
+            path='/success'
             element={
               <AuthGuard requireAuth={true}>
                 <RegistrationSuccess />
@@ -84,7 +94,7 @@ function App() {
             }
           />
           <Route
-            path="/studentsuccess"
+            path='/studentsuccess'
             element={
               <AuthGuard requireAuth={true}>
                 <StudentRegistrationSuccess />
@@ -92,32 +102,50 @@ function App() {
             }
           />
           <Route
-            path="/pricenegotiation"
+            path='/pricenegotiation'
             element={
               <AuthGuard requireAuth={true}>
                 <PriceNegotiation />
               </AuthGuard>
             }
           />
-          <Route
-            path="/teacher/dashboard"
-            element={
-              <AuthGuard requireAuth={true}>
-                <div>Teacher Dashboard</div>
-              </AuthGuard>
-            }
-          />
-          <Route
-            path="/student/dashboard"
-            element={
-              <AuthGuard requireAuth={true}>
-                <div>Student Dashboard</div>
-              </AuthGuard>
-            }
-          />
         </Route>
         <Route
-          path="/admin"
+          path='/teacher'
+          element={
+            <AuthGuard requireAuth={true} requireTeacher={true}>
+              <MainLayout />
+            </AuthGuard>
+          }
+        >
+          <Route index element={<TeacherDashboard title={"Dashboard"} />} />
+          <Route
+            path='dashboard'
+            element={<TeacherDashboard title={"Dashboard"} />}
+          />
+          <Route path='students' element={<TeacherStudents />} />
+          <Route path='students/:id' element={<TeacherStudentDetails />} />
+          <Route path='*' element={<div>404 Not Found</div>} />
+        </Route>
+        <Route
+          path='/student'
+          element={
+            <AuthGuard requireAuth={true} requireStudent={true}>
+              <MainLayout />
+            </AuthGuard>
+          }
+        >
+          <Route index element={<StudentDashboard title={"Dashboard"} />} />
+          <Route
+            path='dashboard'
+            element={<StudentDashboard title={"Dashboard"} />}
+          />
+          <Route path='teachers' element={<StudentTeachers />} />
+          <Route path='teachers/:id' element={<StudentTeacherDetails />} />
+          <Route path='*' element={<div>404 Not Found</div>} />
+        </Route>
+        <Route
+          path='/admin'
           element={
             <AuthGuard requireAuth={true} requireAdmin={true}>
               <MainLayout />
@@ -126,23 +154,23 @@ function App() {
         >
           <Route index element={<AdminDashboard title={"Dashboard"} />} />
           <Route
-            path="dashboard"
+            path='dashboard'
             element={<AdminDashboard title={"Dashboard"} />}
           />
-          <Route path="verifications" element={<TeachersVerification />} />
+          <Route path='verifications' element={<TeachersVerification />} />
           <Route
-            path="verifications/teacher/:id"
+            path='verifications/teacher/:id'
             element={<VerificationsTeacherDetail />}
           />
-          <Route path="pairing" element={<StudentPairing />} />
-          <Route path="users" element={<div>Users Component</div>} />
-          <Route path="settings" element={<div>Settings Component</div>} />
-          <Route path="teachers" element={<div>Teachers Component</div>} />
-          <Route path="*" element={<div>404 Not Found</div>} />
+          <Route path='pairing' element={<StudentPairing />} />
+          <Route path='users' element={<div>Users Component</div>} />
+          <Route path='settings' element={<div>Settings Component</div>} />
+          <Route path='teachers' element={<div>Teachers Component</div>} />
+          <Route path='*' element={<div>404 Not Found</div>} />
         </Route>
 
         {/* Fallback */}
-        <Route path="*" element={<Navigate to="/" replace />} />
+        <Route path='*' element={<Navigate to='/' replace />} />
       </Routes>
     </UserProvider>
   );

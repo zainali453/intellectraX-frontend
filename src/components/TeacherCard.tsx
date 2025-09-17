@@ -1,0 +1,52 @@
+import React from "react";
+import { Teacher as TeacherData } from "@/services/student.service";
+
+interface TeacherCardProps {
+  teacher: TeacherData;
+  onClick: () => void;
+  onSendMessage: () => void;
+}
+
+const TeacherCard: React.FC<TeacherCardProps> = ({
+  teacher,
+  onClick,
+  onSendMessage,
+}) => {
+  return (
+    <div className='bg-white rounded-2xl p-5 shadow-sm border border-gray-100  transition-shadow duration-200 max-w-[280px]'>
+      {/* Student Profile Image */}
+      <div className='mb-4 cursor-pointer' onClick={onClick}>
+        <img
+          src={teacher.profilePic}
+          alt={teacher.fullName}
+          className='w-full h-32 object-cover rounded-xl'
+        />
+      </div>
+
+      {/* Student Details */}
+      <div className='space-y-2 mb-4'>
+        <div className='flex items-center text-sm'>
+          <span className='text-gray-500 font-medium'>Teacher:</span>
+          <span className='ml-2 text-gray-800 font-semibold'>
+            {teacher.fullName}
+          </span>
+        </div>
+
+        <div className='flex items-center text-sm'>
+          <span className='text-gray-500 font-medium'>Teaches Subject:</span>
+          <span className='ml-2 text-gray-800'>{teacher.subject}</span>
+        </div>
+      </div>
+
+      {/* Send Message Button */}
+      <button
+        onClick={onSendMessage}
+        className='w-full bg-transparent border border-bgprimary text-bgprimary py-2.5 px-4 rounded-full font-medium text-sm hover:bg-teal-50 transition-colors duration-200'
+      >
+        Send Message
+      </button>
+    </div>
+  );
+};
+
+export default TeacherCard;

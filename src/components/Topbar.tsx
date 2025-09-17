@@ -62,7 +62,7 @@ export default function Topbar({ main = false }: { main?: boolean }) {
         <img
           src={intellectraxLogo}
           alt='Logo'
-          className='w-48 object-contain cursor-pointer'
+          className='w-40 object-contain cursor-pointer'
           onClick={handleLogoClick}
         />
       </div>

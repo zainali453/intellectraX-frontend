@@ -3,6 +3,7 @@ import CustomIcon from "../components/CustomIcon";
 import useSidebarLinks from "../utils/utils";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import Footer from "../components/Footer";
+import { useUser } from "@/context/UserContext";
 
 export default function DashboardLayout() {
   const navigate = useNavigate();
@@ -11,19 +12,21 @@ export default function DashboardLayout() {
   // Get the active path from the URL
   const pathSegments = location.pathname.split("/");
   const activePath = pathSegments[2] || "";
+  const { user } = useUser();
+  const userRole = user?.role;
 
   return (
-    <div className="flex h-full w-full bg-[#f7f7f7]">
+    <div className='flex h-full w-full bg-[#f7f7f7]'>
       {/* Sidebar */}
-      <aside className="w-66 bg-white flex flex-col h-full">
-        <div className="flex-1 overflow-y-auto pt-3 px-3 pb-15 scroll-optimized">
-          <nav className="space-y-7">
+      <aside className='w-66 bg-white flex flex-col h-full'>
+        <div className='flex-1 overflow-y-auto pt-3 px-3 pb-15 scroll-optimized'>
+          <nav className='space-y-7'>
             {sidebarLinks.map((link) => {
-              const isActive = activePath === link.name.toLowerCase();
+              const isActive = activePath === link.path.toLowerCase();
               return (
                 <div
                   key={link.name}
-                  onClick={() => navigate("/admin/" + link.path)}
+                  onClick={() => navigate(`/${userRole}/` + link.path)}
                   className={`group flex items-center gap-4 px-5 rounded-lg cursor-pointer transition-colors duration-150 ease-out ${
                     isActive
                       ? "text-bgprimary font-medium"
@@ -53,8 +56,8 @@ export default function DashboardLayout() {
       </aside>
 
       {/* Main content area with proper layout */}
-      <div className="flex-1 flex flex-col h-full overflow-hidden">
-        <main className="flex-1 overflow-y-auto scroll-optimized">
+      <div className='flex-1 flex flex-col h-full overflow-hidden'>
+        <main className='flex-1 overflow-y-auto scroll-optimized'>
           <Outlet />
         </main>
         <Footer />
