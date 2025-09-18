@@ -41,7 +41,9 @@ const Teachers = () => {
     return allTeachers.filter(
       (student) =>
         student?.fullName?.toLowerCase().includes(searchValue.toLowerCase()) ||
-        student?.subject?.toLowerCase().includes(searchValue.toLowerCase())
+        student?.subjects?.some((subject) =>
+          subject.toLowerCase().includes(searchValue.toLowerCase())
+        )
     );
   }, [allTeachers, searchValue]);
 

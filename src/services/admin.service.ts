@@ -214,13 +214,13 @@ class AdminService {
   async assignTeacherToStudent(
     teacherId: string,
     studentId: string,
-    subject: string
+    subjects: string[]
   ) {
     try {
       const response = await apiClient.post(`admin/pairing`, {
         teacherId,
         studentId,
-        subject,
+        subjects,
       });
       return response.data;
     } catch (error: any) {

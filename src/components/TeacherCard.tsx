@@ -1,5 +1,6 @@
 import React from "react";
 import { Teacher as TeacherData } from "@/services/student.service";
+import StarRating from "./StarRating";
 
 interface TeacherCardProps {
   teacher: TeacherData;
@@ -31,10 +32,22 @@ const TeacherCard: React.FC<TeacherCardProps> = ({
             {teacher.fullName}
           </span>
         </div>
-
         <div className='flex items-center text-sm'>
-          <span className='text-gray-500 font-medium'>Teaches Subject:</span>
-          <span className='ml-2 text-gray-800'>{teacher.subject}</span>
+          <span className='text-gray-500 font-medium'>Rating:</span>
+          <div className='ml-2'>
+            <StarRating rating={teacher.rating} size='lg' showValue={true} />
+          </div>
+        </div>
+
+        <div className='flex flex-col items-start'>
+          <div className='text-gray-500 text-sm font-medium'>
+            Teaches Subjects
+          </div>
+          <div className='text-gray-800'>
+            {teacher.subjects
+              .join(", ")
+              .replace(/\b\w/g, (char) => char.toUpperCase())}
+          </div>
         </div>
       </div>
 

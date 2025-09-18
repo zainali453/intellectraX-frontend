@@ -87,7 +87,12 @@ const Students = () => {
                 key={index}
                 student={student}
                 onClick={() =>
-                  navigate("/teacher/students/" + student.studentId)
+                  navigate(
+                    "/teacher/students/" +
+                      student.studentId +
+                      "?subject=" +
+                      student.subject
+                  )
                 }
                 onSendMessage={() =>
                   console.log("Send message to:", student.studentId)

@@ -1,5 +1,6 @@
 import CustomHeader from "@/components/CustomHeader";
 import CustomDropdown from "@/components/CustomDropdown";
+import CustomMultiSelect from "@/components/CustomMultiSelect";
 import SkeletonDropdown from "@/components/SkeletonDropdown";
 import ConfirmStudentPairing from "@/components/ConfirmStudentPairing";
 import { adminService } from "@/services/admin.service";
@@ -24,7 +25,7 @@ interface Student {
 const StudentPairing = () => {
   const [selectedTeacher, setSelectedTeacher] = useState<string>("");
   const [selectedStudent, setSelectedStudent] = useState<string>("");
-  const [selectedSubject, setSelectedSubject] = useState<string>("");
+  const [selectedSubject, setSelectedSubject] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
 
@@ -76,7 +77,7 @@ const StudentPairing = () => {
 
     setIsLoadingSubjects(true);
     setSubjects([]); // Clear previous subjects
-    setSelectedSubject(""); // Clear selected subject
+    setSelectedSubject([]); // Clear selected subject
 
     try {
       const response = await adminService.getSubjectsByTeacherAndStudent(
@@ -84,7 +85,13 @@ const StudentPairing = () => {
         selectedStudent
       );
       if (response.success) {
-        setSubjects(response.data);
+        if (
+          response.data.alreadyPaired &&
+          response.data.pairedSubjects.length > 0
+        ) {
+          setSelectedSubject(response.data.pairedSubjects);
+        }
+        setSubjects(response.data.subjects);
       }
     } catch (error) {
       console.error("Error fetching subjects:", error);
@@ -98,14 +105,16 @@ const StudentPairing = () => {
       fetchSubjects();
     } else {
       setSubjects([]);
-      setSelectedSubject("");
+      setSelectedSubject([]);
       setIsLoadingSubjects(false);
     }
   }, [selectedTeacher, selectedStudent]);
 
   const handleAssignTeacher = async () => {
-    if (!selectedTeacher || !selectedStudent || !selectedSubject) {
-      alert("Please select teacher, student, and subject before assigning.");
+    if (!selectedTeacher || !selectedStudent || selectedSubject.length === 0) {
+      alert(
+        "Please select teacher, student, and at least one subject before assigning."
+      );
       return;
     }
 
@@ -139,7 +148,7 @@ const StudentPairing = () => {
   const handleCancel = () => {
     setSelectedTeacher("");
     setSelectedStudent("");
-    setSelectedSubject("");
+    setSelectedSubject([]);
     setShowConfirmation(false);
   };
 
@@ -152,10 +161,10 @@ const StudentPairing = () => {
   const selectedStudentObj = students.find((s) => s.id === selectedStudent);
 
   return (
-    <div className="px-8 py-6">
-      <CustomHeader title="Teacher Assignments" />
+    <div className='px-8 py-6'>
+      <CustomHeader title='Teacher Assignments' />
 
-      <div className="mt-8">
+      <div className='mt-8'>
         {showConfirmation ? (
           <ConfirmStudentPairing
             teacher={selectedTeacherObj!}
@@ -166,18 +175,18 @@ const StudentPairing = () => {
             isLoading={isLoading}
           />
         ) : (
-          <div className="bg-white rounded-xl border border-gray-200 p-8">
-            <h2 className="text-xl font-semibold text-gray-800 mb-8">
+          <div className='bg-white rounded-xl border border-gray-200 p-8'>
+            <h2 className='text-xl font-semibold text-gray-800 mb-8'>
               Create New Teacher-Student Assignment
             </h2>
 
-            <div className="space-y-6 max-w-md">
+            <div className='space-y-6 max-w-md'>
               {isLoadingTeachersAndStudents ? (
-                <SkeletonDropdown label="Select Teacher" required />
+                <SkeletonDropdown label='Select Teacher' required />
               ) : (
                 <CustomDropdown
-                  label="Select Teacher"
-                  placeholder="Select a teacher"
+                  label='Select Teacher'
+                  placeholder='Select a teacher'
                   value={selectedTeacher}
                   onChange={setSelectedTeacher}
                   options={teacherOptions}
@@ -186,11 +195,11 @@ const StudentPairing = () => {
               )}
 
               {isLoadingTeachersAndStudents ? (
-                <SkeletonDropdown label="Select Student" required />
+                <SkeletonDropdown label='Select Student' required />
               ) : (
                 <CustomDropdown
-                  label="Select Student"
-                  placeholder="Select a student"
+                  label='Select Student'
+                  placeholder='Select a student'
                   value={selectedStudent}
                   onChange={setSelectedStudent}
                   options={studentOptions}
@@ -199,11 +208,11 @@ const StudentPairing = () => {
               )}
 
               {isLoadingSubjects || isLoadingTeachersAndStudents ? (
-                <SkeletonDropdown label="Select Subject" required />
+                <SkeletonDropdown label='Select Subject' required />
               ) : (
-                <CustomDropdown
-                  label="Select Subject"
-                  placeholder="Select a subject"
+                <CustomMultiSelect
+                  label='Select Subject'
+                  placeholder='Select subjects'
                   value={selectedSubject}
                   onChange={setSelectedSubject}
                   options={subjectOptions}
@@ -217,11 +226,11 @@ const StudentPairing = () => {
               )}
             </div>
 
-            <div className="flex justify-end gap-4 mt-8">
+            <div className='flex justify-end gap-4 mt-8'>
               <button
                 onClick={handleCancel}
                 disabled={isLoading || isLoadingTeachersAndStudents}
-                className="px-6 py-3 text-gray-600 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors duration-200 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                className='px-6 py-3 text-gray-600 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors duration-200 font-medium disabled:opacity-50 disabled:cursor-not-allowed'
               >
                 Cancel
               </button>
@@ -233,12 +242,12 @@ const StudentPairing = () => {
                   isLoadingSubjects ||
                   !selectedTeacher ||
                   !selectedStudent ||
-                  !selectedSubject
+                  selectedSubject.length === 0
                 }
-                className="px-6 py-3 bg-bgprimary text-white rounded-lg hover:bg-bgprimary/90 transition-colors duration-200 font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                className='px-6 py-3 bg-bgprimary text-white rounded-lg hover:bg-bgprimary/90 transition-colors duration-200 font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2'
               >
                 {isLoading && (
-                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+                  <div className='animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent'></div>
                 )}
                 {isLoading ? "Assigning..." : "Assign Teacher"}
               </button>

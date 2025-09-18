@@ -35,7 +35,9 @@ const StudentCard: React.FC<StudentCardProps> = ({
 
         <div className='flex items-center text-sm'>
           <span className='text-gray-500 font-medium'>Enrolled Class:</span>
-          <span className='ml-2 text-gray-800'>{student.subject}</span>
+          <span className='ml-2 text-gray-800'>
+            {student.subject.replace(/\b\w/g, (char) => char.toUpperCase())}
+          </span>
         </div>
       </div>
 

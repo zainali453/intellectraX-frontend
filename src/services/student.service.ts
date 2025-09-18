@@ -10,9 +10,17 @@ export interface StudentDashboardData {
 export interface Teacher {
   profilePic: string;
   fullName: string;
-  subject: string;
+  subjects: string[];
   teacherId: string;
   userId: string;
+  rating: number;
+}
+
+export interface TeacherDetails {
+  profilePic: string;
+  fullName: string;
+  bio: string;
+  subjects: string[];
 }
 
 interface successResponseWithData<T> {
@@ -45,6 +53,19 @@ class StudentService {
       console.error("Error fetching onboarding data:", error);
       throw new Error(
         error.response?.data?.message || "Failed to fetch onboarding data"
+      );
+    }
+  }
+  async getTeacherDetails(teacherId: string) {
+    try {
+      const response = await apiClient.get<
+        successResponseWithData<TeacherDetails>
+      >(`student/teachers/${teacherId}`);
+      return response.data;
+    } catch (error: any) {
+      console.error("Error fetching teacher details:", error);
+      throw new Error(
+        error.response?.data?.message || "Failed to fetch teacher details"
       );
     }
   }
