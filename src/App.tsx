@@ -19,6 +19,7 @@ import AdminDashboard from "./pages/admin/Dashboard";
 import TeachersVerification from "./pages/admin/Verifications";
 import VerificationsTeacherDetail from "./pages/admin/VerificationsTeacherDetail";
 import StudentPairing from "./pages/admin/StudentPairing";
+import AdminTeachers from "./pages/admin/Teachers";
 
 // teacher
 import TeacherDashboard from "./pages/teacher/Dashboard";
@@ -165,7 +166,8 @@ function App() {
           <Route path='pairing' element={<StudentPairing />} />
           <Route path='users' element={<div>Users Component</div>} />
           <Route path='settings' element={<div>Settings Component</div>} />
-          <Route path='teachers' element={<div>Teachers Component</div>} />
+          <Route path='teachers' element={<AdminTeachers />} />
+          <Route path='teachers/:id' element={<VerificationsTeacherDetail />} />
           <Route path='*' element={<div>404 Not Found</div>} />
         </Route>
 

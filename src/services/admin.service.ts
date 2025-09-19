@@ -230,5 +230,21 @@ class AdminService {
       );
     }
   }
+  async getAllTeachers(currentPage: number) {
+    try {
+      const response = await apiClient.get<{
+        success: boolean;
+        message: string;
+        data: {}[];
+        meta: { pagination: { totalPages: number } };
+      }>(`admin/teachers/all?page=${currentPage}`);
+      return response.data;
+    } catch (error: any) {
+      console.error("Error fetching teachers:", error);
+      throw new Error(
+        error.response?.data?.message || "Failed to fetch teachers"
+      );
+    }
+  }
 }
 export const adminService = new AdminService();
