@@ -58,6 +58,17 @@ export interface TeacherData {
   certificateLinks: string[];
 }
 
+export interface StudentDetailsData {
+  fullName: string;
+  gender: string;
+  subjects: string[];
+  assignedTeachers: {
+    fullName: string;
+    profilePic: string;
+    subjects: string[];
+  }[];
+}
+
 interface getTeacherByIdResponse {
   success: boolean;
   message: string;
@@ -243,6 +254,38 @@ class AdminService {
       console.error("Error fetching teachers:", error);
       throw new Error(
         error.response?.data?.message || "Failed to fetch teachers"
+      );
+    }
+  }
+
+  async getAllStudents(currentPage: number) {
+    try {
+      const response = await apiClient.get<{
+        success: boolean;
+        message: string;
+        data: {}[];
+        meta: { pagination: { totalPages: number } };
+      }>(`admin/students/all?page=${currentPage}`);
+      return response.data;
+    } catch (error: any) {
+      console.error("Error fetching students:", error);
+      throw new Error(
+        error.response?.data?.message || "Failed to fetch students"
+      );
+    }
+  }
+  async getStudentById(studentId: string) {
+    try {
+      const response = await apiClient.get<{
+        success: boolean;
+        message: string;
+        data: StudentDetailsData;
+      }>(`admin/students/${studentId}`);
+      return response.data;
+    } catch (error: any) {
+      console.error("Error fetching student:", error);
+      throw new Error(
+        error.response?.data?.message || "Failed to fetch student"
       );
     }
   }

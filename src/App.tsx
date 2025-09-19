@@ -20,6 +20,8 @@ import TeachersVerification from "./pages/admin/Verifications";
 import VerificationsTeacherDetail from "./pages/admin/VerificationsTeacherDetail";
 import StudentPairing from "./pages/admin/StudentPairing";
 import AdminTeachers from "./pages/admin/Teachers";
+import AdminStudents from "./pages/admin/Students";
+import AdminStudentDetails from "./pages/admin/StudentDetails";
 
 // teacher
 import TeacherDashboard from "./pages/teacher/Dashboard";
@@ -111,6 +113,7 @@ function App() {
             }
           />
         </Route>
+
         <Route
           path='/teacher'
           element={
@@ -128,6 +131,7 @@ function App() {
           <Route path='students/:id' element={<TeacherStudentDetails />} />
           <Route path='*' element={<div>404 Not Found</div>} />
         </Route>
+
         <Route
           path='/student'
           element={
@@ -145,6 +149,7 @@ function App() {
           <Route path='teachers/:id' element={<StudentTeacherDetails />} />
           <Route path='*' element={<div>404 Not Found</div>} />
         </Route>
+
         <Route
           path='/admin'
           element={
@@ -164,8 +169,8 @@ function App() {
             element={<VerificationsTeacherDetail />}
           />
           <Route path='pairing' element={<StudentPairing />} />
-          <Route path='users' element={<div>Users Component</div>} />
-          <Route path='settings' element={<div>Settings Component</div>} />
+          <Route path='students' element={<AdminStudents />} />
+          <Route path='students/:id' element={<AdminStudentDetails />} />
           <Route path='teachers' element={<AdminTeachers />} />
           <Route path='teachers/:id' element={<VerificationsTeacherDetail />} />
           <Route path='*' element={<div>404 Not Found</div>} />
