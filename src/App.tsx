@@ -114,6 +114,7 @@ function App() {
           />
         </Route>
 
+        {/* Teacher Routes */}
         <Route
           path='/teacher'
           element={
@@ -132,6 +133,7 @@ function App() {
           <Route path='*' element={<div>404 Not Found</div>} />
         </Route>
 
+        {/* student Routes */}
         <Route
           path='/student'
           element={
@@ -150,6 +152,7 @@ function App() {
           <Route path='*' element={<div>404 Not Found</div>} />
         </Route>
 
+        {/* admin Routes */}
         <Route
           path='/admin'
           element={

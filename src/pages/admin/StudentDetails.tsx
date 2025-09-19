@@ -88,7 +88,7 @@ const StudentDetails = () => {
             <button className='bg-[#445796] text-white px-5 py-2 rounded-full'>
               Call
             </button>
-            <button className='bg-bgprimary text-white px-5 py-2 rounded-full'>
+            <button className='bg-[#2F6769] text-white px-5 py-2 rounded-full'>
               Message
             </button>
           </div>
@@ -98,7 +98,7 @@ const StudentDetails = () => {
       <div className='flex flex-row justify-between gap-8'>
         <div className='ml-8 w-[70%]'>
           <div className='space-y-6 flex flex-col'>
-            <div className='flex flex-row justify-between gap-8 bg-white rounded-xl p-6'>
+            <div className='flex flex-col justify-between gap-4 bg-white rounded-xl p-6'>
               <div className='relative w-auto max-w-[500px] h-auto max-h-[500px] rounded-lg overflow-hidden'>
                 <img
                   src={studentData.gender === "female" ? female : female}
@@ -109,8 +109,8 @@ const StudentDetails = () => {
                   View Parent Profile
                 </button>
               </div>
-              <div className='flex-1 max-w-[400px]'>
-                <h2 className='text-3xl font-semibold text-gray-900 mb-4'>
+              <div className='ml-2 flex-1 max-w-[400px]'>
+                <h2 className='text-3xl font-semibold text-gray-900'>
                   {studentData.fullName || "N/A"}
                 </h2>
               </div>

@@ -63,7 +63,16 @@ const StudentDetails = () => {
 
   return (
     <div className='px-8 py-6'>
-      <CustomDetailHeader title='Student Details Page' />
+      <CustomDetailHeader title='Student Details Page'>
+        <div className='flex flex-row gap-4'>
+          <button className='bg-[#38BB6D] text-white px-5 py-2 rounded-full'>
+            View Parent Profile
+          </button>
+          <button className='bg-[#2F6769] text-white px-5 py-2 rounded-full'>
+            Message
+          </button>
+        </div>
+      </CustomDetailHeader>
       {loading ? (
         <div className='flex justify-center items-center h-140'>
           <LoadingSpinner size='lg' />
