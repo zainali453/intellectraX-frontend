@@ -144,6 +144,7 @@ const ClassSubject = ({ initialData = [], onChange }: ClassSubjectProps) => {
           <div className='mb-6 p-1'>
             <CustomDropdown
               // label="Select level of study"
+              isAbsolute={false}
               placeholder='Select level of study'
               value={levelData.level}
               onChange={(value) => handleLevelChange(levelIndex, value)}

@@ -17,6 +17,7 @@ interface DatePickerProps {
   helpText?: string;
   maxDate?: Date;
   minDate?: Date;
+  excludeDates?: Date[];
   showYearDropdown?: boolean;
   showMonthDropdown?: boolean;
   dateFormat?: string;
@@ -27,7 +28,7 @@ const CustomInput = forwardRef<
   HTMLInputElement,
   React.InputHTMLAttributes<HTMLInputElement> & { error?: string }
 >(({ error, ...props }, ref) => (
-  <div className="relative">
+  <div className='relative'>
     <input
       {...props}
       ref={ref}
@@ -47,7 +48,7 @@ const CustomInput = forwardRef<
       `}
       readOnly
     />
-    <div className="absolute inset-y-0 right-2 flex items-center pointer-events-none">
+    <div className='absolute inset-y-0 right-2 flex items-center pointer-events-none'>
       <Calendar
         size={18}
         className={`${
@@ -73,6 +74,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
   helpText,
   maxDate,
   minDate,
+  excludeDates = [],
   showYearDropdown = true,
   showMonthDropdown = true,
   dateFormat = "MM/dd/yyyy",
@@ -82,10 +84,10 @@ const DatePicker: React.FC<DatePickerProps> = ({
       {label && (
         <label
           htmlFor={name}
-          className="block text-sm font-medium text-gray-700 mb-2"
+          className='block text-sm font-medium text-gray-700 mb-2'
         >
           {label}
-          {required && <span className="text-red-500 ml-1">*</span>}
+          {required && <span className='text-red-500 ml-1'>*</span>}
         </label>
       )}
 
@@ -99,18 +101,19 @@ const DatePicker: React.FC<DatePickerProps> = ({
         dateFormat={dateFormat}
         maxDate={maxDate}
         minDate={minDate}
+        excludeDates={excludeDates}
         showYearDropdown={showYearDropdown}
         showMonthDropdown={showMonthDropdown}
-        dropdownMode="select"
+        dropdownMode='select'
         customInput={<CustomInput error={error} />}
-        popperClassName="react-datepicker-popper"
-        calendarClassName="react-datepicker-calendar"
+        popperClassName='react-datepicker-popper'
+        calendarClassName='react-datepicker-calendar'
       />
 
       {error ? (
-        <p className="mt-1 text-sm text-red-600">{error}</p>
+        <p className='mt-1 text-sm text-red-600'>{error}</p>
       ) : helpText ? (
-        <p className="mt-1 text-sm text-gray-500">{helpText}</p>
+        <p className='mt-1 text-sm text-gray-500'>{helpText}</p>
       ) : null}
     </div>
   );

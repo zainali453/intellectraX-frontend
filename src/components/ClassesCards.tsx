@@ -1,6 +1,6 @@
 import React from "react";
 
-interface ClassData {
+export interface ClassData {
   id: string;
   subject: string;
   student: string;

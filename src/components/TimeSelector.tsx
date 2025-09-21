@@ -140,15 +140,15 @@ const TimeSelector: React.FC<TimeSelectorProps> = ({
   return (
     <div className={`relative ${className}`} ref={dropdownRef}>
       {label && (
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+        <label className='block text-sm font-medium text-gray-700 mb-2'>
           {label}
-          {required && <span className="text-red-500 ml-1">*</span>}
+          {required && <span className='text-red-500 ml-1'>*</span>}
         </label>
       )}
 
-      <div className="relative">
+      <div className='relative'>
         <button
-          type="button"
+          type='button'
           onClick={toggleDropdown}
           disabled={disabled}
           className={`
@@ -173,7 +173,7 @@ const TimeSelector: React.FC<TimeSelectorProps> = ({
           </span>
         </button>
         {!isOpen && (
-          <div className="absolute inset-y-0 right-2 flex items-center pointer-events-none">
+          <div className='absolute inset-y-0 right-2 flex items-center pointer-events-none'>
             <Clock
               size={18}
               className={`${
@@ -184,23 +184,23 @@ const TimeSelector: React.FC<TimeSelectorProps> = ({
         )}
         {/* Time Picker Dropdown */}
         {isOpen && (
-          <div className="z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg">
-            <div className="p-4">
+          <div className='absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg'>
+            <div className='p-4'>
               <div
                 className={`flex gap-4 ${
                   !format24 ? "justify-between" : "justify-center"
                 }`}
               >
                 {/* Hours */}
-                <div className="flex-1">
-                  <label className="block text-xs font-medium text-gray-500 mb-2 text-center">
+                <div className='flex-1'>
+                  <label className='block text-xs font-medium text-gray-500 mb-2 text-center'>
                     Hours
                   </label>
-                  <div className="max-h-32 overflow-y-auto border rounded">
+                  <div className='max-h-32 overflow-y-auto border rounded'>
                     {hours.map((hour) => (
                       <button
                         key={hour}
-                        type="button"
+                        type='button'
                         onClick={() => handleTimeChange("hour", hour)}
                         className={`
                           w-full px-3 py-1 text-sm hover:bg-gray-50 transition-colors
@@ -218,15 +218,15 @@ const TimeSelector: React.FC<TimeSelectorProps> = ({
                 </div>
 
                 {/* Minutes */}
-                <div className="flex-1">
-                  <label className="block text-xs font-medium text-gray-500 mb-2 text-center">
+                <div className='flex-1'>
+                  <label className='block text-xs font-medium text-gray-500 mb-2 text-center'>
                     Minutes
                   </label>
-                  <div className="max-h-32 overflow-y-auto border rounded">
+                  <div className='max-h-32 overflow-y-auto border rounded'>
                     {minutes.map((minute) => (
                       <button
                         key={minute}
-                        type="button"
+                        type='button'
                         onClick={() => handleTimeChange("minute", minute)}
                         className={`
                           w-full px-3 py-1 text-sm hover:bg-gray-50 transition-colors
@@ -245,15 +245,15 @@ const TimeSelector: React.FC<TimeSelectorProps> = ({
 
                 {/* AM/PM for 12-hour format */}
                 {!format24 && (
-                  <div className="flex-1">
-                    <label className="block text-xs font-medium text-gray-500 mb-2 text-center">
+                  <div className='flex-1'>
+                    <label className='block text-xs font-medium text-gray-500 mb-2 text-center'>
                       Period
                     </label>
-                    <div className="border rounded">
+                    <div className='border rounded'>
                       {["AM", "PM"].map((period) => (
                         <button
                           key={period}
-                          type="button"
+                          type='button'
                           onClick={() => handleTimeChange("period", period)}
                           className={`
                             w-full px-3 py-1 text-sm hover:bg-gray-50 transition-colors
@@ -272,18 +272,18 @@ const TimeSelector: React.FC<TimeSelectorProps> = ({
                 )}
               </div>
 
-              <div className="mt-4 flex gap-2">
+              <div className='mt-4 flex gap-2'>
                 <button
-                  type="button"
+                  type='button'
                   onClick={() => setIsOpen(false)}
-                  className="flex-1 px-3 py-2 text-sm bg-gray-100 text-gray-700 rounded hover:bg-gray-200 transition-colors"
+                  className='flex-1 px-3 py-2 text-sm bg-gray-100 text-gray-700 rounded hover:bg-gray-200 transition-colors'
                 >
                   Cancel
                 </button>
                 <button
-                  type="button"
+                  type='button'
                   onClick={() => setIsOpen(false)}
-                  className="flex-1 px-3 py-2 text-sm bg-teal-500 text-white rounded hover:bg-teal-600 transition-colors"
+                  className='flex-1 px-3 py-2 text-sm bg-teal-500 text-white rounded hover:bg-teal-600 transition-colors'
                 >
                   Done
                 </button>
@@ -293,7 +293,7 @@ const TimeSelector: React.FC<TimeSelectorProps> = ({
         )}
       </div>
 
-      {error && <p className="mt-1 text-sm text-red-600">{error}</p>}
+      {error && <p className='mt-1 text-sm text-red-600'>{error}</p>}
     </div>
   );
 };

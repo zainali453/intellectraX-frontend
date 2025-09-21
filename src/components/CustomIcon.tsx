@@ -29,6 +29,10 @@ import totalUsers from "../assets/icons/totalUsers.png";
 import audioVideo from "../assets/icons/audioVideo.png";
 import card from "../assets/icons/card.png";
 import badge from "../assets/icons/badge.png";
+import add from "../assets/icons/add.png";
+import studentStar from "../assets/icons/studentStar.png";
+import calender from "../assets/icons/calendar.png";
+import clock from "../assets/icons/clock.png";
 
 import dashboardActive from "../assets/icons/dashboardActive.png";
 import assignmentsActive from "../assets/icons/assignmentsActive.png";
@@ -77,6 +81,10 @@ const ICONS = {
   audioVideo,
   card,
   badge,
+  add,
+  studentStar,
+  calender,
+  clock,
 
   dashboardActive,
   assignmentsActive,

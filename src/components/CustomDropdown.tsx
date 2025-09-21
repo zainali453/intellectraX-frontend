@@ -17,6 +17,7 @@ interface CustomDropdownProps {
   error?: string;
   disabled?: boolean;
   className?: string;
+  isAbsolute?: boolean;
 }
 
 const CustomDropdown: React.FC<CustomDropdownProps> = ({
@@ -29,6 +30,7 @@ const CustomDropdown: React.FC<CustomDropdownProps> = ({
   error,
   disabled = false,
   className = "",
+  isAbsolute = true,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -68,15 +70,15 @@ const CustomDropdown: React.FC<CustomDropdownProps> = ({
   return (
     <div className={`relative ${className}`} ref={dropdownRef}>
       {label && (
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+        <label className='block text-sm font-medium text-gray-700 mb-2'>
           {label}
-          {required && <span className="text-red-500 ml-1">*</span>}
+          {required && <span className='text-red-500 ml-1'>*</span>}
         </label>
       )}
 
-      <div className="relative">
+      <div className='relative'>
         <button
-          type="button"
+          type='button'
           onClick={toggleDropdown}
           disabled={disabled}
           className={`
@@ -109,7 +111,11 @@ const CustomDropdown: React.FC<CustomDropdownProps> = ({
 
         {/* Dropdown Menu */}
         {isOpen && (
-          <div className="w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg">
+          <div
+            className={` ${
+              isAbsolute ? "absolute" : ""
+            } top-12 z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg`}
+          >
             {options.map((option) => (
               <div
                 key={option.value}
@@ -137,7 +143,7 @@ const CustomDropdown: React.FC<CustomDropdownProps> = ({
         )}
       </div>
 
-      {error && <p className="mt-1 text-sm text-red-600">{error}</p>}
+      {error && <p className='mt-1 text-sm text-red-600'>{error}</p>}
     </div>
   );
 };

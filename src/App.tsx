@@ -27,6 +27,8 @@ import AdminStudentDetails from "./pages/admin/StudentDetails";
 import TeacherDashboard from "./pages/teacher/Dashboard";
 import TeacherStudents from "./pages/teacher/Students";
 import TeacherStudentDetails from "./pages/teacher/StudentDetails";
+import TeacherClasses from "./pages/teacher/Classes";
+import TeacherClassDetails from "./pages/teacher/ClassDetails";
 
 // student
 import StudentDashboard from "./pages/student/Dashboard";
@@ -130,6 +132,9 @@ function App() {
           />
           <Route path='students' element={<TeacherStudents />} />
           <Route path='students/:id' element={<TeacherStudentDetails />} />
+          <Route path='classes' element={<TeacherClasses />} />
+          <Route path='classes/:id' element={<TeacherClassDetails />} />
+
           <Route path='*' element={<div>404 Not Found</div>} />
         </Route>
 

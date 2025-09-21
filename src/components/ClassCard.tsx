@@ -1,0 +1,75 @@
+import React, { useState } from "react";
+
+export interface ClassData {
+  id: string;
+  subject: string;
+  student: string;
+  date: string;
+  time: string;
+  onJoinClass?: () => void;
+  onClick?: () => void;
+}
+
+interface ClassCardProps {
+  data: ClassData;
+}
+
+const ClassCard: React.FC<ClassCardProps> = ({ data }) => {
+  const [imageError, setImageError] = useState(false);
+  return (
+    <div className='bg-white rounded-2xl p-4 shadow-sm border border-gray-100 min-w-[280px] max-w-[320px]'>
+      {/* Subject Image */}
+      <div className='relative mb-4 cursor-pointer' onClick={data.onClick}>
+        {!imageError ? (
+          <img
+            src={`/subjects/${data?.subject?.toLowerCase()}.png`}
+            alt={data?.subject}
+            className='w-full h-32 object-cover rounded-xl'
+            onError={() => setImageError(true)}
+          />
+        ) : (
+          <div className='w-full h-32 bg-[#4393961a] rounded-xl flex items-center justify-center p-2'>
+            <span className='text-bgprimary font-medium text-2xl capitalize wrap-anywhere text-center'>
+              {data.subject || "Subject"}
+            </span>
+          </div>
+        )}
+      </div>
+
+      {/* Class Details */}
+      <div className='space-y-2 mb-4'>
+        <div className='flex items-center text-sm'>
+          <span className='text-gray-500 font-medium'>Subject:</span>
+          <span className='ml-2 text-gray-800 font-semibold'>
+            {data.subject}
+          </span>
+        </div>
+
+        <div className='flex items-center text-sm'>
+          <span className='text-gray-500 font-medium'>Student:</span>
+          <span className='ml-2 text-gray-800'>{data.student}</span>
+        </div>
+
+        <div className='flex items-center text-sm'>
+          <span className='text-gray-500 font-medium'>Date:</span>
+          <span className='ml-2 text-gray-800'>{data.date}</span>
+        </div>
+
+        <div className='flex items-center text-sm'>
+          <span className='text-gray-500 font-medium'>Time:</span>
+          <span className='ml-2 text-gray-800'>{data.time}</span>
+        </div>
+      </div>
+
+      {/* Join Class Button */}
+      <button
+        onClick={data.onJoinClass}
+        className='w-full bg-transparent border border-bgprimary text-bgprimary py-2.5 px-4 rounded-full font-medium text-sm hover:bg-teal-50 transition-colors duration-200'
+      >
+        Join Class
+      </button>
+    </div>
+  );
+};
+
+export default ClassCard;
