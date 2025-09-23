@@ -13,6 +13,7 @@ import LoadingSpinner from "@/components/LoadingSpinner";
 import { useNavigate } from "react-router-dom";
 import CustomIcon from "@/components/CustomIcon";
 import ClassCard, { ClassData as ClassCardsData } from "@/components/ClassCard";
+import SuccessModal from "@/components/SuccessModal";
 
 const ITEMS_PER_PAGE = 12;
 
@@ -25,6 +26,7 @@ const Classes = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [updating, setUpdating] = useState(false);
   const [refreshFlag, setRefreshFlag] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
 
   const openCreateModal = () => {
     setIsModalOpen(true);
@@ -39,8 +41,8 @@ const Classes = () => {
       setUpdating(true);
       const response = await teacherService.createClass(classData);
       if (response && response.success) {
-        alert("Class created successfully!");
         closeModal();
+        setShowSuccess(true);
       }
     } catch (error) {
       console.error("Error creating class:", error);
@@ -70,7 +72,6 @@ const Classes = () => {
               onClick: () => navigate(`/teacher/classes/${item.classId}`),
             }))
           );
-          console.log("Fetched classes:", response.data);
         }
       } catch (error) {
         console.error("Error fetching classes:", error);
@@ -190,6 +191,13 @@ const Classes = () => {
           onSave={handleSaveClass}
           mode='create'
           loading={updating}
+        />
+      )}
+      {showSuccess && (
+        <SuccessModal
+          isOpen={showSuccess}
+          onClose={() => setShowSuccess(false)}
+          title='Successfully Created!'
         />
       )}
     </div>

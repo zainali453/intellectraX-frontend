@@ -10,6 +10,8 @@ import {
   ClassData,
 } from "@/services/teacher.service";
 import EditClassModal from "@/components/EditClassModal";
+import SuccessModal from "@/components/SuccessModal";
+import ConfirmDeleteModal from "@/components/ConfirmDeleteModal";
 
 interface ClassDetailsType {
   student: string;
@@ -39,6 +41,8 @@ const ClassDetails = () => {
     days: [],
     description: "",
   });
+  const [showDelete, setShowDelete] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -108,7 +112,6 @@ const ClassDetails = () => {
         classData
       );
       if (response && response.success) {
-        alert("Class updated successfully!");
         closeModal();
         navigate(-1);
       }
@@ -122,16 +125,15 @@ const ClassDetails = () => {
   };
 
   const handleDeleteClass = async () => {
-    const res = confirm("Are you sure you want to delete this class?");
-    if (res) {
-      const response = await teacherService.deleteClass(
-        classDetails?.schedulerId || ""
-      );
-      if (response && response.success) {
-        alert("Class deleted successfully!");
-        navigate(-1);
-      }
+    setIsDeleting(true);
+    const response = await teacherService.deleteClass(
+      classDetails?.schedulerId || ""
+    );
+    if (response && response.success) {
+      setIsDeleting(false);
+      navigate(-1);
     }
+    setIsDeleting(false);
   };
 
   return (
@@ -140,7 +142,7 @@ const ClassDetails = () => {
         <div className='flex flex-row gap-4'>
           <button
             className='bg-[#FF534F] text-white px-5 py-2 rounded-full'
-            onClick={handleDeleteClass}
+            onClick={() => setShowDelete(true)}
           >
             Delete
           </button>
@@ -223,6 +225,16 @@ const ClassDetails = () => {
           mode='edit'
           loading={loadingModal}
           initialData={schedulerData}
+        />
+      )}
+
+      {showDelete && (
+        <ConfirmDeleteModal
+          isOpen={showDelete}
+          onClose={() => setShowDelete(false)}
+          onConfirm={handleDeleteClass}
+          itemName={"this class"}
+          loading={isDeleting}
         />
       )}
     </div>
