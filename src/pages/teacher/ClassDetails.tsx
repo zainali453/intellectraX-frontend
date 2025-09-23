@@ -1,13 +1,15 @@
 import CustomDetailHeader from "@/components/CustomDetailHeader";
 import CustomDetailCard from "@/components/CustomDetailCard";
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import {
   teacherService,
   formatDate,
   formatDisplayTime,
+  ClassData,
 } from "@/services/teacher.service";
+import EditClassModal from "@/components/EditClassModal";
 
 interface ClassDetailsType {
   student: string;
@@ -15,16 +17,28 @@ interface ClassDetailsType {
   date: string;
   time: string;
   description: string;
+  recursive: boolean;
+  schedulerId: string;
 }
 
 const ClassDetails = () => {
   const classId = useParams().id;
+  const navigate = useNavigate();
 
   const [loading, setLoading] = useState(true);
   const [classDetails, setClassDetails] = useState<ClassDetailsType | null>(
     null
   );
   const [imageError, setImageError] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [loadingModal, setLoadingModal] = useState(true);
+  const [refreshFlag, setRefreshFlag] = useState(false);
+  const [schedulerData, setSchedulerData] = useState<ClassData>({
+    subject: "",
+    student: "",
+    days: [],
+    description: "",
+  });
 
   useEffect(() => {
     const fetchData = async () => {
@@ -44,6 +58,8 @@ const ClassDetails = () => {
               data.timeSlot.startTime
             )} - ${formatDisplayTime(data.timeSlot.endTime)}`,
             description: data.description,
+            recursive: data.recursive,
+            schedulerId: data.schedulerId,
           });
         }
       } catch (error) {
@@ -53,16 +69,85 @@ const ClassDetails = () => {
       }
     };
     fetchData();
-  }, []);
+  }, [classId, refreshFlag]);
+
+  const fetchSchedulerData = async (schedulerId: string) => {
+    try {
+      setLoadingModal(true);
+      const response = await teacherService.getSchedulerDetails(schedulerId);
+      if (response && response.data) {
+        setSchedulerData(response.data);
+      }
+    } catch (error) {
+      console.error("Error fetching scheduler details:", error);
+    } finally {
+      setLoadingModal(false);
+    }
+  };
+
+  const openEditModal = () => {
+    setIsModalOpen(true);
+    if (classDetails?.schedulerId) {
+      fetchSchedulerData(classDetails.schedulerId);
+    }
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setSchedulerData({ subject: "", student: "", days: [], description: "" });
+  };
+
+  const handleUpdateClass = async (classData: ClassData) => {
+    try {
+      setLoadingModal(true);
+
+      if (!classDetails?.schedulerId) throw new Error("Invalid Scheduler ID");
+
+      const response = await teacherService.updateClass(
+        classDetails.schedulerId,
+        classData
+      );
+      if (response && response.success) {
+        alert("Class updated successfully!");
+        closeModal();
+        navigate(-1);
+      }
+    } catch (error) {
+      console.error("Error updating class:", error);
+      alert(error);
+    } finally {
+      setLoadingModal(false);
+      setRefreshFlag((prev) => !prev);
+    }
+  };
+
+  const handleDeleteClass = async () => {
+    const res = confirm("Are you sure you want to delete this class?");
+    if (res) {
+      const response = await teacherService.deleteClass(
+        classDetails?.schedulerId || ""
+      );
+      if (response && response.success) {
+        alert("Class deleted successfully!");
+        navigate(-1);
+      }
+    }
+  };
 
   return (
     <div className='px-8 py-6'>
       <CustomDetailHeader title='Class Details Page'>
         <div className='flex flex-row gap-4'>
-          <button className='bg-[#FF534F] text-white px-5 py-2 rounded-full'>
+          <button
+            className='bg-[#FF534F] text-white px-5 py-2 rounded-full'
+            onClick={handleDeleteClass}
+          >
             Delete
           </button>
-          <button className='bg-[#445796] text-white px-5 py-2 rounded-full'>
+          <button
+            className='bg-[#445796] text-white px-5 py-2 rounded-full'
+            onClick={openEditModal}
+          >
             Edit Class
           </button>
           <button className='bg-[#2F6769] text-white px-5 py-2 rounded-full'>
@@ -77,7 +162,7 @@ const ClassDetails = () => {
       ) : classDetails ? (
         <>
           <div className='mt-8 bg-white p-6 rounded-2xl shadow-sm border border-gray-100'>
-            <div>
+            <div className='relative'>
               {!imageError ? (
                 <img
                   src={`/subjects/${classDetails?.subject?.toLowerCase()}.png`}
@@ -92,6 +177,9 @@ const ClassDetails = () => {
                   </span>
                 </div>
               )}
+              <div className='absolute top-4 left-4 bg-white bg-opacity-80 backdrop-blur-md px-4 py-2 rounded-full text-lg font-medium'>
+                {classDetails.recursive ? "Recurring Class" : "One-time Class"}
+              </div>
             </div>
             <div>
               <h2 className='text-3xl text-textprimary font-semibold mt-6 mb-4'>
@@ -126,6 +214,16 @@ const ClassDetails = () => {
         <div className='flex justify-center items-center h-140'>
           <p className='text-gray-500'>No class details found.</p>
         </div>
+      )}
+      {isModalOpen && (
+        <EditClassModal
+          isOpen={isModalOpen}
+          onClose={closeModal}
+          onSave={handleUpdateClass}
+          mode='edit'
+          loading={loadingModal}
+          initialData={schedulerData}
+        />
       )}
     </div>
   );

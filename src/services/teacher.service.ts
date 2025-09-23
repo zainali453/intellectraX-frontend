@@ -58,6 +58,7 @@ export interface TimeSlot {
 interface DaySession {
   date: Date | null;
   timeSlots: TimeSlot[];
+  recursive: boolean;
 }
 
 export interface ClassData {
@@ -84,6 +85,8 @@ interface ClassDataForDetailsPage {
   date: string;
   timeSlot: TimeSlot;
   description: string;
+  recursive: boolean;
+  schedulerId: string;
 }
 
 export interface StudentDetailsType {
@@ -215,6 +218,47 @@ class TeacherService {
       console.error("Error fetching student details:", error);
       throw new Error(
         error.response?.data?.message || "Failed to fetch student details"
+      );
+    }
+  }
+  async getSchedulerDetails(schedulerId: string) {
+    try {
+      const response = await apiClient.get<successResponseWithData<ClassData>>(
+        `teacher/schedulers/${schedulerId}`
+      );
+      return response.data;
+    } catch (error: any) {
+      console.error("Error fetching scheduler details:", error);
+      throw new Error(
+        error.response?.data?.message || "Failed to fetch scheduler details"
+      );
+    }
+  }
+
+  async updateClass(schedulerId: string, classData: ClassData) {
+    try {
+      const response = await apiClient.put<successResponseWithoutData>(
+        `teacher/schedulers/${schedulerId}`,
+        classData
+      );
+      return response.data;
+    } catch (error: any) {
+      console.error("Error updating class:", error);
+      throw new Error(
+        error.response?.data?.message || "Failed to update class"
+      );
+    }
+  }
+  async deleteClass(schedulerId: string) {
+    try {
+      const response = await apiClient.delete<successResponseWithoutData>(
+        `teacher/schedulers/${schedulerId}`
+      );
+      return response.data;
+    } catch (error: any) {
+      console.error("Error deleting class:", error);
+      throw new Error(
+        error.response?.data?.message || "Failed to delete class"
       );
     }
   }

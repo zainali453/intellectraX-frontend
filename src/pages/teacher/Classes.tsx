@@ -23,6 +23,8 @@ const Classes = () => {
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [updating, setUpdating] = useState(false);
+  const [refreshFlag, setRefreshFlag] = useState(false);
 
   const openCreateModal = () => {
     setIsModalOpen(true);
@@ -34,6 +36,7 @@ const Classes = () => {
 
   const handleSaveClass = async (classData: ClassData) => {
     try {
+      setUpdating(true);
       const response = await teacherService.createClass(classData);
       if (response && response.success) {
         alert("Class created successfully!");
@@ -42,11 +45,14 @@ const Classes = () => {
     } catch (error) {
       console.error("Error creating class:", error);
       alert(error);
+    } finally {
+      setUpdating(false);
+      setRefreshFlag((prev) => !prev);
     }
   };
 
   useEffect(() => {
-    const fetchStudents = async () => {
+    const fetchClasses = async () => {
       try {
         setLoading(true);
         const response = await teacherService.getTeacherClasses();
@@ -72,8 +78,8 @@ const Classes = () => {
         setLoading(false);
       }
     };
-    fetchStudents();
-  }, []);
+    fetchClasses();
+  }, [refreshFlag]);
 
   // Filter students based on search (searches across ALL data, not just current page)
   const filteredClasses = useMemo(() => {
@@ -112,7 +118,7 @@ const Classes = () => {
   return (
     <div className='px-8 py-6'>
       <TeacherCustomHeader
-        title='Classes'
+        title='Upcoming Classes'
         onSearchChange={handleSearchChange}
         searchValue={searchValue}
       >
@@ -183,6 +189,7 @@ const Classes = () => {
           onClose={closeModal}
           onSave={handleSaveClass}
           mode='create'
+          loading={updating}
         />
       )}
     </div>

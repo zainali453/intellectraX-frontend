@@ -3,6 +3,7 @@ import { X, Calendar, Plus } from "lucide-react";
 import CustomDropdown from "./CustomDropdown";
 import TimeSelector from "./TimeSelector";
 import DatePicker from "./DatePicker";
+import LoadingSpinner from "./LoadingSpinner";
 import {
   ClassData,
   StudentForClass,
@@ -17,6 +18,7 @@ interface EditClassModalProps {
   onSave: (classData: ClassData) => void;
   initialData?: ClassData;
   mode: "create" | "edit";
+  loading: boolean;
 }
 
 const formatDisplayTime = (value: string, format24: boolean = false) => {
@@ -40,11 +42,18 @@ const EditClassModal: React.FC<EditClassModalProps> = ({
   onSave,
   initialData,
   mode = "create",
+  loading,
 }) => {
   const [formData, setFormData] = useState<ClassData>({
     subject: "",
     student: "",
-    days: [{ date: null, timeSlots: [{ startTime: "", endTime: "" }] }],
+    days: [
+      {
+        date: null,
+        timeSlots: [{ startTime: "", endTime: "" }],
+        recursive: true,
+      },
+    ],
     description: "",
   });
 
@@ -106,7 +115,13 @@ const EditClassModal: React.FC<EditClassModalProps> = ({
         setFormData({
           subject: "",
           student: "",
-          days: [{ date: null, timeSlots: [{ startTime: "", endTime: "" }] }],
+          days: [
+            {
+              date: null,
+              timeSlots: [{ startTime: "", endTime: "" }],
+              recursive: true,
+            },
+          ],
           description: "",
         });
       }
@@ -125,6 +140,15 @@ const EditClassModal: React.FC<EditClassModalProps> = ({
       ...prev,
       days: prev.days.map((day, i) =>
         i === dayIndex ? { ...day, date } : day
+      ),
+    }));
+  };
+
+  const handleRecursiveChange = (dayIndex: number, recursive: boolean) => {
+    setFormData((prev) => ({
+      ...prev,
+      days: prev.days.map((day, i) =>
+        i === dayIndex ? { ...day, recursive } : day
       ),
     }));
   };
@@ -167,10 +191,12 @@ const EditClassModal: React.FC<EditClassModalProps> = ({
     // Check against ALL slots in ALL days, not just the current day
     for (let i = 0; i < formData.days.length; i++) {
       const otherDay = formData.days[i];
+      if (typeof otherDay.date === "string")
+        otherDay.date = new Date(otherDay.date);
       if (!otherDay.date) continue;
 
       // Only check conflicts with the same date
-      if (otherDay.date.toDateString() === currentDay.date.toDateString()) {
+      if (otherDay.date?.toDateString() === currentDay.date?.toDateString()) {
         for (let j = 0; j < otherDay.timeSlots.length; j++) {
           // Skip the current slot we're checking
           if (i === dayIndex && j === slotIndex) continue;
@@ -245,7 +271,11 @@ const EditClassModal: React.FC<EditClassModalProps> = ({
       ...prev,
       days: [
         ...prev.days,
-        { date: null, timeSlots: [{ startTime: "", endTime: "" }] },
+        {
+          date: null,
+          timeSlots: [{ startTime: "", endTime: "" }],
+          recursive: true,
+        },
       ],
     }));
   };
@@ -308,7 +338,9 @@ const EditClassModal: React.FC<EditClassModalProps> = ({
 
   const formatDate = (date: Date | null) => {
     if (!date) return "";
-    return date.toLocaleDateString("en-US", {
+
+    if (typeof date === "string") date = new Date(date);
+    return date?.toLocaleDateString("en-US", {
       weekday: "long",
       year: "numeric",
       month: "long",
@@ -326,6 +358,13 @@ const EditClassModal: React.FC<EditClassModalProps> = ({
       />
 
       <div className='relative w-full max-w-2xl max-h-[83vh] overflow-y-auto bg-white rounded-lg shadow-xl'>
+        {/* Loading Overlay */}
+        {loading && (
+          <div className='absolute inset-0 bg-white bg-opacity-90 flex items-center justify-center z-10 rounded-lg'>
+            <LoadingSpinner size='lg' color='primary' text='Loading...' />
+          </div>
+        )}
+
         {/* Modal Content */}
         <div className='p-6'>
           {/* Header */}
@@ -357,6 +396,7 @@ const EditClassModal: React.FC<EditClassModalProps> = ({
                     label: student.fullName,
                   }))}
                   required
+                  disabled={mode === "edit"}
                 />
               )}
             </div>
@@ -376,6 +416,7 @@ const EditClassModal: React.FC<EditClassModalProps> = ({
                   }))}
                   required
                   disabled={
+                    mode === "edit" ||
                     loadingStudents ||
                     students.length === 0 ||
                     !formData.student
@@ -410,6 +451,29 @@ const EditClassModal: React.FC<EditClassModalProps> = ({
                           Remove Day
                         </button>
                       )}
+                    </div>
+
+                    {/* Recursive Toggle */}
+                    <div className='flex items-center justify-between mb-4 p-3 bg-white rounded-lg border border-gray-200'>
+                      <div className='flex items-center gap-2'>
+                        <span className='text-sm font-medium text-gray-700'>
+                          Recurring Class
+                        </span>
+                        <span className='text-xs text-gray-500'>
+                          (Repeat this class weekly)
+                        </span>
+                      </div>
+                      <label className='relative inline-flex items-center cursor-pointer'>
+                        <input
+                          type='checkbox'
+                          checked={day.recursive}
+                          onChange={(e) =>
+                            handleRecursiveChange(dayIndex, e.target.checked)
+                          }
+                          className='sr-only peer'
+                        />
+                        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-teal-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-bgprimary"></div>
+                      </label>
                     </div>
 
                     {/* Date Selection */}
@@ -597,7 +661,8 @@ const EditClassModal: React.FC<EditClassModalProps> = ({
           <div className='flex flex-col gap-3 mt-2 bg-white pt-4 border-t border-gray-100'>
             <button
               onClick={handleSave}
-              className='w-full bg-bgprimary text-white py-4 px-6 rounded-full font-medium text-base hover:bg-teal-600 transition-colors duration-200'
+              disabled={loading}
+              className='w-full bg-bgprimary text-white py-4 px-6 rounded-full font-medium text-base hover:bg-teal-600 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed'
             >
               Save Changes
             </button>
