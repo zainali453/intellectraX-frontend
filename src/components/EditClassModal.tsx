@@ -218,6 +218,14 @@ const EditClassModal: React.FC<EditClassModalProps> = ({
     return false;
   };
 
+  // Check for all time slot issues (conflicts + duration)
+  const hasTimeSlotIssue = (dayIndex: number, slotIndex: number) => {
+    return (
+      hasTimeConflict(dayIndex, slotIndex) ||
+      hasExcessiveDuration(dayIndex, slotIndex)
+    );
+  };
+
   // Get list of already selected dates to exclude from DatePicker
   const getExcludedDates = (currentDayIndex: number) => {
     const excludedDates: Date[] = [];
@@ -236,6 +244,27 @@ const EditClassModal: React.FC<EditClassModalProps> = ({
     if (!timeStr) return 0;
     const [hours, minutes] = timeStr.split(":").map(Number);
     return hours * 60 + minutes;
+  };
+
+  // Check if time slot duration exceeds 1 hour (60 minutes)
+  const hasExcessiveDuration = (dayIndex: number, slotIndex: number) => {
+    const currentDay = formData.days[dayIndex];
+    if (!currentDay.date) return false;
+
+    const currentSlot = currentDay.timeSlots[slotIndex];
+    if (!currentSlot.startTime || !currentSlot.endTime) return false;
+
+    const startMinutes = timeToMinutes(currentSlot.startTime);
+    const endMinutes = timeToMinutes(currentSlot.endTime);
+
+    // Check if end time is before or equal to start time
+    if (endMinutes <= startMinutes) return false;
+
+    // Calculate duration in minutes
+    const durationMinutes = endMinutes - startMinutes;
+
+    // Check if duration exceeds 60 minutes (1 hour)
+    return durationMinutes > 60;
   };
 
   const addTimeSlot = (dayIndex: number) => {
@@ -301,6 +330,8 @@ const EditClassModal: React.FC<EditClassModalProps> = ({
     let hasConflicts = false;
     let totalClasses = 0;
 
+    let hasDurationIssues = false;
+
     formData.days.forEach((day, dayIndex) => {
       if (day.date) {
         day.timeSlots.forEach((slot, slotIndex) => {
@@ -309,6 +340,9 @@ const EditClassModal: React.FC<EditClassModalProps> = ({
             if (hasTimeConflict(dayIndex, slotIndex)) {
               hasConflicts = true;
             }
+            if (hasExcessiveDuration(dayIndex, slotIndex)) {
+              hasDurationIssues = true;
+            }
           }
         });
       }
@@ -316,6 +350,13 @@ const EditClassModal: React.FC<EditClassModalProps> = ({
 
     if (hasConflicts) {
       alert("Please resolve all time conflicts before saving.");
+      return;
+    }
+
+    if (hasDurationIssues) {
+      alert(
+        "Please fix time slots with duration exceeding 1 hour before saving."
+      );
       return;
     }
 
@@ -506,7 +547,7 @@ const EditClassModal: React.FC<EditClassModalProps> = ({
                         <div
                           key={slotIndex}
                           className={`bg-white rounded-lg p-4 border-2 ${
-                            hasTimeConflict(dayIndex, slotIndex)
+                            hasTimeSlotIssue(dayIndex, slotIndex)
                               ? "border-red-300 bg-red-50"
                               : "border-gray-200"
                           }`}
@@ -515,9 +556,11 @@ const EditClassModal: React.FC<EditClassModalProps> = ({
                             <span className='text-sm font-medium text-gray-600'>
                               Time Slot {slotIndex + 1}
                             </span>
-                            {hasTimeConflict(dayIndex, slotIndex) && (
+                            {hasTimeSlotIssue(dayIndex, slotIndex) && (
                               <span className='text-xs text-red-600 bg-red-100 px-2 py-1 rounded-full'>
-                                Time Conflict
+                                {hasExcessiveDuration(dayIndex, slotIndex)
+                                  ? "Max 1 Hour"
+                                  : "Time Conflict"}
                               </span>
                             )}
                           </div>
@@ -527,7 +570,7 @@ const EditClassModal: React.FC<EditClassModalProps> = ({
                               <div className='flex items-center justify-center mb-2'>
                                 <span
                                   className={`text-white text-xs px-3 py-1 rounded-full ${
-                                    hasTimeConflict(dayIndex, slotIndex)
+                                    hasTimeSlotIssue(dayIndex, slotIndex)
                                       ? "bg-red-500"
                                       : "bg-bgprimary"
                                   }`}
@@ -554,7 +597,7 @@ const EditClassModal: React.FC<EditClassModalProps> = ({
                               <div className='flex items-center justify-center mb-2'>
                                 <span
                                   className={`text-white text-xs px-3 py-1 rounded-full ${
-                                    hasTimeConflict(dayIndex, slotIndex)
+                                    hasTimeSlotIssue(dayIndex, slotIndex)
                                       ? "bg-red-500"
                                       : "bg-bgprimary"
                                   }`}
@@ -603,8 +646,8 @@ const EditClassModal: React.FC<EditClassModalProps> = ({
                             )}
                           </div>
 
-                          {/* Conflict Warning */}
-                          {hasTimeConflict(dayIndex, slotIndex) && (
+                          {/* Time Slot Issues Warning */}
+                          {hasTimeSlotIssue(dayIndex, slotIndex) && (
                             <div className='mt-3 p-3 bg-red-100 border border-red-300 rounded-lg'>
                               <p className='text-sm text-red-700 flex items-center'>
                                 <svg
@@ -618,8 +661,9 @@ const EditClassModal: React.FC<EditClassModalProps> = ({
                                     clipRule='evenodd'
                                   />
                                 </svg>
-                                Time conflict detected or end time is before
-                                start time
+                                {hasExcessiveDuration(dayIndex, slotIndex)
+                                  ? "Class duration cannot exceed 1 hour (60 minutes)"
+                                  : "Time conflict detected or end time is before start time"}
                               </p>
                             </div>
                           )}

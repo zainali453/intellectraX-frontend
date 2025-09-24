@@ -8,6 +8,8 @@ import {
   teacherService,
   formatDate,
   formatDisplayTime,
+  getOriginalDateUTC,
+  getOriginalTimeUTC,
 } from "@/services/teacher.service";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import { useNavigate } from "react-router-dom";
@@ -60,17 +62,28 @@ const Classes = () => {
         const response = await teacherService.getTeacherClasses();
         if (response && response.data) {
           setAllClasses(
-            response.data.map((item) => ({
-              id: item.classId,
-              student: item.studentName,
-              subject: item.subject.replace(/^\w/, (c) => c.toUpperCase()),
-              date: formatDate(item.date),
-              time: `${formatDisplayTime(
+            response.data.map((item) => {
+              const utcStartTime = getOriginalDateUTC(
+                item.date,
                 item.timeSlot.startTime
-              )} - ${formatDisplayTime(item.timeSlot.endTime)}`,
-              onJoinClass: () => console.log("Join class", item.classId),
-              onClick: () => navigate(`/teacher/classes/${item.classId}`),
-            }))
+              );
+              const utcEndTime = getOriginalDateUTC(
+                item.date,
+                item.timeSlot.endTime
+              );
+
+              return {
+                id: item.classId,
+                student: item.studentName,
+                subject: item.subject.replace(/^\w/, (c) => c.toUpperCase()),
+                date: formatDate(utcStartTime),
+                time: `${formatDisplayTime(
+                  getOriginalTimeUTC(utcStartTime)
+                )} - ${formatDisplayTime(getOriginalTimeUTC(utcEndTime))}`,
+                onJoinClass: () => console.log("Join class", item.classId),
+                onClick: () => navigate(`/teacher/classes/${item.classId}`),
+              };
+            })
           );
         }
       } catch (error) {

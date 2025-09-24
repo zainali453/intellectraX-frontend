@@ -30,6 +30,18 @@ export const formatDisplayTime = (value: string, format24: boolean = false) => {
   }
 };
 
+export const getOriginalDateUTC = (date: string, time: string) => {
+  const newDate = new Date(date).setHours(
+    new Date(date).getHours() + parseInt(time.split(":")[0]),
+    new Date(date).getMinutes() + parseInt(time.split(":")[1])
+  );
+  return new Date(newDate);
+};
+
+export const getOriginalTimeUTC = (date: Date) => {
+  return `${date.getHours()}:${date.getMinutes()}`;
+};
+
 export interface TeacherDashboardData {
   totalClasses: number;
   totalStudents: number;

@@ -8,6 +8,8 @@ import {
   formatDate,
   formatDisplayTime,
   ClassData,
+  getOriginalDateUTC,
+  getOriginalTimeUTC,
 } from "@/services/teacher.service";
 import EditClassModal from "@/components/EditClassModal";
 import SuccessModal from "@/components/SuccessModal";
@@ -54,13 +56,22 @@ const ClassDetails = () => {
         const response = await teacherService.getClassDetails(classId);
         if (response && response.data) {
           const data = response.data;
+          const utcStartTime = getOriginalDateUTC(
+            data.date,
+            data.timeSlot.startTime
+          );
+          const utcEndTime = getOriginalDateUTC(
+            data.date,
+            data.timeSlot.endTime
+          );
+
           setClassDetails({
             student: data.studentName,
             subject: data.subject.replace(/^\w/, (c) => c.toUpperCase()),
-            date: formatDate(data.date),
+            date: formatDate(utcStartTime),
             time: `${formatDisplayTime(
-              data.timeSlot.startTime
-            )} - ${formatDisplayTime(data.timeSlot.endTime)}`,
+              getOriginalTimeUTC(utcStartTime)
+            )} - ${formatDisplayTime(getOriginalTimeUTC(utcEndTime))}`,
             description: data.description,
             recursive: data.recursive,
             schedulerId: data.schedulerId,
