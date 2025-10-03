@@ -5,11 +5,19 @@ import {
   StudentDashboardData,
   studentService,
 } from "@/services/student.service";
+import {
+  formatDisplayTime,
+  getOriginalDateUTC,
+  getOriginalTimeUTC,
+  TeacherDashboardData,
+  formatDate,
+} from "@/services/teacher.service";
 import { useEffect, useState } from "react";
 import CustomChart from "@/components/CustomChart";
-import ClassesCards from "@/components/ClassesCards";
+import ClassCard, { ClassData } from "@/components/ClassCard";
 import english from "../../assets/subjects/english.png";
 import mathematics from "../../assets/subjects/mathematics.png";
+import { useNavigate } from "react-router-dom";
 
 const statCardsData = [
   {
@@ -39,27 +47,6 @@ const statCardsData = [
     Icon: "dollar",
     iconBg: "bg-[#38BB6D0D]",
     iconClass: "w-4 h-7",
-  },
-];
-
-const upcomingClasses = [
-  {
-    id: "1",
-    subject: "English",
-    student: "Steven Smith",
-    date: "Thursday, May 9, 2025",
-    time: "3:00 PM – 4:00 PM",
-    image: english,
-    onJoinClass: () => console.log("Joining English class"),
-  },
-  {
-    id: "2",
-    subject: "Mathematics",
-    student: "Steven Smith",
-    date: "Thursday, May 9, 2025",
-    time: "4:00 PM – 5:00 PM",
-    image: mathematics,
-    onJoinClass: () => console.log("Joining Math class"),
   },
 ];
 
@@ -93,6 +80,7 @@ const StatCard = ({ label, value, Icon, iconBg, iconClass }) => {
 };
 
 const DashMain = ({ title }) => {
+  const navigate = useNavigate();
   const [dashboardData, setDashboardData] = useState<StudentDashboardData>({
     totalClasses: 0,
     totalTeachers: 0,
@@ -101,15 +89,49 @@ const DashMain = ({ title }) => {
   });
   const [loading, setLoading] = useState(true);
   const [showPending, setShowPending] = useState(false);
+  const [classesData, setClassesData] = useState<ClassData[]>([]);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const response = await studentService.getDashboardData();
-        if (response.success && response.data) {
-          setDashboardData(response.data);
+        const [classesResponse, dashboardResponse] = await Promise.all([
+          studentService.getStudentClasses(),
+          studentService.getDashboardData(),
+        ]);
+        if (dashboardResponse.success && dashboardResponse.data) {
+          setDashboardData(dashboardResponse.data);
         } else setShowPending(true);
+
+        if (classesResponse.success && classesResponse.data) {
+          // only get the first 3 upcoming classes
+          const upcomingClasses = classesResponse.data.classes.slice(0, 3);
+          setClassesData(
+            upcomingClasses.map((item) => {
+              const utcStartTime = getOriginalDateUTC(
+                item.date,
+                item.timeSlot.startTime
+              );
+              const utcEndTime = getOriginalDateUTC(
+                item.date,
+                item.timeSlot.endTime
+              );
+
+              return {
+                id: item.classId,
+                student: item.teacherName,
+                subject: item.subject.replace(/^\w/, (c) => c.toUpperCase()),
+                date: formatDate(utcStartTime),
+                time: `${formatDisplayTime(
+                  getOriginalTimeUTC(utcStartTime)
+                )} - ${formatDisplayTime(getOriginalTimeUTC(utcEndTime))}`,
+                onJoinClass: () => console.log("Join class", item.classId),
+                onClick: () => navigate(`/student/classes/${item.classId}`),
+                isTeacher: true,
+              };
+            })
+          );
+        }
       } catch (error) {
         console.error("Error fetching dashboard data:", error);
       } finally {
@@ -168,10 +190,14 @@ const DashMain = ({ title }) => {
           ) : (
             <div className=''>
               <div className='mb-6 p-6 bg-white rounded-3xl'>
-                <ClassesCards
-                  classes={upcomingClasses}
-                  title='Upcoming Classes'
-                />
+                <h2 className='text-2xl font-semibold text-textprimary mb-4'>
+                  {"Upcoming Classes"}
+                </h2>
+                <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-3'>
+                  {classesData.map((classData) => (
+                    <ClassCard key={classData.id} data={classData} />
+                  ))}
+                </div>
               </div>
               <div className='mb-6 p-6 bg-white rounded-3xl'>
                 <CustomChart

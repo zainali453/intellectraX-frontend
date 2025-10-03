@@ -1,35 +1,21 @@
 import CustomDetailHeader from "@/components/CustomDetailHeader";
 import female from "../../assets/subjects/female.png";
-import ClassesCards from "@/components/ClassesCards";
-import english from "../../assets/subjects/english.png";
-import mathematics from "../../assets/subjects/mathematics.png";
+// import ClassesCards from "@/components/ClassesCards";
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
-import { teacherService, StudentDetailsType } from "@/services/teacher.service";
+import { useNavigate, useParams } from "react-router-dom";
+import {
+  teacherService,
+  StudentDetailsType,
+  formatDate,
+  formatDisplayTime,
+  getOriginalTimeUTC,
+  getOriginalDateUTC,
+} from "@/services/teacher.service";
 import LoadingSpinner from "@/components/LoadingSpinner";
-
-const upcomingClasses = [
-  {
-    id: "1",
-    subject: "English",
-    student: "Steven Smith",
-    date: "Thursday, May 9, 2025",
-    time: "3:00 PM – 4:00 PM",
-    image: english,
-    onJoinClass: () => console.log("Joining English class"),
-  },
-  {
-    id: "2",
-    subject: "Mathematics",
-    student: "Steven Smith",
-    date: "Thursday, May 9, 2025",
-    time: "4:00 PM – 5:00 PM",
-    image: mathematics,
-    onJoinClass: () => console.log("Joining Math class"),
-  },
-];
+import ClassCard, { ClassData } from "@/components/ClassCard";
 
 const StudentDetails = () => {
+  const navigate = useNavigate();
   const studentId = useParams().id;
   const query = new URLSearchParams(window.location.search);
   const subject = query.get("subject");
@@ -37,6 +23,7 @@ const StudentDetails = () => {
   const [loading, setLoading] = useState(true);
   const [studentDetails, setStudentDetails] =
     useState<StudentDetailsType | null>(null);
+  const [classesData, setClassesData] = useState<ClassData[]>([]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -45,12 +32,42 @@ const StudentDetails = () => {
       try {
         setLoading(true);
 
-        const response = await teacherService.getStudentDetails(
-          studentId,
-          subject
-        );
-        if (response && response.data) {
-          setStudentDetails(response.data);
+        const [classesResponse, studentResponse] = await Promise.all([
+          teacherService.getTeacherClasses(),
+          teacherService.getStudentDetails(studentId, subject),
+        ]);
+
+        if (studentResponse && studentResponse.data) {
+          setStudentDetails(studentResponse.data);
+        }
+
+        if (classesResponse.success && classesResponse.data) {
+          // only get the first 3 upcoming classes
+          const upcomingClasses = classesResponse.data.slice(0, 3);
+          setClassesData(
+            upcomingClasses.map((item) => {
+              const utcStartTime = getOriginalDateUTC(
+                item.date,
+                item.timeSlot.startTime
+              );
+              const utcEndTime = getOriginalDateUTC(
+                item.date,
+                item.timeSlot.endTime
+              );
+
+              return {
+                id: item.classId,
+                student: item.studentName,
+                subject: item.subject.replace(/^\w/, (c) => c.toUpperCase()),
+                date: formatDate(utcStartTime),
+                time: `${formatDisplayTime(
+                  getOriginalTimeUTC(utcStartTime)
+                )} - ${formatDisplayTime(getOriginalTimeUTC(utcEndTime))}`,
+                onJoinClass: () => console.log("Join class", item.classId),
+                onClick: () => navigate(`/teacher/classes/${item.classId}`),
+              };
+            })
+          );
         }
       } catch (error) {
         console.error("Error fetching student details:", error);
@@ -146,8 +163,17 @@ const StudentDetails = () => {
               </div>
             </div>
           </div>
-          <div className='flex flex-col justify-between gap-4 bg-white p-6 rounded-xl m-2 mt-6'>
-            <ClassesCards classes={upcomingClasses} title='Upcoming Classes' />
+          <div className='m-2 mt-6'>
+            <div className='mb-6 p-6 bg-white rounded-xl'>
+              <h2 className='text-2xl font-semibold text-textprimary mb-4'>
+                {"Upcoming Classes"}
+              </h2>
+              <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-3'>
+                {classesData.map((classData) => (
+                  <ClassCard key={classData.id} data={classData} />
+                ))}
+              </div>
+            </div>
           </div>
         </>
       ) : (

@@ -12,6 +12,8 @@ const Teachers = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [update, setUpdate] = useState(false);
   const [data, setData] = useState<any[]>([]);
+  const [originalData, setOriginalData] = useState<any[]>([]);
+  const [search, setSearch] = useState("");
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
@@ -50,6 +52,7 @@ const Teachers = () => {
         const response = await adminService.getAllTeachers(currentPage);
         if (response.data) {
           setData(response.data);
+          setOriginalData(response.data);
         }
         if (response.meta) setTotalPages(response.meta.pagination.totalPages);
       } catch (error) {
@@ -61,9 +64,30 @@ const Teachers = () => {
     fetchVerifications();
   }, [update]);
 
+  useEffect(() => {
+    if (search.trim() === "") {
+      setData(originalData);
+      return;
+    }
+    const filteredData = originalData.filter(
+      (student) =>
+        student.fullName.toLowerCase().includes(search.toLowerCase()) ||
+        student.email.toLowerCase().includes(search.toLowerCase()) ||
+        student.mobileNumber.toLowerCase().includes(search.toLowerCase()) ||
+        student.subjects.some((subject: string) =>
+          subject.toLowerCase().includes(search.toLowerCase())
+        )
+    );
+    setData(filteredData);
+  }, [search]);
+
   return (
     <div className='px-8 py-6'>
-      <CustomHeader title='Teachers' />
+      <CustomHeader
+        title='Teachers'
+        searchValue={search}
+        onSearchChange={setSearch}
+      />
 
       <CustomDataTable
         columns={columns}

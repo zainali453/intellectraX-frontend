@@ -82,6 +82,7 @@ const Classes = () => {
                 )} - ${formatDisplayTime(getOriginalTimeUTC(utcEndTime))}`,
                 onJoinClass: () => console.log("Join class", item.classId),
                 onClick: () => navigate(`/teacher/classes/${item.classId}`),
+                status: item.acceptedByStudent ? "Accepted" : "Pending",
               };
             })
           );

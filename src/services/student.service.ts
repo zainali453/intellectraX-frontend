@@ -16,6 +16,20 @@ export interface Teacher {
   rating: number;
 }
 
+export interface TimeSlot {
+  startTime: string;
+  endTime: string;
+}
+
+export interface ClassDataForCards {
+  classId: string;
+  teacherId: string;
+  teacherName: string;
+  subject: string;
+  date: string;
+  timeSlot: TimeSlot;
+}
+
 export interface TeacherDetails {
   profilePic: string;
   fullName: string;
@@ -23,10 +37,26 @@ export interface TeacherDetails {
   subjects: string[];
 }
 
+interface ClassDataForDetailsPage {
+  classId: string;
+  teacherId: string;
+  teacherName: string;
+  subject: string;
+  date: string;
+  timeSlot: TimeSlot;
+  description: string;
+  acceptedByStudent: boolean;
+}
+
 interface successResponseWithData<T> {
   success: boolean;
   message: string;
   data: T;
+}
+
+interface successResponseWithoutData {
+  success: boolean;
+  message: string;
 }
 // Teacher Service Class
 class StudentService {
@@ -66,6 +96,62 @@ class StudentService {
       console.error("Error fetching teacher details:", error);
       throw new Error(
         error.response?.data?.message || "Failed to fetch teacher details"
+      );
+    }
+  }
+  async getStudentClasses() {
+    try {
+      const response = await apiClient.get<
+        successResponseWithData<{
+          classes: ClassDataForCards[];
+          classRequests: number;
+        }>
+      >(`student/classes`);
+      return response.data;
+    } catch (error: any) {
+      console.error("Error fetching classes data:", error);
+      throw new Error(
+        error.response?.data?.message || "Failed to fetch classes data"
+      );
+    }
+  }
+  async getStudentClassDetails(classId: string) {
+    try {
+      const response = await apiClient.get<
+        successResponseWithData<ClassDataForDetailsPage>
+      >(`student/classes/${classId}`);
+      return response.data;
+    } catch (error: any) {
+      console.error("Error fetching class details:", error);
+      throw new Error(
+        error.response?.data?.message || "Failed to fetch class details"
+      );
+    }
+  }
+  async getStudentClassRequests() {
+    try {
+      const response = await apiClient.get<
+        successResponseWithData<ClassDataForCards[]>
+      >(`student/classrequests`);
+      return response.data;
+    } catch (error: any) {
+      console.error("Error fetching classes data:", error);
+      throw new Error(
+        error.response?.data?.message || "Failed to fetch classes data"
+      );
+    }
+  }
+  async setStudentClassAcceptance(classId: string, accepted: boolean) {
+    try {
+      const response = await apiClient.post<successResponseWithoutData>(
+        `student/classrequests/${classId}`,
+        { accepted }
+      );
+      return response.data;
+    } catch (error: any) {
+      console.error("Error fetching classes data:", error);
+      throw new Error(
+        error.response?.data?.message || "Failed to fetch classes data"
       );
     }
   }

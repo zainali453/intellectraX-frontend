@@ -4,6 +4,12 @@ import CustomPagination from "@/components/CustomPagination";
 import { useEffect, useState } from "react";
 import { adminService } from "@/services/admin.service";
 import { useNavigate } from "react-router-dom";
+import {
+  formatDate,
+  formatDisplayTime,
+  getOriginalDateUTC,
+  getOriginalTimeUTC,
+} from "@/services/teacher.service";
 
 const Teachers = () => {
   const navigate = useNavigate();
@@ -21,38 +27,57 @@ const Teachers = () => {
   };
 
   const columns = [
-    { key: "fullName", title: "Student Name" },
     {
-      key: "email",
-      title: "Email",
+      key: "subject",
+      title: "Class",
       render: (value: string) => (
-        <span className='text-[#4A6CF7]'>{value}</span>
+        <span>{value.replace(/^\w/, (c) => c.toUpperCase())}</span>
       ),
     },
-    { key: "mobileNumber", title: "Contact Number" },
     {
-      key: "subjects",
-      title: "Subjects",
-      render: (subjects: string[]) => (
-        <div className='flex flex-row gap-1'>
-          {subjects?.map((subject) => (
-            <div key={subject} className='px-2 py-1 bg-[#F5F7FA] rounded-md'>
-              <span className='text-[#5C6AC4]'>{subject}</span>
-            </div>
-          ))}
-        </div>
-      ),
+      key: "date",
+      title: "Date",
+      render: (value: string) => <span>{value}</span>,
     },
+    {
+      key: "time",
+      title: "Time",
+      render: (value: string) => <span>{value}</span>,
+    },
+    { key: "teacher", title: "Teacher Name" },
+    { key: "student", title: "Student Name" },
   ];
 
   useEffect(() => {
     const fetchVerifications = async () => {
       setLoading(true);
       try {
-        const response = await adminService.getAllStudents(currentPage);
+        const response = await adminService.getAllClasses(currentPage);
         if (response.data) {
-          setData(response.data);
-          setOriginalData(response.data);
+          const processedData = response.data.map((item: any) => {
+            const utcStartTime = getOriginalDateUTC(
+              item.date,
+              item.timeSlot.startTime
+            );
+            const utcEndTime = getOriginalDateUTC(
+              item.date,
+              item.timeSlot.endTime
+            );
+
+            return {
+              classId: item._id,
+              subject: item.subject.replace(/^\w/, (c) => c.toUpperCase()),
+              date: formatDate(utcStartTime),
+              time: `${formatDisplayTime(
+                getOriginalTimeUTC(utcStartTime)
+              )} - ${formatDisplayTime(getOriginalTimeUTC(utcEndTime))}`,
+              student: item.studentName,
+              teacher: item.teacherName,
+            };
+          });
+
+          setData(processedData);
+          setOriginalData(processedData);
         }
         if (response.meta) setTotalPages(response.meta.pagination.totalPages);
       } catch (error) {
@@ -72,12 +97,11 @@ const Teachers = () => {
     }
     const filteredData = originalData.filter(
       (student) =>
-        student.fullName.toLowerCase().includes(search.toLowerCase()) ||
-        student.email.toLowerCase().includes(search.toLowerCase()) ||
-        student.mobileNumber.toLowerCase().includes(search.toLowerCase()) ||
-        student.subjects.some((subject: string) =>
-          subject.toLowerCase().includes(search.toLowerCase())
-        )
+        student.subject.toLowerCase().includes(search.toLowerCase()) ||
+        student.date.toLowerCase().includes(search.toLowerCase()) ||
+        student.time.toLowerCase().includes(search.toLowerCase()) ||
+        student.student.toLowerCase().includes(search.toLowerCase()) ||
+        student.teacher.toLowerCase().includes(search.toLowerCase())
     );
     setData(filteredData);
   }, [search]);
@@ -85,7 +109,7 @@ const Teachers = () => {
   return (
     <div className='px-8 py-6'>
       <CustomHeader
-        title='Students'
+        title='Classes'
         searchValue={search}
         onSearchChange={setSearch}
       />
@@ -94,7 +118,7 @@ const Teachers = () => {
         columns={columns}
         data={data}
         loading={loading}
-        onRowClick={(row) => navigate(`/admin/students/${row.studentId}`)}
+        onRowClick={(row) => navigate(`/admin/classes/${row.classId}`)}
       />
 
       <div className='mt-4'>

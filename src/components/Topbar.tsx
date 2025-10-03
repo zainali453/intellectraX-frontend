@@ -111,7 +111,7 @@ export default function Topbar({ main = false }: { main?: boolean }) {
                   </div>
                   <div className='flex-1'>
                     <p className='font-medium text-gray-800'>
-                      {profileData || user?.email?.split("@")[0] || "User"}
+                      {user?.fullName || "User"}
                     </p>
                     <p className='text-sm text-gray-500'>
                       {user?.email || "No email"}

@@ -87,6 +87,7 @@ export interface ClassDataForCards {
   subject: string;
   date: string;
   timeSlot: TimeSlot;
+  acceptedByStudent: boolean;
 }
 
 interface ClassDataForDetailsPage {

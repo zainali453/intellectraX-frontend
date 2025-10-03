@@ -19,7 +19,7 @@ const CustomHeader: React.FC<CustomHeaderProps> = ({
     <div className='flex justify-between items-center mb-4'>
       <h1 className='text-3xl font-semibold text-textprimary'>{title}</h1>
 
-      {searchValue && onSearchChange && (
+      {onSearchChange && (
         <div className='flex items-center gap-4'>
           {/* Search Input */}
           <div className='relative'>
@@ -46,9 +46,10 @@ const CustomHeader: React.FC<CustomHeaderProps> = ({
               className='block w-64 pl-10 pr-3 py-2 border border-gray-300 rounded-full leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-bgprimary focus:border-bgprimary sm:text-sm'
             />
           </div>
-
-          {/* Date Range Selector */}
-          <div className='flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-md bg-white'>
+        </div>
+      )}
+      {/* Date Range Selector */}
+      {/* <div className='flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-md bg-white'>
             <svg
               className='h-5 w-5 text-bgprimary'
               fill='none'
@@ -65,9 +66,7 @@ const CustomHeader: React.FC<CustomHeaderProps> = ({
             <span className='text-bgprimary font-medium cursor-pointer'>
               Select Date Range
             </span>
-          </div>
-        </div>
-      )}
+          </div> */}
     </div>
   );
 };

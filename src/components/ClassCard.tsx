@@ -7,7 +7,10 @@ export interface ClassData {
   date: string;
   time: string;
   onJoinClass?: () => void;
+  onAcceptence?: (accepted: boolean) => void;
   onClick?: () => void;
+  isTeacher?: boolean;
+  status?: string;
 }
 
 interface ClassCardProps {
@@ -46,7 +49,9 @@ const ClassCard: React.FC<ClassCardProps> = ({ data }) => {
         </div>
 
         <div className='flex items-center text-sm'>
-          <span className='text-gray-500 font-medium'>Student:</span>
+          <span className='text-gray-500 font-medium'>
+            {data.isTeacher ? "Teacher:" : "Student:"}
+          </span>
           <span className='ml-2 text-gray-800'>{data.student}</span>
         </div>
 
@@ -59,15 +64,52 @@ const ClassCard: React.FC<ClassCardProps> = ({ data }) => {
           <span className='text-gray-500 font-medium'>Time:</span>
           <span className='ml-2 text-gray-800'>{data.time}</span>
         </div>
+        {data.status && (
+          <div className='flex items-center text-sm'>
+            <span className='text-gray-500 font-medium'>Status:</span>
+            <span
+              className={`ml-2 ${
+                data.status === "Accepted"
+                  ? "text-green-600"
+                  : "text-yellow-600"
+              }`}
+            >
+              {data.status}
+            </span>
+          </div>
+        )}
       </div>
 
       {/* Join Class Button */}
-      <button
-        onClick={data.onJoinClass}
-        className='w-full bg-transparent border border-bgprimary text-bgprimary py-2.5 px-4 rounded-full font-medium text-sm hover:bg-teal-50 transition-colors duration-200'
-      >
-        Join Class
-      </button>
+      {data.onJoinClass ? (
+        <button
+          onClick={data.onJoinClass}
+          className='w-full bg-transparent border border-bgprimary text-bgprimary py-2.5 px-4 rounded-full font-medium text-sm hover:bg-teal-50 transition-colors duration-200'
+        >
+          Join Class
+        </button>
+      ) : (
+        data.onAcceptence && (
+          <div className='grid grid-cols-2 gap-2'>
+            <button
+              onClick={() => {
+                data.onAcceptence && data.onAcceptence(true);
+              }}
+              className='w-full border-bgprimary border text-bgprimary hover:text-white py-2.5 px-4 rounded-full font-medium text-sm hover:bg-teal-600 transition-colors duration-200'
+            >
+              Accept
+            </button>
+            <button
+              onClick={() => {
+                data.onAcceptence && data.onAcceptence(false);
+              }}
+              className='w-full border-[#D94141] border text-[#D94141] hover:text-white py-2.5 px-4 rounded-full font-medium text-sm hover:bg-[#D94141] transition-colors duration-200'
+            >
+              Reject
+            </button>
+          </div>
+        )
+      )}
     </div>
   );
 };

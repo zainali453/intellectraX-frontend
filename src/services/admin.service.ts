@@ -289,5 +289,44 @@ class AdminService {
       );
     }
   }
+  async getAllClasses(currentPage: number) {
+    try {
+      const response = await apiClient.get<{
+        success: boolean;
+        message: string;
+        data: {}[];
+        meta: { pagination: { totalPages: number } };
+      }>(`admin/classes?page=${currentPage}`);
+      return response.data;
+    } catch (error: any) {
+      console.error("Error fetching classes:", error);
+      throw new Error(
+        error.response?.data?.message || "Failed to fetch classes"
+      );
+    }
+  }
+  async getClassById(classId: string) {
+    try {
+      const response = await apiClient.get<{
+        success: boolean;
+        message: string;
+        data: {
+          _id: string;
+          teacherName: string;
+          subject: string;
+          date: string;
+          timeSlot: { startTime: string; endTime: string };
+          description: string;
+          acceptedByStudent: boolean | null;
+          studentName: string;
+          mobileNumber: string;
+        };
+      }>(`admin/classes/${classId}`);
+      return response.data;
+    } catch (error: any) {
+      console.error("Error fetching class:", error);
+      throw new Error(error.response?.data?.message || "Failed to fetch class");
+    }
+  }
 }
 export const adminService = new AdminService();
