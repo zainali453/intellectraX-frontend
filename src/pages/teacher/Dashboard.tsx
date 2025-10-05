@@ -104,28 +104,30 @@ const DashMain = ({ title }) => {
           // only get the first 3 upcoming classes
           const upcomingClasses = classesResponse.data.slice(0, 3);
           setClassesData(
-            upcomingClasses.map((item) => {
-              const utcStartTime = getOriginalDateUTC(
-                item.date,
-                item.timeSlot.startTime
-              );
-              const utcEndTime = getOriginalDateUTC(
-                item.date,
-                item.timeSlot.endTime
-              );
+            upcomingClasses
+              .filter((item) => item.acceptedByStudent === true)
+              .map((item) => {
+                const utcStartTime = getOriginalDateUTC(
+                  item.date,
+                  item.timeSlot.startTime
+                );
+                const utcEndTime = getOriginalDateUTC(
+                  item.date,
+                  item.timeSlot.endTime
+                );
 
-              return {
-                id: item.classId,
-                student: item.studentName,
-                subject: item.subject.replace(/^\w/, (c) => c.toUpperCase()),
-                date: formatDate(utcStartTime),
-                time: `${formatDisplayTime(
-                  getOriginalTimeUTC(utcStartTime)
-                )} - ${formatDisplayTime(getOriginalTimeUTC(utcEndTime))}`,
-                onJoinClass: () => console.log("Join class", item.classId),
-                onClick: () => navigate(`/teacher/classes/${item.classId}`),
-              };
-            })
+                return {
+                  id: item.classId,
+                  student: item.studentName,
+                  subject: item.subject.replace(/^\w/, (c) => c.toUpperCase()),
+                  date: formatDate(utcStartTime),
+                  time: `${formatDisplayTime(
+                    getOriginalTimeUTC(utcStartTime)
+                  )} - ${formatDisplayTime(getOriginalTimeUTC(utcEndTime))}`,
+                  onJoinClass: () => console.log("Join class", item.classId),
+                  onClick: () => navigate(`/teacher/classes/${item.classId}`),
+                };
+              })
           );
         }
       } catch (error) {
@@ -192,16 +194,18 @@ const DashMain = ({ title }) => {
             ))}
           </div>
           <div className=''>
-            <div className='mb-6 p-6 bg-white rounded-3xl'>
-              <h2 className='text-2xl font-semibold text-textprimary mb-4'>
-                {"Upcoming Classes"}
-              </h2>
-              <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-3'>
-                {classesData.map((classData) => (
-                  <ClassCard key={classData.id} data={classData} />
-                ))}
+            {classesData && classesData.length > 0 && (
+              <div className='mb-6 p-6 bg-white rounded-3xl'>
+                <h2 className='text-2xl font-semibold text-textprimary mb-4'>
+                  {"Upcoming Classes"}
+                </h2>
+                <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-3'>
+                  {classesData.map((classData) => (
+                    <ClassCard key={classData.id} data={classData} />
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
             <div className='mb-6 p-6 bg-white rounded-3xl'>
               <CustomChart
                 data={performanceData}

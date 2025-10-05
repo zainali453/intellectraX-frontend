@@ -33,6 +33,8 @@ import add from "../assets/icons/add.png";
 import studentStar from "../assets/icons/studentStar.png";
 import calender from "../assets/icons/calendar.png";
 import clock from "../assets/icons/clock.png";
+import openBookFilled from "../assets/icons/openBookFilled.png";
+import attachmentDoc from "../assets/icons/attachmentDoc.png";
 
 import dashboardActive from "../assets/icons/dashboardActive.png";
 import assignmentsActive from "../assets/icons/assignmentsActive.png";
@@ -85,6 +87,8 @@ const ICONS = {
   studentStar,
   calender,
   clock,
+  openBookFilled,
+  attachmentDoc,
 
   dashboardActive,
   assignmentsActive,

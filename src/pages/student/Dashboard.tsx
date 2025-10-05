@@ -189,16 +189,18 @@ const DashMain = ({ title }) => {
             </div>
           ) : (
             <div className=''>
-              <div className='mb-6 p-6 bg-white rounded-3xl'>
-                <h2 className='text-2xl font-semibold text-textprimary mb-4'>
-                  {"Upcoming Classes"}
-                </h2>
-                <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-3'>
-                  {classesData.map((classData) => (
-                    <ClassCard key={classData.id} data={classData} />
-                  ))}
+              {classesData && classesData.length > 0 && (
+                <div className='mb-6 p-6 bg-white rounded-3xl'>
+                  <h2 className='text-2xl font-semibold text-textprimary mb-4'>
+                    {"Upcoming Classes"}
+                  </h2>
+                  <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-3'>
+                    {classesData.map((classData) => (
+                      <ClassCard key={classData.id} data={classData} />
+                    ))}
+                  </div>
                 </div>
-              </div>
+              )}
               <div className='mb-6 p-6 bg-white rounded-3xl'>
                 <CustomChart
                   data={performanceData}

@@ -31,6 +31,10 @@ import TeacherStudents from "./pages/teacher/Students";
 import TeacherStudentDetails from "./pages/teacher/StudentDetails";
 import TeacherClasses from "./pages/teacher/Classes";
 import TeacherClassDetails from "./pages/teacher/ClassDetails";
+import TeacherAssignments from "./pages/teacher/Assignments";
+import TeacherAssignmentDetails from "./pages/teacher/AssignmentDetails";
+import TeacherQuizzes from "./pages/teacher/Quizzes";
+import TeacherQuizDetails from "./pages/teacher/QuizDetails";
 
 // student
 import StudentDashboard from "./pages/student/Dashboard";
@@ -38,6 +42,10 @@ import StudentTeachers from "./pages/student/Teachers";
 import StudentTeacherDetails from "./pages/student/TeacherDetails";
 import StudentClasses from "./pages/student/Classes";
 import StudentClassDetails from "./pages/student/ClassDetails";
+import StudentAssignments from "./pages/student/Assignments";
+import StudentAssignmentDetails from "./pages/student/AssignmentDetails";
+import StudentQuizzes from "./pages/student/Quizzes";
+import StudentQuizDetails from "./pages/student/QuizDetails";
 
 function App() {
   return (
@@ -138,6 +146,13 @@ function App() {
           <Route path='students/:id' element={<TeacherStudentDetails />} />
           <Route path='classes' element={<TeacherClasses />} />
           <Route path='classes/:id' element={<TeacherClassDetails />} />
+          <Route path='assignments' element={<TeacherAssignments />} />
+          <Route
+            path='assignments/:id'
+            element={<TeacherAssignmentDetails />}
+          />
+          <Route path='quizzes' element={<TeacherQuizzes />} />
+          <Route path='quizzes/:id' element={<TeacherQuizDetails />} />
 
           <Route path='*' element={<div>404 Not Found</div>} />
         </Route>
@@ -160,6 +175,13 @@ function App() {
           <Route path='teachers/:id' element={<StudentTeacherDetails />} />
           <Route path='classes' element={<StudentClasses />} />
           <Route path='classes/:id' element={<StudentClassDetails />} />
+          <Route path='assignments' element={<StudentAssignments />} />
+          <Route
+            path='assignments/:id'
+            element={<StudentAssignmentDetails />}
+          />
+          <Route path='quizzes' element={<StudentQuizzes />} />
+          <Route path='quizzes/:id' element={<StudentQuizDetails />} />
           <Route path='*' element={<div>404 Not Found</div>} />
         </Route>
 
