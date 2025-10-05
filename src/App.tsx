@@ -24,6 +24,10 @@ import AdminStudents from "./pages/admin/Students";
 import AdminStudentDetails from "./pages/admin/StudentDetails";
 import AdminClasses from "./pages/admin/Classes";
 import AdminClassDetails from "./pages/admin/ClassDetails";
+import AdminAssignments from "./pages/admin/Assignments";
+import AdminAssignmentDetails from "./pages/admin/AssignmentDetails";
+import AdminQuizzes from "./pages/admin/Quizzes";
+import AdminQuizDetails from "./pages/admin/QuizDetails";
 
 // teacher
 import TeacherDashboard from "./pages/teacher/Dashboard";
@@ -211,6 +215,11 @@ function App() {
           <Route path='teachers/:id' element={<VerificationsTeacherDetail />} />
           <Route path='classes' element={<AdminClasses />} />
           <Route path='classes/:id' element={<AdminClassDetails />} />
+          <Route path='assignments' element={<AdminAssignments />} />
+          <Route path='assignments/:id' element={<AdminAssignmentDetails />} />
+          <Route path='quizzes' element={<AdminQuizzes />} />
+          <Route path='quizzes/:id' element={<AdminQuizDetails />} />
+
           <Route path='*' element={<div>404 Not Found</div>} />
         </Route>
 

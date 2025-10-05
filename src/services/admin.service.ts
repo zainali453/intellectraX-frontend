@@ -100,6 +100,29 @@ interface VerificationResponse {
   data?: any;
 }
 
+interface AssignmentData {
+  _id: string;
+  title: string;
+  subject: string;
+  teacherName: string;
+  studentName: string;
+  dueDate: string;
+  isCompleted: boolean;
+  isSubmitted: boolean;
+  createdAt: string;
+}
+export interface QuizDataForCards {
+  _id: string;
+  teacherName: string;
+  studentName: string;
+  subject: string;
+  title: string;
+  dueDate: string;
+  isCompleted: boolean;
+  isSubmitted: boolean;
+  startTime: string;
+  endTime: string;
+}
 // Admin Service Class
 class AdminService {
   async getTeachers(
@@ -326,6 +349,104 @@ class AdminService {
     } catch (error: any) {
       console.error("Error fetching class:", error);
       throw new Error(error.response?.data?.message || "Failed to fetch class");
+    }
+  }
+
+  async getAssignments() {
+    try {
+      const response = await apiClient.get<{
+        success: boolean;
+        message: string;
+        data: AssignmentData[];
+      }>("admin/assignments");
+      return response.data;
+    } catch (error: any) {
+      console.error("Error fetching assignments:", error);
+      throw new Error(
+        error.response?.data?.message || "Failed to fetch assignments"
+      );
+    }
+  }
+
+  async getAssignmentById(assignmentId: string) {
+    try {
+      const response = await apiClient.get<{
+        success: boolean;
+        message: string;
+        data: {
+          _id: string;
+          teacherName: string;
+          subject: string;
+          title: string;
+          dueDate: string;
+          createdAt: string;
+          instructions: string;
+          isCompleted: boolean;
+          attachment: string;
+          isMarked: boolean;
+          marks: number;
+          grade: string;
+          teacherComments: string;
+          submissionDate: string;
+          submissionAttachment: string;
+          studentName: string;
+          isSubmitted: boolean;
+        };
+      }>(`admin/assignments/${assignmentId}`);
+      return response.data;
+    } catch (error: any) {
+      console.error("Error fetching assignment:", error);
+      throw new Error(
+        error.response?.data?.message || "Failed to fetch assignment"
+      );
+    }
+  }
+
+  async getQuizzes() {
+    try {
+      const response = await apiClient.get<{
+        success: boolean;
+        message: string;
+        data: QuizDataForCards[];
+      }>("admin/quizzes");
+      return response.data;
+    } catch (error: any) {
+      console.error("Error fetching quizzes:", error);
+      throw new Error(
+        error.response?.data?.message || "Failed to fetch quizzes"
+      );
+    }
+  }
+  async getQuizById(quizId: string) {
+    try {
+      const response = await apiClient.get<{
+        success: boolean;
+        message: string;
+        data: {
+          _id: string;
+          teacherName: string;
+          subject: string;
+          title: string;
+          dueDate: string;
+          startTime: string;
+          endTime: string;
+          instructions: string;
+          isCompleted: boolean;
+          attachment: string;
+          isMarked: boolean;
+          marks: number;
+          grade: string;
+          teacherComments: string;
+          submissionDate: string;
+          submissionAttachment: string;
+          studentName: string;
+          isSubmitted: boolean;
+        };
+      }>(`admin/quizzes/${quizId}`);
+      return response.data;
+    } catch (error: any) {
+      console.error("Error fetching quiz:", error);
+      throw new Error(error.response?.data?.message || "Failed to fetch quiz");
     }
   }
 }
