@@ -12,8 +12,6 @@ import {
 import { useEffect, useState } from "react";
 import CustomChart from "@/components/CustomChart";
 import ClassCard, { ClassData } from "@/components/ClassCard";
-import english from "../../assets/subjects/english.png";
-import mathematics from "../../assets/subjects/mathematics.png";
 import { useNavigate } from "react-router-dom";
 
 const statCardsData = [
@@ -102,32 +100,32 @@ const DashMain = ({ title }) => {
 
         if (classesResponse.success && classesResponse.data) {
           // only get the first 3 upcoming classes
-          const upcomingClasses = classesResponse.data.slice(0, 3);
+          const upcomingClasses = classesResponse.data
+            .filter((item) => item.acceptedByStudent === true)
+            .slice(0, 3);
           setClassesData(
-            upcomingClasses
-              .filter((item) => item.acceptedByStudent === true)
-              .map((item) => {
-                const utcStartTime = getOriginalDateUTC(
-                  item.date,
-                  item.timeSlot.startTime
-                );
-                const utcEndTime = getOriginalDateUTC(
-                  item.date,
-                  item.timeSlot.endTime
-                );
+            upcomingClasses.map((item) => {
+              const utcStartTime = getOriginalDateUTC(
+                item.date,
+                item.timeSlot.startTime
+              );
+              const utcEndTime = getOriginalDateUTC(
+                item.date,
+                item.timeSlot.endTime
+              );
 
-                return {
-                  id: item.classId,
-                  student: item.studentName,
-                  subject: item.subject.replace(/^\w/, (c) => c.toUpperCase()),
-                  date: formatDate(utcStartTime),
-                  time: `${formatDisplayTime(
-                    getOriginalTimeUTC(utcStartTime)
-                  )} - ${formatDisplayTime(getOriginalTimeUTC(utcEndTime))}`,
-                  onJoinClass: () => console.log("Join class", item.classId),
-                  onClick: () => navigate(`/teacher/classes/${item.classId}`),
-                };
-              })
+              return {
+                id: item.classId,
+                student: item.studentName,
+                subject: item.subject.replace(/^\w/, (c) => c.toUpperCase()),
+                date: formatDate(utcStartTime),
+                time: `${formatDisplayTime(
+                  getOriginalTimeUTC(utcStartTime)
+                )} - ${formatDisplayTime(getOriginalTimeUTC(utcEndTime))}`,
+                onJoinClass: () => console.log("Join class", item.classId),
+                onClick: () => navigate(`/teacher/classes/${item.classId}`),
+              };
+            })
           );
         }
       } catch (error) {

@@ -65,15 +65,22 @@ const ConfirmClassEnrollmentModal = ({
 
           {/* Credit Deduction Info */}
           <div className='mb-8 text-textprimary leading-relaxed'>
-            <p>
-              Accepting this class will deduct{" "}
-              <span className='font-bold text-gray-700'>1 credit</span> from
-              your available credits. After confirmation, you will have{" "}
-              <span className='font-bold text-gray-700'>
-                {creditsAfterEnrollment} credits
-              </span>{" "}
-              remaining.
-            </p>
+            {creditsAfterEnrollment >= 0 ? (
+              <p>
+                Accepting this class will deduct{" "}
+                <span className='font-bold text-gray-700'>1 credit</span> from
+                your available credits. After confirmation, you will have{" "}
+                <span className='font-bold text-gray-700'>
+                  {creditsAfterEnrollment} credits
+                </span>{" "}
+                remaining.
+              </p>
+            ) : (
+              <p>
+                You do not have enough credits to enroll in this class. Please
+                top up your credits to proceed.
+              </p>
+            )}
           </div>
 
           {/* Class Details */}

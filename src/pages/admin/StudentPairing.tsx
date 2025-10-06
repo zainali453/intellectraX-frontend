@@ -32,6 +32,7 @@ const StudentPairing = () => {
   const [teachers, setTeachers] = useState<Teacher[]>([]);
   const [students, setStudents] = useState<Student[]>([]);
   const [subjects, setSubjects] = useState<string[]>([]);
+  const [alreadyPaired, setAlreadyPaired] = useState(false);
 
   // Loading states for different data
   const [isLoadingTeachersAndStudents, setIsLoadingTeachersAndStudents] =
@@ -90,6 +91,9 @@ const StudentPairing = () => {
           response.data.pairedSubjects.length > 0
         ) {
           setSelectedSubject(response.data.pairedSubjects);
+          setAlreadyPaired(true);
+        } else {
+          setAlreadyPaired(false);
         }
         setSubjects(response.data.subjects);
       }
@@ -111,7 +115,11 @@ const StudentPairing = () => {
   }, [selectedTeacher, selectedStudent]);
 
   const handleAssignTeacher = async () => {
-    if (!selectedTeacher || !selectedStudent || selectedSubject.length === 0) {
+    if (
+      !selectedTeacher ||
+      !selectedStudent ||
+      (selectedSubject.length === 0 && !alreadyPaired)
+    ) {
       alert(
         "Please select teacher, student, and at least one subject before assigning."
       );
@@ -119,7 +127,8 @@ const StudentPairing = () => {
     }
 
     // Show confirmation step instead of directly calling API
-    setShowConfirmation(true);
+    if (!alreadyPaired) setShowConfirmation(true);
+    else handleConfirmAssignment();
   };
 
   const handleConfirmAssignment = async () => {
@@ -130,7 +139,8 @@ const StudentPairing = () => {
       const response = await adminService.assignTeacherToStudent(
         selectedTeacher,
         selectedStudent,
-        selectedSubject
+        selectedSubject,
+        alreadyPaired
       );
 
       if (response.success) {
@@ -242,14 +252,18 @@ const StudentPairing = () => {
                   isLoadingSubjects ||
                   !selectedTeacher ||
                   !selectedStudent ||
-                  selectedSubject.length === 0
+                  (selectedSubject.length === 0 && !alreadyPaired)
                 }
                 className='px-6 py-3 bg-bgprimary text-white rounded-lg hover:bg-bgprimary/90 transition-colors duration-200 font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2'
               >
                 {isLoading && (
                   <div className='animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent'></div>
                 )}
-                {isLoading ? "Assigning..." : "Assign Teacher"}
+                {isLoading
+                  ? "Assigning..."
+                  : alreadyPaired
+                  ? "Update Assigning"
+                  : "Assign Teacher"}
               </button>
             </div>
           </div>

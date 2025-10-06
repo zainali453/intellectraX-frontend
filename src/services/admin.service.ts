@@ -248,14 +248,18 @@ class AdminService {
   async assignTeacherToStudent(
     teacherId: string,
     studentId: string,
-    subjects: string[]
+    subjects: string[],
+    alreadyPaired: boolean
   ) {
     try {
-      const response = await apiClient.post(`admin/pairing`, {
-        teacherId,
-        studentId,
-        subjects,
-      });
+      const response = await apiClient.post(
+        `admin/pairing?update=${alreadyPaired}`,
+        {
+          teacherId,
+          studentId,
+          subjects,
+        }
+      );
       return response.data;
     } catch (error: any) {
       console.error("Error assigning teacher to student:", error);

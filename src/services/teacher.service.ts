@@ -190,6 +190,7 @@ export interface ClassDataForCards {
   date: string;
   timeSlot: TimeSlot;
   acceptedByStudent: boolean;
+  rejectedByStudent: boolean;
 }
 
 interface ClassDataForDetailsPage {

@@ -107,7 +107,7 @@ const Assignments = () => {
       ></TeacherCustomHeader>
 
       <div className='bg-white rounded-2xl p-6'>
-        <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-3 gap-20'>
+        <div className='grid grid-cols-1 sm:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 3xl:grid-cols-4 gap-4 px-10 pb-6'>
           {loading && (
             <div className='flex justify-center items-center col-span-full py-12 h-80'>
               <LoadingSpinner size='lg' />

@@ -71,6 +71,8 @@ const ClassCard: React.FC<ClassCardProps> = ({ data }) => {
               className={`ml-2 ${
                 data.status === "Accepted"
                   ? "text-green-600"
+                  : data.status === "Rejected"
+                  ? "text-red-600"
                   : "text-yellow-600"
               }`}
             >
