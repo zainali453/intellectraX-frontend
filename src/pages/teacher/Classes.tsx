@@ -151,7 +151,7 @@ const Classes = () => {
       </TeacherCustomHeader>
 
       <div className='bg-white p-6 rounded-2xl'>
-        <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6'>
+      <div className={`flex gap-2 flex-wrap ${loading ? " justify-center" : ""}`}>
           {loading && (
             <div className='flex justify-center items-center col-span-full py-12 h-80'>
               <LoadingSpinner size='lg' />

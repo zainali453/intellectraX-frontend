@@ -14,13 +14,13 @@ const TeacherCard: React.FC<TeacherCardProps> = ({
   onSendMessage,
 }) => {
   return (
-    <div className='bg-white rounded-2xl p-5 shadow-sm border border-gray-100  transition-shadow duration-200 max-w-[280px]'>
+    <div className='rounded-2xl p-4 shadow-sm border border-gray-100 max-w-[280px]'>
       {/* Student Profile Image */}
       <div className='mb-4 cursor-pointer' onClick={onClick}>
         <img
           src={teacher.profilePic}
           alt={teacher.fullName}
-          className='w-full h-32 object-cover rounded-xl'
+          className='w-full h-32 object-cover object-top rounded-xl'
         />
       </div>
 

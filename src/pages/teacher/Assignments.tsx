@@ -176,7 +176,7 @@ const Assignments = () => {
             ))}
           </nav>
         </div>
-        <div className='grid grid-cols-1 sm:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 3xl:grid-cols-4 gap-4 px-10'>
+        <div className={`flex gap-2 flex-wrap pb-2 pl-2 ${loading ? " justify-center" : ""}`}>
           {loading && (
             <div className='flex justify-center items-center col-span-full py-12 h-80'>
               <LoadingSpinner size='lg' />
