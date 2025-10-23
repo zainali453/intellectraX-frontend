@@ -32,6 +32,47 @@ const UpcomingClasses = ({ setUpcomingClasses }) => {
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [classRequests, setClassRequests] = useState(0);
+  const [meetingWindows, setMeetingWindows] = useState<
+    Map<string, Window | null>
+  >(new Map());
+
+  const handleJoinClass = (
+    classId: string,
+    utcStartTime: Date,
+    utcEndTime: Date
+  ) => {
+    if (!classId) return;
+
+    const isClassOver = utcEndTime <= new Date();
+    const isClassStarted = utcStartTime <= new Date();
+
+    if (!isClassStarted) {
+      alert("Class has not started yet");
+      return;
+    } else if (isClassOver) {
+      alert("Class has ended");
+      return;
+    }
+    const existingWindow = meetingWindows.get(classId);
+
+    // Check if window exists and is not closed
+    if (existingWindow && !existingWindow.closed) {
+      // Focus on existing window instead of opening new one
+      existingWindow.focus();
+      return;
+    }
+
+    // Open new window
+    const newWindow = window.open(
+      `/student/meeting/${classId}`,
+      `meeting-${classId}` // Named window - same name will reuse the window
+    );
+
+    // Store reference
+    if (newWindow) {
+      setMeetingWindows((prev) => new Map(prev).set(classId, newWindow));
+    }
+  };
 
   useEffect(() => {
     const fetchClasses = async () => {
@@ -49,7 +90,6 @@ const UpcomingClasses = ({ setUpcomingClasses }) => {
                 item.date,
                 item.timeSlot.endTime
               );
-
               return {
                 id: item.classId,
                 student: item.teacherName,
@@ -58,7 +98,8 @@ const UpcomingClasses = ({ setUpcomingClasses }) => {
                 time: `${formatDisplayTime(
                   getOriginalTimeUTC(utcStartTime)
                 )} - ${formatDisplayTime(getOriginalTimeUTC(utcEndTime))}`,
-                onJoinClass: () => console.log("Join class", item.classId),
+                onJoinClass: () =>
+                  handleJoinClass(item.classId, utcStartTime, utcEndTime),
                 onClick: () => navigate(`/student/classes/${item.classId}`),
                 isTeacher: true,
               };

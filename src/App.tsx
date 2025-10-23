@@ -40,6 +40,7 @@ import TeacherAssignmentDetails from "./pages/teacher/AssignmentDetails";
 import TeacherQuizzes from "./pages/teacher/Quizzes";
 import TeacherQuizDetails from "./pages/teacher/QuizDetails";
 import TeacherMessages from "./pages/teacher/Messages.tsx";
+import TeacherMeeting from "./pages/teacher/TeacherMeeting";
 
 // student
 import StudentDashboard from "./pages/student/Dashboard";
@@ -52,6 +53,7 @@ import StudentAssignmentDetails from "./pages/student/AssignmentDetails";
 import StudentQuizzes from "./pages/student/Quizzes";
 import StudentQuizDetails from "./pages/student/QuizDetails";
 import StudentMessages from "./pages/student/Messages.tsx";
+import StudentMeeting from "./pages/student/StudentMeeting";
 
 function App() {
   return (
@@ -165,6 +167,16 @@ function App() {
           <Route path='*' element={<div>404 Not Found</div>} />
         </Route>
 
+        {/* Teacher Meeting - Standalone (No Dashboard Layout) */}
+        <Route
+          path='/teacher/meeting/:classId'
+          element={
+            <AuthGuard requireAuth={true} requireTeacher={true}>
+              <TeacherMeeting />
+            </AuthGuard>
+          }
+        />
+
         {/* student Routes */}
         <Route
           path='/student'
@@ -194,6 +206,16 @@ function App() {
           <Route path='messages/:id' element={<StudentMessages />} />
           <Route path='*' element={<div>404 Not Found</div>} />
         </Route>
+
+        {/* Student Meeting - Standalone (No Dashboard Layout) */}
+        <Route
+          path='/student/meeting/:classId'
+          element={
+            <AuthGuard requireAuth={true} requireStudent={true}>
+              <StudentMeeting />
+            </AuthGuard>
+          }
+        />
 
         {/* admin Routes */}
         <Route

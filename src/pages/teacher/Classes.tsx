@@ -29,6 +29,9 @@ const Classes = () => {
   const [updating, setUpdating] = useState(false);
   const [refreshFlag, setRefreshFlag] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [meetingWindows, setMeetingWindows] = useState<
+    Map<string, Window | null>
+  >(new Map());
 
   const openCreateModal = () => {
     setIsModalOpen(true);
@@ -36,6 +39,45 @@ const Classes = () => {
 
   const closeModal = () => {
     setIsModalOpen(false);
+  };
+
+  const handleJoinClass = (
+    classId: string,
+    utcStartTime: Date,
+    utcEndTime: Date
+  ) => {
+    if (!classId) return;
+
+    const isClassOver = utcEndTime <= new Date();
+    const isClassStarted = utcStartTime <= new Date();
+
+    if (!isClassStarted) {
+      alert("Class has not started yet");
+      return;
+    } else if (isClassOver) {
+      alert("Class has ended");
+      return;
+    }
+
+    const existingWindow = meetingWindows.get(classId);
+
+    // Check if window exists and is not closed
+    if (existingWindow && !existingWindow.closed) {
+      // Focus on existing window instead of opening new one
+      existingWindow.focus();
+      return;
+    }
+
+    // Open new window
+    const newWindow = window.open(
+      `/teacher/meeting/${classId}`,
+      `meeting-${classId}` // Named window - same name will reuse the window
+    );
+
+    // Store reference
+    if (newWindow) {
+      setMeetingWindows((prev) => new Map(prev).set(classId, newWindow));
+    }
   };
 
   const handleSaveClass = async (classData: ClassData) => {
@@ -80,7 +122,10 @@ const Classes = () => {
                 time: `${formatDisplayTime(
                   getOriginalTimeUTC(utcStartTime)
                 )} - ${formatDisplayTime(getOriginalTimeUTC(utcEndTime))}`,
-                onJoinClass: () => console.log("Join class", item.classId),
+                onJoinClass: item.acceptedByStudent
+                  ? () =>
+                      handleJoinClass(item.classId, utcStartTime, utcEndTime)
+                  : () => alert("Class not accepted yet"),
                 onClick: () => navigate(`/teacher/classes/${item.classId}`),
                 status: item.acceptedByStudent
                   ? "Accepted"
@@ -98,7 +143,7 @@ const Classes = () => {
       }
     };
     fetchClasses();
-  }, [refreshFlag]);
+  }, [refreshFlag, navigate]);
 
   // Filter students based on search (searches across ALL data, not just current page)
   const filteredClasses = useMemo(() => {
@@ -151,7 +196,9 @@ const Classes = () => {
       </TeacherCustomHeader>
 
       <div className='bg-white p-6 rounded-2xl'>
-      <div className={`flex gap-2 flex-wrap ${loading ? " justify-center" : ""}`}>
+        <div
+          className={`flex gap-2 flex-wrap ${loading ? " justify-center" : ""}`}
+        >
           {loading && (
             <div className='flex justify-center items-center col-span-full py-12 h-80'>
               <LoadingSpinner size='lg' />
