@@ -213,6 +213,7 @@ export interface StudentDetailsType {
   averageScore: string;
   assignmentCompletion: string;
   missedClasses: number;
+  userId: string;
 }
 
 interface successResponseWithoutData {
@@ -603,6 +604,57 @@ class TeacherService {
       console.error("Error submitting quiz grade:", error);
       throw new Error(
         error.response?.data?.message || "Failed to submit quiz grade"
+      );
+    }
+  }
+
+  async getChats() {
+    try {
+      const response = await apiClient.get(`teacher/chats`);
+      return response.data;
+    } catch (error: any) {
+      console.error("Error fetching chats data:", error);
+      throw new Error(
+        error.response?.data?.message || "Failed to fetch chats data"
+      );
+    }
+  }
+
+  async getStudentForChat(userId: string) {
+    try {
+      const response = await apiClient.get(`teacher/chats/student/${userId}`);
+      return response.data;
+    } catch (error: any) {
+      console.error("Error fetching student for chat data:", error);
+      throw new Error(
+        error.response?.data?.message || "Failed to fetch student for chat data"
+      );
+    }
+  }
+  async getMessages(userId: string) {
+    try {
+      const response = await apiClient.get(`teacher/chats/${userId}/messages`);
+      return response.data;
+    } catch (error: any) {
+      console.error("Error fetching messages data:", error);
+      throw new Error(
+        error.response?.data?.message || "Failed to fetch messages data"
+      );
+    }
+  }
+  async sendMessage(userId: string, message: string) {
+    try {
+      const response = await apiClient.post(
+        `teacher/chats/${userId}/messages`,
+        {
+          message,
+        }
+      );
+      return response.data;
+    } catch (error: any) {
+      console.error("Error sending message:", error);
+      throw new Error(
+        error.response?.data?.message || "Failed to send message"
       );
     }
   }

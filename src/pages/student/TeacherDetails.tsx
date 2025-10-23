@@ -7,10 +7,11 @@ import {
   studentService,
   TeacherDetails as TeacherDetailsType,
 } from "@/services/student.service";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import LoadingSpinner from "@/components/LoadingSpinner";
 
 const TeacherDetails = () => {
+  const navigate = useNavigate();
   const teacherId = useParams().id;
   const [loading, setLoading] = useState(true);
   const [teacherDetails, setTeacherDetails] =
@@ -37,7 +38,13 @@ const TeacherDetails = () => {
   return (
     <div className='px-8 py-6'>
       <CustomDetailHeader title='Teacher Details Page'>
-        <button className='bg-[#2F6769] text-white px-5 py-2 rounded-full'>
+        <button
+          className='bg-[#2F6769] text-white px-5 py-2 rounded-full'
+          onClick={() => {
+            navigate(`/student/messages/${teacherDetails?.userId}`);
+          }}
+          disabled={!teacherDetails}
+        >
           Message
         </button>
       </CustomDetailHeader>

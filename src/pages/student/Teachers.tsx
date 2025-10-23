@@ -78,7 +78,9 @@ const Teachers = () => {
       />
 
       <div className='bg-white p-6 rounded-2xl'>
-      <div className={`flex gap-2 flex-wrap ${loading ? " justify-center" : ""}`}>
+        <div
+          className={`flex gap-2 flex-wrap ${loading ? " justify-center" : ""}`}
+        >
           {loading && (
             <div className='flex justify-center items-center col-span-full py-12 h-80'>
               <LoadingSpinner size='lg' />
@@ -93,7 +95,7 @@ const Teachers = () => {
                   navigate("/student/teachers/" + student.teacherId)
                 }
                 onSendMessage={() =>
-                  console.log("Send message to:", student.teacherId)
+                  navigate("/student/messages/" + student.userId)
                 }
               />
             ))}

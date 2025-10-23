@@ -39,6 +39,7 @@ import TeacherAssignments from "./pages/teacher/Assignments";
 import TeacherAssignmentDetails from "./pages/teacher/AssignmentDetails";
 import TeacherQuizzes from "./pages/teacher/Quizzes";
 import TeacherQuizDetails from "./pages/teacher/QuizDetails";
+import TeacherMessages from "./pages/teacher/Messages.tsx";
 
 // student
 import StudentDashboard from "./pages/student/Dashboard";
@@ -50,6 +51,7 @@ import StudentAssignments from "./pages/student/Assignments";
 import StudentAssignmentDetails from "./pages/student/AssignmentDetails";
 import StudentQuizzes from "./pages/student/Quizzes";
 import StudentQuizDetails from "./pages/student/QuizDetails";
+import StudentMessages from "./pages/student/Messages.tsx";
 
 function App() {
   return (
@@ -157,6 +159,8 @@ function App() {
           />
           <Route path='quizzes' element={<TeacherQuizzes />} />
           <Route path='quizzes/:id' element={<TeacherQuizDetails />} />
+          <Route path='messages' element={<TeacherMessages />} />
+          <Route path='messages/:id' element={<TeacherMessages />} />
 
           <Route path='*' element={<div>404 Not Found</div>} />
         </Route>
@@ -186,6 +190,8 @@ function App() {
           />
           <Route path='quizzes' element={<StudentQuizzes />} />
           <Route path='quizzes/:id' element={<StudentQuizDetails />} />
+          <Route path='messages' element={<StudentMessages />} />
+          <Route path='messages/:id' element={<StudentMessages />} />
           <Route path='*' element={<div>404 Not Found</div>} />
         </Route>
 

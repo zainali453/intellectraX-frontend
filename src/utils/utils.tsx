@@ -149,7 +149,7 @@ const teacherLinks: {
   {
     name: "Audio/Video Call",
     icon: "audioVideo",
-    path: "messages",
+    path: "calls",
     size: "w-[21px] h-[15px]",
   },
   {

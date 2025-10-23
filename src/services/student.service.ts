@@ -31,6 +31,7 @@ export interface ClassDataForCards {
 }
 
 export interface TeacherDetails {
+  userId: string;
   profilePic: string;
   fullName: string;
   bio: string;
@@ -323,6 +324,41 @@ class StudentService {
     } catch (error: any) {
       console.error("Upload error:", error);
       throw new Error(error.response?.data?.message || "Upload failed");
+    }
+  }
+
+  async getChats() {
+    try {
+      const response = await apiClient.get(`student/chats`);
+      return response.data;
+    } catch (error: any) {
+      console.error("Error fetching chats:", error);
+      throw new Error(error.response?.data?.message || "Failed to fetch chats");
+    }
+  }
+  async getMessages(userId: string) {
+    try {
+      const response = await apiClient.get(`student/chats/${userId}/messages`);
+      return response.data;
+    } catch (error: any) {
+      console.error("Error fetching messages:", error);
+      throw new Error(
+        error.response?.data?.message || "Failed to fetch messages"
+      );
+    }
+  }
+  async sendMessage(userId: string, message: string) {
+    try {
+      const response = await apiClient.post<successResponseWithoutData>(
+        `student/chats/${userId}/messages`,
+        { message }
+      );
+      return response.data;
+    } catch (error: any) {
+      console.error("Error sending message:", error);
+      throw new Error(
+        error.response?.data?.message || "Failed to send message"
+      );
     }
   }
 }

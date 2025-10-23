@@ -85,7 +85,13 @@ const StudentDetails = () => {
           <button className='bg-[#38BB6D] text-white px-5 py-2 rounded-full'>
             View Parent Profile
           </button>
-          <button className='bg-[#2F6769] text-white px-5 py-2 rounded-full'>
+          <button
+            className='bg-[#2F6769] text-white px-5 py-2 rounded-full'
+            onClick={() =>
+              navigate("/teacher/messages/" + studentDetails?.userId)
+            }
+            disabled={!studentDetails}
+          >
             Message
           </button>
         </div>
