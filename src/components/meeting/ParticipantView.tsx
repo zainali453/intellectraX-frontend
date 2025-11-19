@@ -11,50 +11,35 @@ const ParticipantView: React.FC<ParticipantViewProps> = ({ participantId }) => {
   const { webcamStream, micStream, webcamOn, micOn, isLocal, displayName } =
     useParticipant(participantId);
 
-  const videoStream = useMemo(() => {
+  const webcamMedia = useMemo(() => {
     if (webcamOn && webcamStream) {
       const mediaStream = new MediaStream();
       mediaStream.addTrack(webcamStream.track);
       return mediaStream;
     }
-  }, [webcamStream, webcamOn]);
+    return undefined;
+  }, [webcamOn, webcamStream]);
 
   useEffect(() => {
-    if (micRef.current) {
-      if (micOn && micStream) {
-        const mediaStream = new MediaStream();
-        mediaStream.addTrack(micStream.track);
+    if (!micRef.current) return;
 
-        micRef.current.srcObject = mediaStream;
-        micRef.current
-          .play()
-          .catch((error) =>
-            console.error("videoElem.current.play() failed", error)
-          );
-      } else {
-        micRef.current.srcObject = null;
-      }
+    if (micOn && micStream) {
+      const mediaStream = new MediaStream();
+      mediaStream.addTrack(micStream.track);
+      micRef.current.srcObject = mediaStream;
+      micRef.current
+        .play()
+        .catch((error) => console.error("mic playback failed", error));
+    } else {
+      micRef.current.srcObject = null;
     }
-  }, [micStream, micOn]);
+  }, [micOn, micStream]);
 
   return (
     <div className='relative aspect-video bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl overflow-hidden shadow-2xl border border-gray-700/50'>
       <audio ref={micRef} autoPlay playsInline muted={isLocal} />
-      {webcamOn ? (
-        <ReactPlayer
-          playsinline
-          pip={false}
-          light={false}
-          controls={false}
-          muted={true}
-          playing={true}
-          url={videoStream}
-          height={"100%"}
-          width={"100%"}
-          onError={(err) => {
-            console.log(err, "participant video error");
-          }}
-        />
+      {webcamMedia ? (
+        <MediaStreamVideo stream={webcamMedia} mirror />
       ) : (
         <div className='flex items-center justify-center h-full bg-gradient-to-br from-gray-800 to-gray-900'>
           <div className='text-center'>
@@ -71,7 +56,6 @@ const ParticipantView: React.FC<ParticipantViewProps> = ({ participantId }) => {
         </div>
       )}
 
-      {/* Participant info overlay with glass effect */}
       <div className='absolute bottom-3 left-3 right-3 flex items-center justify-between bg-black/60 backdrop-blur-md rounded-xl px-3 py-2 border border-white/10'>
         <div className='flex items-center gap-2'>
           <div
@@ -113,55 +97,38 @@ const ParticipantView: React.FC<ParticipantViewProps> = ({ participantId }) => {
   );
 };
 
-function ReactPlayer({
-  playsinline,
-  pip,
-  light,
-  controls,
-  muted,
-  playing,
-  url,
-  height,
-  width,
-  onError,
+const MediaStreamVideo = ({
+  stream,
+  mirror = false,
+  objectFit = "cover",
 }: {
-  playsinline: boolean;
-  pip: boolean;
-  light: boolean;
-  controls: boolean;
-  muted: boolean;
-  playing: boolean;
-  url: MediaStream | undefined;
-  height: string;
-  width: string;
-  onError: (err: any) => void;
-}) {
+  stream: MediaStream;
+  mirror?: boolean;
+  objectFit?: "cover" | "contain";
+}) => {
   const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
-    if (videoRef.current && url) {
-      videoRef.current.srcObject = url;
-      if (playing) {
-        videoRef.current.play().catch(onError);
-      }
-    }
-  }, [url, playing]);
+    if (!videoRef.current) return;
+    videoRef.current.srcObject = stream;
+    videoRef.current
+      .play()
+      .catch((error) => console.error("video playback failed", error));
+  }, [stream]);
 
   return (
     <video
       ref={videoRef}
-      autoPlay={playing}
-      playsInline={playsinline}
-      muted={muted}
-      controls={controls}
+      autoPlay
+      playsInline
+      muted
+      className='w-full h-full'
       style={{
-        height,
-        width,
-        objectFit: "cover",
-        transform: "scaleX(-1)",
+        objectFit,
+        transform: mirror ? "scaleX(-1)" : "none",
       }}
     />
   );
-}
+};
 
 export default ParticipantView;

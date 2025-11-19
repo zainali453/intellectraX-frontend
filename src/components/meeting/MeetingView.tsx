@@ -2,7 +2,16 @@ import { useMeeting } from "@videosdk.live/react-sdk";
 import { useEffect, useState } from "react";
 import ParticipantView from "./ParticipantView";
 import MeetingControls from "./MeetingControls";
+import ScreenShareTile from "./ScreenShareTile";
 import { Clock, Users } from "lucide-react";
+
+function getGridTemplateColumns(count: number) {
+  if (count <= 1) return "repeat(1, minmax(0, 1fr))";
+  if (count === 2) return "repeat(2, minmax(0, 1fr))";
+  if (count <= 4) return "repeat(2, minmax(0, 1fr))";
+  if (count <= 6) return "repeat(3, minmax(0, 1fr))";
+  return "repeat(auto-fit, minmax(200px, 1fr))";
+}
 
 interface MeetingViewProps {
   onMeetingLeft: () => void;
@@ -23,7 +32,7 @@ const MeetingView: React.FC<MeetingViewProps> = ({
 }) => {
   const [joined, setJoined] = useState<string | null>(null);
   const [elapsedTime, setElapsedTime] = useState(0);
-  const { join, participants, leave, end } = useMeeting({
+  const { join, participants, leave, end, presenterId } = useMeeting({
     onMeetingJoined: () => {
       setJoined("JOINED");
     },
@@ -91,6 +100,9 @@ const MeetingView: React.FC<MeetingViewProps> = ({
   };
 
   const participantIds = [...participants.keys()];
+  const participantGridTemplate = getGridTemplateColumns(
+    participantIds.length || 1
+  );
 
   return (
     <div className='min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex flex-col'>
@@ -176,26 +188,27 @@ const MeetingView: React.FC<MeetingViewProps> = ({
       <div className='flex-1 p-6 overflow-hidden'>
         <div className='max-w-7xl mx-auto h-full'>
           {joined === "JOINED" ? (
-            <div
-              className={`grid gap-4 h-full ${
-                participantIds.length === 1
-                  ? "grid-cols-1"
-                  : participantIds.length === 2
-                  ? "grid-cols-2"
-                  : participantIds.length <= 4
-                  ? "grid-cols-2 grid-rows-2"
-                  : "grid-cols-3"
-              }`}
-            >
-              {participantIds.map((participantId) => (
-                <ParticipantView
-                  key={participantId}
-                  participantId={participantId}
+            <div className='h-full flex flex-col gap-4'>
+              {presenterId && (
+                <ScreenShareTile
+                  key={`screen-share-${presenterId}`}
+                  participantId={presenterId}
                 />
-              ))}
+              )}
+              <div
+                className='grid gap-4 flex-1 auto-rows-[minmax(200px,1fr)]'
+                style={{ gridTemplateColumns: participantGridTemplate }}
+              >
+                {participantIds.map((participantId) => (
+                  <ParticipantView
+                    key={participantId}
+                    participantId={participantId}
+                  />
+                ))}
+              </div>
             </div>
           ) : (
-            <div className='flex items-center justify-center h-[85vh]'>
+            <div className='flex items-center justify-center h-[75vh]'>
               <div className='text-center'>
                 <div className='relative w-20 h-20 mx-auto mb-6'>
                   <div className='absolute inset-0 rounded-full border-4 border-teal-500/30'></div>
