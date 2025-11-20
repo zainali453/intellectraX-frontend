@@ -167,6 +167,24 @@ function App() {
           <Route path='*' element={<div>404 Not Found</div>} />
         </Route>
 
+        {/* Parent Routes */}
+        <Route
+          path='/parent'
+          element={
+            <AuthGuard requireAuth={true} requireParent={true}>
+              <MainLayout />
+            </AuthGuard>
+          }
+        >
+          <Route index element={<TeacherDashboard title={"Dashboard"} />} />
+          <Route
+            path='dashboard'
+            element={<TeacherDashboard title={"Dashboard"} />}
+          />
+
+          <Route path='*' element={<div>404 Not Found</div>} />
+        </Route>
+
         {/* Teacher Meeting - Standalone (No Dashboard Layout) */}
         <Route
           path='/teacher/meeting/:classId'

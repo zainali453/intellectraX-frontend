@@ -3,6 +3,7 @@ import { useUser } from "../context/UserContext";
 import TeacherOnboarding from "./TeacherOnboarding";
 import StudentOnboarding from "./StudentsOnboarding";
 import { useNavigate } from "react-router-dom";
+import ParentsOnboarding from "./ParentsOnboarding";
 
 const Onboarding = () => {
   const { user } = useUser();
@@ -32,7 +33,7 @@ const Onboarding = () => {
     case "student":
       return <StudentOnboarding />;
     case "parent":
-      return <>Parent Onboarding</>;
+      return <ParentsOnboarding />;
     case "admin":
       return null;
     default:

@@ -15,6 +15,7 @@ interface AuthGuardProps {
   requireAdmin?: boolean;
   requireTeacher?: boolean;
   requireStudent?: boolean;
+  requireParent?: boolean;
 }
 
 const AuthGuard = ({
@@ -23,11 +24,10 @@ const AuthGuard = ({
   requireAdmin = false,
   requireTeacher = false,
   requireStudent = false,
+  requireParent = false,
 }: AuthGuardProps) => {
   const { user } = useUser();
   const location = useLocation();
-
-  console.log(location.pathname);
 
   // Get token from cookies
   const token = cookieUtils.get(COOKIE_NAMES.AUTH_TOKEN);
@@ -99,8 +99,11 @@ const AuthGuard = ({
         return <Navigate to='/student/dashboard' replace />;
       } else if (user.role === "teacher") {
         return <Navigate to='/teacher/dashboard' replace />;
+      } else if (user.role === "parent") {
+        return <Navigate to='/parent/dashboard' replace />;
       }
     }
+    console.log("Redirecting to onboarding", user);
 
     return <Navigate to='/onboarding' replace />;
   }
@@ -112,6 +115,9 @@ const AuthGuard = ({
     return <Navigate to='/' replace />;
   }
   if (requireStudent && user.role !== "student") {
+    return <Navigate to='/' replace />;
+  }
+  if (requireParent && user.role !== "parent") {
     return <Navigate to='/' replace />;
   }
 

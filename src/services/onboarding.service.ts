@@ -91,6 +91,21 @@ interface StudentOnboardingDataResponse {
   data?: StudentOnboardingData;
 }
 
+interface ParentOnboardingData {
+  profilePic: string;
+  bio: string;
+  childs: {
+    email: string;
+    fullName: string;
+  }[];
+}
+
+interface ParentOnboardingDataResponse {
+  success: boolean;
+  message: string;
+  data?: ParentOnboardingData;
+}
+
 interface OnboardingService {
   upload(formData: FormData, query: string): Promise<UploadResponse>;
   removeUpload(fileUrl: string, fileType: string): Promise<SuccessResponse>;
@@ -166,6 +181,35 @@ class OnboardingService {
       if (error?.response?.data?.message === "Student not found") {
         localStorage.removeItem("studentonboardingStep");
       }
+      throw new Error(
+        error.response?.data?.message || "Failed to fetch onboarding data"
+      );
+    }
+  }
+  async getParentOnBoardingData() {
+    try {
+      const response = await apiClient.get<ParentOnboardingDataResponse>(
+        "parent/onboarding"
+      );
+      return response.data;
+    } catch (error: any) {
+      console.error("Error fetching onboarding data:", error);
+      console.log(error.response);
+      throw new Error(
+        error.response?.data?.message || "Failed to fetch onboarding data"
+      );
+    }
+  }
+  async saveParentOnBoardingData(data: ParentOnboardingData) {
+    try {
+      const response = await apiClient.post<ParentOnboardingDataResponse>(
+        "parent/onboarding",
+        data
+      );
+      return response.data;
+    } catch (error: any) {
+      console.error("Error fetching onboarding data:", error);
+      console.log(error.response);
       throw new Error(
         error.response?.data?.message || "Failed to fetch onboarding data"
       );
