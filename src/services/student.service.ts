@@ -362,5 +362,16 @@ class StudentService {
       );
     }
   }
+  async getTeacherForChat(userId: string) {
+    try {
+      const response = await apiClient.get(`student/chats/teacher/${userId}`);
+      return response.data;
+    } catch (error: any) {
+      console.error("Error fetching teacher for chat data:", error);
+      throw new Error(
+        error.response?.data?.message || "Failed to fetch teacher for chat data"
+      );
+    }
+  }
 }
 export const studentService = new StudentService();

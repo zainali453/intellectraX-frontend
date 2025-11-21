@@ -65,6 +65,8 @@ import ParentAssignments from "./pages/parent/Assignments";
 import ParentAssignmentDetails from "./pages/parent/AssignmentDetails";
 import ParentQuizzes from "./pages/parent/Quizzes";
 import ParentQuizDetails from "./pages/parent/QuizDetails";
+import ParentMeeting from "./pages/parent/ParentMeeting.tsx";
+import ParentMessages from "./pages/parent/Messages.tsx";
 
 function App() {
   return (
@@ -210,19 +212,21 @@ function App() {
           <Route path='assignments/:id' element={<ParentAssignmentDetails />} />
           <Route path='quizzes' element={<ParentQuizzes />} />
           <Route path='quizzes/:id' element={<ParentQuizDetails />} />
+          <Route path='messages' element={<ParentMessages />} />
+          <Route path='messages/:id' element={<ParentMessages />} />
 
           <Route path='*' element={<div>404 Not Found</div>} />
         </Route>
 
         {/* Parent Meeting - Standalone (No Dashboard Layout) */}
-        {/* <Route
+        <Route
           path='/parent/meeting/:classId'
           element={
             <AuthGuard requireAuth={true} requireParent={true}>
               <ParentMeeting />
             </AuthGuard>
           }
-        /> */}
+        />
 
         {/* student Routes */}
         <Route

@@ -277,5 +277,53 @@ class ParentService {
       );
     }
   }
+
+  async getChats() {
+    try {
+      const response = await apiClient.get(`parent/chats`);
+      return response.data;
+    } catch (error: any) {
+      console.error("Error fetching chats data:", error);
+      throw new Error(
+        error.response?.data?.message || "Failed to fetch chats data"
+      );
+    }
+  }
+
+  async getTeacherForChat(userId: string) {
+    try {
+      const response = await apiClient.get(`parent/chats/teacher/${userId}`);
+      return response.data;
+    } catch (error: any) {
+      console.error("Error fetching teacher for chat data:", error);
+      throw new Error(
+        error.response?.data?.message || "Failed to fetch teacher for chat data"
+      );
+    }
+  }
+  async getMessages(userId: string) {
+    try {
+      const response = await apiClient.get(`parent/chats/${userId}/messages`);
+      return response.data;
+    } catch (error: any) {
+      console.error("Error fetching messages data:", error);
+      throw new Error(
+        error.response?.data?.message || "Failed to fetch messages data"
+      );
+    }
+  }
+  async sendMessage(userId: string, message: string) {
+    try {
+      const response = await apiClient.post(`parent/chats/${userId}/messages`, {
+        message,
+      });
+      return response.data;
+    } catch (error: any) {
+      console.error("Error sending message:", error);
+      throw new Error(
+        error.response?.data?.message || "Failed to send message"
+      );
+    }
+  }
 }
 export const parentService = new ParentService();

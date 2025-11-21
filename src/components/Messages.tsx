@@ -9,6 +9,7 @@ export interface Message {
 }
 
 export interface Chat {
+  _id: string;
   userId: string;
   fullName: string;
   profilePic?: string;
@@ -19,50 +20,34 @@ export interface Chat {
 
 interface MessagesProps {
   chats: Chat[];
+  messages: Message[];
+  loading: boolean;
   onSendMessage: (userId: string, message: string) => void;
-  onLoadMessages: (userId: string) => Promise<Message[]>;
   selectedChat: Chat | null;
   setSelectedChat: (chat: Chat | null) => void;
 }
 
 const Messages = ({
   chats = [],
+  messages = [],
+  loading = false,
   onSendMessage,
-  onLoadMessages,
   selectedChat,
   setSelectedChat,
 }: MessagesProps) => {
-  const [messages, setMessages] = useState<Message[]>([]);
   const [messageInput, setMessageInput] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
-  const [loading, setLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const previousMessagesLengthRef = useRef<number>(0);
 
   // Filter chats based on search
   const filteredChats = chats.filter((chat) =>
     chat.fullName.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  // Load messages when a chat is selected
+  // Auto-scroll to bottom only when new messages arrive (not on initial load)
   useEffect(() => {
-    if (selectedChat) {
-      setLoading(true);
-      onLoadMessages(selectedChat.userId)
-        .then((loadedMessages) => {
-          setMessages(loadedMessages);
-          console.log(loadedMessages);
-          setLoading(false);
-        })
-        .catch(() => {
-          setMessages([]);
-          setLoading(false);
-        });
-    }
-  }, [selectedChat, onLoadMessages]);
-
-  // Auto-scroll to bottom when new messages arrive
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    messagesEndRef.current?.scrollIntoView({ behavior: "instant" });
   }, [messages]);
 
   // Handle send message
@@ -73,14 +58,6 @@ const Messages = ({
 
     if (selectedChat) {
       onSendMessage(selectedChat.userId, messageInput);
-      setMessages([
-        ...messages,
-        {
-          message: messageInput,
-          time: new Date(),
-          senderId: "currentUser", // This should be the current user's ID
-        },
-      ]);
       setMessageInput("");
     }
   };
@@ -98,7 +75,7 @@ const Messages = ({
     return new Date(date).toLocaleTimeString("en-US", {
       hour: "2-digit",
       minute: "2-digit",
-      hour12: false,
+      hour12: true,
     });
   };
 
@@ -117,6 +94,66 @@ const Messages = ({
         day: "numeric",
       });
     }
+  };
+
+  // Format date separator for messages
+  const formatDateSeparator = (date: Date) => {
+    const now = new Date();
+    const messageDate = new Date(date);
+
+    // Reset time to midnight for accurate day comparison
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const msgDay = new Date(
+      messageDate.getFullYear(),
+      messageDate.getMonth(),
+      messageDate.getDate()
+    );
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+
+    const diffInMs = today.getTime() - msgDay.getTime();
+    const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
+
+    // Today
+    if (diffInDays === 0) {
+      return "Today";
+    }
+
+    // Yesterday
+    if (diffInDays === 1) {
+      return "Yesterday";
+    }
+
+    // This week (show day name like "Monday", "Tuesday")
+    if (diffInDays < 7 && diffInDays > 1) {
+      return messageDate.toLocaleDateString("en-US", { weekday: "long" });
+    }
+
+    // Same year (show "Month Day" like "Jan 15")
+    if (messageDate.getFullYear() === now.getFullYear()) {
+      return messageDate.toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+      });
+    }
+
+    // Different year (show full date like "Jan 15, 2024")
+    return messageDate.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
+  };
+
+  // Check if two dates are on different days
+  const isDifferentDay = (date1: Date, date2: Date) => {
+    const d1 = new Date(date1);
+    const d2 = new Date(date2);
+    return (
+      d1.getFullYear() !== d2.getFullYear() ||
+      d1.getMonth() !== d2.getMonth() ||
+      d1.getDate() !== d2.getDate()
+    );
   };
 
   return (
@@ -203,7 +240,7 @@ const Messages = ({
                       </h3>
                       <span className='text-xs text-gray-500 flex-shrink-0 ml-2'>
                         {chat.time
-                          ? formatLastMessageTime(chat.time)
+                          ? formatDateSeparator(chat.time)
                           : "No messages"}
                       </span>
                     </div>
@@ -269,38 +306,57 @@ const Messages = ({
                     {messages.map((msg, index) => {
                       const isCurrentUser =
                         msg.senderId !== selectedChat.userId;
+
+                      // Show date separator if this is the first message or if the date changed
+                      const showDateSeparator =
+                        index === 0 ||
+                        isDifferentDay(messages[index - 1].time, msg.time);
+
                       return (
-                        <div
-                          key={index}
-                          className={`flex ${
-                            isCurrentUser ? "justify-end" : "justify-start"
-                          }`}
-                        >
-                          <div className='flex items-end gap-2 max-w-[70%]'>
-                            {!isCurrentUser && (
-                              <img
-                                src={selectedChat.profilePic || user}
-                                alt={selectedChat.fullName}
-                                className='w-8 h-8 rounded-full object-cover flex-shrink-0'
-                              />
-                            )}
-                            <div>
-                              <div
-                                className={`px-4 py-2 rounded-2xl ${
-                                  isCurrentUser
-                                    ? "bg-bgprimary text-white rounded-br-none"
-                                    : "bg-gray-200 text-gray-900 rounded-bl-none"
-                                }`}
-                              >
-                                <p className='text-sm'>{msg.message}</p>
+                        <div key={index}>
+                          {/* Date Separator */}
+                          {showDateSeparator && (
+                            <div className='flex items-center justify-center my-6'>
+                              <div className='flex-1 h-px bg-gray-300'></div>
+                              <div className='px-4 py-1.5 bg-gray-200 text-gray-600 text-xs font-medium rounded-full mx-3'>
+                                {formatDateSeparator(msg.time)}
                               </div>
-                              <span
-                                className={`text-xs text-gray-500 mt-1 block ${
-                                  isCurrentUser ? "text-right" : "text-left"
-                                }`}
-                              >
-                                {formatTime(msg.time)}
-                              </span>
+                              <div className='flex-1 h-px bg-gray-300'></div>
+                            </div>
+                          )}
+
+                          {/* Message */}
+                          <div
+                            className={`flex ${
+                              isCurrentUser ? "justify-end" : "justify-start"
+                            }`}
+                          >
+                            <div className='flex items-end gap-2 max-w-[70%]'>
+                              {!isCurrentUser && (
+                                <img
+                                  src={selectedChat.profilePic || user}
+                                  alt={selectedChat.fullName}
+                                  className='w-8 h-8 rounded-full object-cover flex-shrink-0'
+                                />
+                              )}
+                              <div>
+                                <div
+                                  className={`px-4 py-2 rounded-2xl ${
+                                    isCurrentUser
+                                      ? "bg-bgprimary text-white rounded-br-none"
+                                      : "bg-gray-200 text-gray-900 rounded-bl-none"
+                                  }`}
+                                >
+                                  <p className='text-sm'>{msg.message}</p>
+                                </div>
+                                <span
+                                  className={`text-xs text-gray-500 mt-1 block ${
+                                    isCurrentUser ? "text-right" : "text-left"
+                                  }`}
+                                >
+                                  {formatTime(msg.time)}
+                                </span>
+                              </div>
                             </div>
                           </div>
                         </div>

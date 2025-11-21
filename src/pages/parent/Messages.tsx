@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
 import Messages, { Chat, Message } from "@/components/Messages";
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
-import { teacherService } from "@/services/teacher.service";
 import LoadingSpinner from "@/components/LoadingSpinner";
+import { parentService } from "@/services/parent.service";
 
 const MessagesPage = () => {
   const id = useParams().id;
@@ -44,7 +44,7 @@ const MessagesPage = () => {
       const newSearchParams = new URLSearchParams(searchParams);
       newSearchParams.set("chatId", chat.userId);
       navigate(
-        { pathname: "/teacher/messages", search: newSearchParams.toString() },
+        { pathname: "/parent/messages", search: newSearchParams.toString() },
         { replace: true }
       );
     } else {
@@ -52,7 +52,7 @@ const MessagesPage = () => {
       const newSearchParams = new URLSearchParams(searchParams);
       newSearchParams.delete("chatId");
       navigate(
-        { pathname: "/teacher/messages", search: newSearchParams.toString() },
+        { pathname: "/parent/messages", search: newSearchParams.toString() },
         { replace: true }
       );
     }
@@ -84,7 +84,7 @@ const MessagesPage = () => {
         setLoading(true);
       }
 
-      const response = await teacherService.getChats();
+      const response = await parentService.getChats();
       if (response && response.data) {
         const newChats = response.data;
 
@@ -139,7 +139,7 @@ const MessagesPage = () => {
             if (chat) {
               handleSetSelectedChat(chat);
             } else {
-              const studentDetails = await teacherService.getStudentForChat(id);
+              const studentDetails = await parentService.getTeacherForChat(id);
               if (studentDetails && studentDetails.data) {
                 const newChat: Chat = {
                   _id: studentDetails.data.userId, // Add _id field
@@ -157,7 +157,7 @@ const MessagesPage = () => {
                 newSearchParams.delete("chatId");
                 navigate(
                   {
-                    pathname: "/teacher/messages",
+                    pathname: "/parent/messages",
                     search: newSearchParams.toString(),
                   },
                   { replace: true }
@@ -195,7 +195,7 @@ const MessagesPage = () => {
 
   const loadMessages = async (userId: string, isPolling = false) => {
     try {
-      const response = await teacherService.getMessages(userId);
+      const response = await parentService.getMessages(userId);
       if (response && response.data && response.data.messages) {
         const newMessages = response.data.messages;
 
@@ -264,7 +264,7 @@ const MessagesPage = () => {
       // Add to messages immediately
       setMessages((prevMessages) => [...prevMessages, optimisticMessage]);
 
-      const response = await teacherService.sendMessage(userId, message);
+      const response = await parentService.sendMessage(userId, message);
       if (response && response.success) {
         // Reload messages and chats after a short delay to get actual data from server
         setTimeout(() => {
