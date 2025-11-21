@@ -14,7 +14,7 @@ export interface Teacher {
   teacherId: string;
   userId: string;
   rating: number;
-  studentName?: string;
+  studentName: string;
 }
 
 export interface TimeSlot {
@@ -29,6 +29,7 @@ export interface ClassDataForCards {
   subject: string;
   date: string;
   timeSlot: TimeSlot;
+  studentName: string;
 }
 
 export interface TeacherDetails {
@@ -47,7 +48,7 @@ interface ClassDataForDetailsPage {
   date: string;
   timeSlot: TimeSlot;
   description: string;
-  acceptedByStudent: boolean;
+  studentName: string;
 }
 
 export interface AssignmentDataForCards {
@@ -59,6 +60,7 @@ export interface AssignmentDataForCards {
   createdAt: string;
   isCompleted: boolean;
   isSubmitted: boolean;
+  studentName: string;
 }
 
 export interface QuizDataForCards {
@@ -71,6 +73,7 @@ export interface QuizDataForCards {
   isSubmitted: boolean;
   startTime: string;
   endTime: string;
+  studentName: string;
 }
 
 interface UploadResponse {
@@ -83,6 +86,27 @@ interface UploadResponse {
   };
 }
 
+interface UpcomingClass {
+  subject: string;
+  time: string;
+  date: string;
+}
+
+interface ImportantInfo {
+  title: string;
+  description: string;
+  icon: string;
+  color: string;
+}
+
+export interface ChildDashboardCard {
+  childName: string;
+  grade: string;
+  profilePic?: string;
+  academicProgress: number; // 0-100
+  upcomingClasses: UpcomingClass[];
+}
+
 interface successResponseWithData<T> {
   success: boolean;
   message: string;
@@ -93,25 +117,51 @@ interface successResponseWithoutData {
   success: boolean;
   message: string;
 }
-// Teacher Service Class
-class StudentService {
-  async getDashboardData() {
+// Parent Service Class
+class ParentService {
+  async getParentDashboard() {
     try {
       const response = await apiClient.get<
-        successResponseWithData<StudentDashboardData>
-      >(`student/dashboard`);
+        successResponseWithData<ChildDashboardCard[]>
+      >(`parent/dashboard`);
       return response.data;
     } catch (error: any) {
-      console.error("Error fetching onboarding data:", error);
+      console.error("Error fetching classes data:", error);
       throw new Error(
-        error.response?.data?.message || "Failed to fetch onboarding data"
+        error.response?.data?.message || "Failed to fetch classes data"
+      );
+    }
+  }
+  async getParentStudentClasses() {
+    try {
+      const response = await apiClient.get<
+        successResponseWithData<ClassDataForCards[]>
+      >(`parent/classes`);
+      return response.data;
+    } catch (error: any) {
+      console.error("Error fetching classes data:", error);
+      throw new Error(
+        error.response?.data?.message || "Failed to fetch classes data"
+      );
+    }
+  }
+  async getParentStudentClassDetails(classId: string) {
+    try {
+      const response = await apiClient.get<
+        successResponseWithData<ClassDataForDetailsPage>
+      >(`parent/classes/${classId}`);
+      return response.data;
+    } catch (error: any) {
+      console.error("Error fetching class details:", error);
+      throw new Error(
+        error.response?.data?.message || "Failed to fetch class details"
       );
     }
   }
   async getTeachers() {
     try {
       const response = await apiClient.get<successResponseWithData<Teacher[]>>(
-        `student/teachers`
+        `parent/teachers`
       );
       return response.data;
     } catch (error: any) {
@@ -125,7 +175,7 @@ class StudentService {
     try {
       const response = await apiClient.get<
         successResponseWithData<TeacherDetails>
-      >(`student/teachers/${teacherId}`);
+      >(`parent/teachers/${teacherId}`);
       return response.data;
     } catch (error: any) {
       console.error("Error fetching teacher details:", error);
@@ -134,68 +184,12 @@ class StudentService {
       );
     }
   }
-  async getStudentClasses() {
-    try {
-      const response = await apiClient.get<
-        successResponseWithData<{
-          classes: ClassDataForCards[];
-          classRequests: number;
-        }>
-      >(`student/classes`);
-      return response.data;
-    } catch (error: any) {
-      console.error("Error fetching classes data:", error);
-      throw new Error(
-        error.response?.data?.message || "Failed to fetch classes data"
-      );
-    }
-  }
-  async getStudentClassDetails(classId: string) {
-    try {
-      const response = await apiClient.get<
-        successResponseWithData<ClassDataForDetailsPage>
-      >(`student/classes/${classId}`);
-      return response.data;
-    } catch (error: any) {
-      console.error("Error fetching class details:", error);
-      throw new Error(
-        error.response?.data?.message || "Failed to fetch class details"
-      );
-    }
-  }
-  async getStudentClassRequests() {
-    try {
-      const response = await apiClient.get<
-        successResponseWithData<ClassDataForCards[]>
-      >(`student/classrequests`);
-      return response.data;
-    } catch (error: any) {
-      console.error("Error fetching classes data:", error);
-      throw new Error(
-        error.response?.data?.message || "Failed to fetch classes data"
-      );
-    }
-  }
-  async setStudentClassAcceptance(classId: string, accepted: boolean) {
-    try {
-      const response = await apiClient.post<successResponseWithoutData>(
-        `student/classrequests/${classId}`,
-        { accepted }
-      );
-      return response.data;
-    } catch (error: any) {
-      console.error("Error fetching classes data:", error);
-      throw new Error(
-        error.response?.data?.message || "Failed to fetch classes data"
-      );
-    }
-  }
 
-  async getAssignments() {
+  async getAssignments(query: "pending" | "completed") {
     try {
       const response = await apiClient.get<
         successResponseWithData<AssignmentDataForCards[]>
-      >(`student/assignments`);
+      >(`parent/assignments?status=${query}`);
       return response.data;
     } catch (error: any) {
       console.error("Error fetching assignments data:", error);
@@ -227,7 +221,7 @@ class StudentService {
           studentName: string;
           isSubmitted: boolean;
         }>
-      >(`student/assignments/${assignmentId}`);
+      >(`parent/assignments/${assignmentId}`);
       return response.data;
     } catch (error: any) {
       console.error("Error fetching assignment details:", error);
@@ -237,33 +231,11 @@ class StudentService {
     }
   }
 
-  async assignmentSubmission(
-    formData: FormData,
-    assignmentId: string
-  ): Promise<UploadResponse> {
-    try {
-      const response = await apiClient.post<UploadResponse>(
-        `student/assignments/${assignmentId}/submit`,
-        formData,
-        {
-          headers: {
-            "Content-Type": undefined,
-          },
-        }
-      );
-
-      return response.data;
-    } catch (error: any) {
-      console.error("Upload error:", error);
-      throw new Error(error.response?.data?.message || "Upload failed");
-    }
-  }
-
-  async getQuizzes() {
+  async getQuizzes(query: "pending" | "completed") {
     try {
       const response = await apiClient.get<
         successResponseWithData<QuizDataForCards[]>
-      >(`student/quizzes`);
+      >(`parent/quizzes?status=${query}`);
       return response.data;
     } catch (error: any) {
       console.error("Error fetching quizzes data:", error);
@@ -296,7 +268,7 @@ class StudentService {
           studentName: string;
           isSubmitted: boolean;
         }>
-      >(`student/quizzes/${quizId}`);
+      >(`parent/quizzes/${quizId}`);
       return response.data;
     } catch (error: any) {
       console.error("Error fetching quiz details:", error);
@@ -305,62 +277,5 @@ class StudentService {
       );
     }
   }
-
-  async quizSubmission(
-    formData: FormData,
-    quizId: string
-  ): Promise<UploadResponse> {
-    try {
-      const response = await apiClient.post<UploadResponse>(
-        `student/quizzes/${quizId}/submit`,
-        formData,
-        {
-          headers: {
-            "Content-Type": undefined,
-          },
-        }
-      );
-
-      return response.data;
-    } catch (error: any) {
-      console.error("Upload error:", error);
-      throw new Error(error.response?.data?.message || "Upload failed");
-    }
-  }
-
-  async getChats() {
-    try {
-      const response = await apiClient.get(`student/chats`);
-      return response.data;
-    } catch (error: any) {
-      console.error("Error fetching chats:", error);
-      throw new Error(error.response?.data?.message || "Failed to fetch chats");
-    }
-  }
-  async getMessages(userId: string) {
-    try {
-      const response = await apiClient.get(`student/chats/${userId}/messages`);
-      return response.data;
-    } catch (error: any) {
-      console.error("Error fetching messages:", error);
-      throw new Error(
-        error.response?.data?.message || "Failed to fetch messages"
-      );
-    }
-  }
-  async sendMessage(userId: string, message: string) {
-    try {
-      const response = await apiClient.post<successResponseWithoutData>(
-        `student/chats/${userId}/messages`,
-        { message }
-      );
-      return response.data;
-    } catch (error: any) {
-      console.error("Error sending message:", error);
-      throw new Error(
-        error.response?.data?.message || "Failed to send message"
-      );
-    }
-  }
 }
-export const studentService = new StudentService();
+export const parentService = new ParentService();

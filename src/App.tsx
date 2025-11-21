@@ -55,6 +55,17 @@ import StudentQuizDetails from "./pages/student/QuizDetails";
 import StudentMessages from "./pages/student/Messages.tsx";
 import StudentMeeting from "./pages/student/StudentMeeting";
 
+// Parent
+import ParentDashboard from "./pages/parent/Dashboard.tsx";
+import ParentClasses from "./pages/parent/Classes";
+import ParentClassDetails from "./pages/parent/ClassDetails";
+import ParentTeachers from "./pages/parent/Teachers";
+import ParentTeacherDetails from "./pages/parent/TeacherDetails";
+import ParentAssignments from "./pages/parent/Assignments";
+import ParentAssignmentDetails from "./pages/parent/AssignmentDetails";
+import ParentQuizzes from "./pages/parent/Quizzes";
+import ParentQuizDetails from "./pages/parent/QuizDetails";
+
 function App() {
   return (
     <UserProvider>
@@ -167,24 +178,6 @@ function App() {
           <Route path='*' element={<div>404 Not Found</div>} />
         </Route>
 
-        {/* Parent Routes */}
-        <Route
-          path='/parent'
-          element={
-            <AuthGuard requireAuth={true} requireParent={true}>
-              <MainLayout />
-            </AuthGuard>
-          }
-        >
-          <Route index element={<TeacherDashboard title={"Dashboard"} />} />
-          <Route
-            path='dashboard'
-            element={<TeacherDashboard title={"Dashboard"} />}
-          />
-
-          <Route path='*' element={<div>404 Not Found</div>} />
-        </Route>
-
         {/* Teacher Meeting - Standalone (No Dashboard Layout) */}
         <Route
           path='/teacher/meeting/:classId'
@@ -194,6 +187,42 @@ function App() {
             </AuthGuard>
           }
         />
+        {/* Parent Routes */}
+        <Route
+          path='/parent'
+          element={
+            <AuthGuard requireAuth={true} requireParent={true}>
+              <MainLayout />
+            </AuthGuard>
+          }
+        >
+          <Route index element={<ParentDashboard title={"Dashboard"} />} />
+          <Route
+            path='dashboard'
+            element={<ParentDashboard title={"Dashboard"} />}
+          />
+          <Route path='classes' element={<ParentClasses />} />
+          <Route path='classes/:id' element={<ParentClassDetails />} />
+          <Route path='teachers' element={<ParentTeachers />} />
+          <Route path='teachers/:id' element={<ParentTeacherDetails />} />
+
+          <Route path='assignments' element={<ParentAssignments />} />
+          <Route path='assignments/:id' element={<ParentAssignmentDetails />} />
+          <Route path='quizzes' element={<ParentQuizzes />} />
+          <Route path='quizzes/:id' element={<ParentQuizDetails />} />
+
+          <Route path='*' element={<div>404 Not Found</div>} />
+        </Route>
+
+        {/* Parent Meeting - Standalone (No Dashboard Layout) */}
+        {/* <Route
+          path='/parent/meeting/:classId'
+          element={
+            <AuthGuard requireAuth={true} requireParent={true}>
+              <ParentMeeting />
+            </AuthGuard>
+          }
+        /> */}
 
         {/* student Routes */}
         <Route

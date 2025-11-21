@@ -11,6 +11,7 @@ export interface QuizCardData {
   onClick: () => void;
   isTeacher?: boolean;
   teacher?: string;
+  studentName?: string;
 }
 
 interface QuizCardProps {
@@ -54,6 +55,12 @@ const ClassCard: React.FC<QuizCardProps> = ({ data }) => {
           </span>
           <span className='ml-2 text-gray-800'>{data.student}</span>
         </div>
+        {data.studentName && (
+          <div className='flex items-center text-sm'>
+            <span className='text-gray-500 font-medium'>{"Child:"}</span>
+            <span className='ml-2 text-gray-800'>{data.studentName}</span>
+          </div>
+        )}
 
         <div className='flex items-center text-sm'>
           <span className='text-gray-500 font-medium'>Title:</span>

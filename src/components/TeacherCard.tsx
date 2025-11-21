@@ -6,12 +6,14 @@ interface TeacherCardProps {
   teacher: TeacherData;
   onClick: () => void;
   onSendMessage: () => void;
+  isParent?: boolean;
 }
 
 const TeacherCard: React.FC<TeacherCardProps> = ({
   teacher,
   onClick,
   onSendMessage,
+  isParent,
 }) => {
   return (
     <div className='rounded-2xl p-4 shadow-sm border border-gray-100 max-w-[280px]'>
@@ -32,6 +34,14 @@ const TeacherCard: React.FC<TeacherCardProps> = ({
             {teacher.fullName}
           </span>
         </div>
+        {isParent && (
+          <div className='flex items-center text-sm'>
+            <span className='text-gray-500 font-medium'>Child:</span>
+            <span className='ml-2 text-gray-800 font-semibold'>
+              {teacher.studentName}
+            </span>
+          </div>
+        )}
         <div className='flex items-center text-sm'>
           <span className='text-gray-500 font-medium'>Rating:</span>
           <div className='ml-2'>

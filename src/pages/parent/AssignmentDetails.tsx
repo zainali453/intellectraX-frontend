@@ -4,9 +4,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import { formatDate } from "@/services/teacher.service";
-import { studentService } from "@/services/student.service";
-import CustomUpload, { UploadedFile } from "@/components/CustomUpload";
-import { adminService } from "@/services/admin.service";
+import { parentService } from "@/services/parent.service";
 
 interface AssignmentDetailsType {
   assignmentId: string;
@@ -50,9 +48,6 @@ const AssignmentDetails = () => {
 
   const [imageError, setImageError] = useState(false);
   const [refreshFlag, setRefreshFlag] = useState(false);
-  const [attachment, setAttachment] = useState<UploadedFile | null>(null);
-  const [uploading, setUploading] = useState(false);
-  const [uploadError, setUploadError] = useState("");
 
   useEffect(() => {
     const fetchData = async () => {
@@ -61,10 +56,10 @@ const AssignmentDetails = () => {
       try {
         setLoading(true);
 
-        const response = await adminService.getAssignmentById(assignmentId);
+        const response = await parentService.getAssignmentDetails(assignmentId);
         if (response && response.data) {
           setAssignmentDetails({
-            assignmentId: response.data._id,
+            assignmentId: response.data.assignmentId,
             teacher: response.data.teacherName,
             subject: response.data.subject.replace(/^\w/, (c) =>
               c.toUpperCase()
@@ -246,12 +241,6 @@ const AssignmentDetails = () => {
                     </div>
                   </div>
                 </div>
-              )}
-
-              {assignmentDetails.isSubmitted === false && (
-                <p className='text-gray-500 text-2xl text-center my-10'>
-                  This assignment has not been submitted yet.
-                </p>
               )}
 
               {assignmentDetails.isMarked === false &&

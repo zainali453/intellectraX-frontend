@@ -3,17 +3,20 @@ import CustomDetailCard from "@/components/CustomDetailCard";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import LoadingSpinner from "@/components/LoadingSpinner";
-import { formatDate } from "@/services/teacher.service";
-import { studentService } from "@/services/student.service";
+import {
+  calculateTimeLimit,
+  formatDate,
+  formatDateWithTime,
+  getTimeString,
+} from "@/services/teacher.service";
+import { parentService } from "@/services/parent.service";
 import CustomUpload, { UploadedFile } from "@/components/CustomUpload";
-import { adminService } from "@/services/admin.service";
 
-interface AssignmentDetailsType {
-  assignmentId: string;
+interface QuizDetailsType {
+  quizId: string;
   teacher: string;
   subject: string;
   dueDate: string;
-  assignedDate: string;
   description: string;
   title: string;
   attachment: string;
@@ -27,6 +30,8 @@ interface AssignmentDetailsType {
   submissionAttachmentUrl: string;
   studentName: string;
   isSubmitted: boolean;
+  startTime: string;
+  endTime: string;
 }
 
 // Extract filename from URL
@@ -40,13 +45,26 @@ const extractFileNameFromUrl = (url: string): string => {
   }
 };
 
-const AssignmentDetails = () => {
-  const assignmentId = useParams().id;
-  const navigate = useNavigate();
+const getQuizTime = (startTime: string, endTime: string): string => {
+  const start = new Date(startTime);
+  const end = new Date(endTime);
+  console.log(start, end);
+  const options: Intl.DateTimeFormatOptions = {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true,
+  };
+  return `${start.toLocaleTimeString([], options)} - ${end.toLocaleTimeString(
+    [],
+    options
+  )}`;
+};
+
+const QuizDetails = () => {
+  const quizId = useParams().id;
 
   const [loading, setLoading] = useState(true);
-  const [assignmentDetails, setAssignmentDetails] =
-    useState<AssignmentDetailsType | null>(null);
+  const [quizDetails, setQuizDetails] = useState<QuizDetailsType | null>(null);
 
   const [imageError, setImageError] = useState(false);
   const [refreshFlag, setRefreshFlag] = useState(false);
@@ -56,30 +74,33 @@ const AssignmentDetails = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      if (!assignmentId) return;
+      if (!quizId) return;
 
       try {
         setLoading(true);
 
-        const response = await adminService.getAssignmentById(assignmentId);
+        const response = await parentService.getQuizDetails(quizId);
         if (response && response.data) {
-          setAssignmentDetails({
-            assignmentId: response.data._id,
+          setQuizDetails({
+            quizId: response.data.quizId,
             teacher: response.data.teacherName,
             subject: response.data.subject.replace(/^\w/, (c) =>
               c.toUpperCase()
             ),
             dueDate: formatDate(response.data.dueDate),
-            assignedDate: formatDate(response.data.createdAt),
             description: response.data.instructions,
             title: response.data.title,
-            attachment: extractFileNameFromUrl(response.data.attachment),
-            attachmentUrl: response.data.attachment,
+            attachment: response.data.attachment
+              ? extractFileNameFromUrl(response.data.attachment)
+              : "",
+            attachmentUrl: response.data.attachment || "",
             isMarked: response.data.isMarked,
+            startTime: response.data.startTime,
+            endTime: response.data.endTime,
             marks: response.data.marks,
             grade: response.data.grade,
             teacherComments: response.data.teacherComments,
-            submissionDate: formatDate(response.data.submissionDate),
+            submissionDate: formatDateWithTime(response.data.submissionDate),
             submissionAttachment: extractFileNameFromUrl(
               response.data.submissionAttachment
             ),
@@ -95,40 +116,40 @@ const AssignmentDetails = () => {
       }
     };
     fetchData();
-  }, [assignmentId, refreshFlag]);
+  }, [quizId, refreshFlag]);
 
   return (
     <div className='px-8 py-6'>
-      <CustomDetailHeader title='Assignment Details'></CustomDetailHeader>
+      <CustomDetailHeader title='Quiz Details'></CustomDetailHeader>
       {loading ? (
         <div className='flex justify-center items-center h-140'>
           <LoadingSpinner size='lg' />
         </div>
-      ) : assignmentDetails ? (
+      ) : quizDetails ? (
         <>
           <div className='mt-8 bg-white p-6 rounded-2xl shadow-sm border border-gray-100'>
             <div className='relative'>
               {!imageError ? (
                 <img
-                  src={`/subjects/${assignmentDetails?.subject?.toLowerCase()}.png`}
-                  alt={assignmentDetails?.subject}
+                  src={`/subjects/${quizDetails?.subject?.toLowerCase()}.png`}
+                  alt={quizDetails?.subject}
                   className='w-full h-100 object-cover rounded-xl'
                   onError={() => setImageError(true)}
                 />
               ) : (
                 <div className='w-full h-100 bg-[#4393961a] rounded-xl flex items-center justify-center p-2'>
                   <span className='text-bgprimary font-semibold text-7xl capitalize wrap-anywhere text-center'>
-                    {assignmentDetails.subject || "Subject"}
+                    {quizDetails.subject || "Subject"}
                   </span>
                 </div>
               )}
             </div>
             <div>
               <h2 className='text-3xl text-textprimary font-semibold mt-6 mb-4'>
-                {assignmentDetails.title || "Assignment Title"}
+                {quizDetails.title || "Quiz Title"}
               </h2>
               <p className='text-gray-800 leading-relaxed mb-8'>
-                {assignmentDetails.description || "No description available."}
+                {quizDetails.description || "No description available."}
               </p>
 
               {/* Detail Cards Grid */}
@@ -136,35 +157,50 @@ const AssignmentDetails = () => {
                 <CustomDetailCard
                   icon='studentStar'
                   label='Assigned By'
-                  value={assignmentDetails.teacher || "N/A"}
+                  value={quizDetails.teacher || "N/A"}
                 />
                 <CustomDetailCard
                   icon='calender'
-                  label='Assigned Date'
-                  value={assignmentDetails.assignedDate || "N/A"}
+                  label='Quiz Date'
+                  value={quizDetails.dueDate || "N/A"}
                 />
                 <CustomDetailCard
-                  icon='calender'
-                  label='Due Date'
-                  value={assignmentDetails.dueDate || "N/A"}
+                  icon='clock'
+                  label='Quiz Time'
+                  value={
+                    getQuizTime(quizDetails.startTime, quizDetails.endTime) ||
+                    "N/A"
+                  }
                 />
                 <CustomDetailCard
                   icon='openBookFilled'
                   label='Subject'
-                  value={assignmentDetails.subject || "N/A"}
+                  value={quizDetails.subject || "N/A"}
                 />
+                {quizDetails.attachment && (
+                  <CustomDetailCard
+                    icon='attachmentDoc'
+                    label='Attachments'
+                    className='cursor-pointer'
+                    onClick={() => {
+                      if (quizDetails.attachmentUrl) {
+                        window.open(quizDetails.attachmentUrl, "_blank");
+                      }
+                    }}
+                    value={quizDetails.attachment || "N/A"}
+                    tooltip='Click to view attachment'
+                    iconClassName='h-[26x] w-[23px]'
+                  />
+                )}
                 <CustomDetailCard
-                  icon='attachmentDoc'
-                  label='Attachments'
-                  className='cursor-pointer'
-                  onClick={() => {
-                    if (assignmentDetails.attachmentUrl) {
-                      window.open(assignmentDetails.attachmentUrl, "_blank");
-                    }
-                  }}
-                  value={assignmentDetails.attachment || "N/A"}
-                  tooltip='Click to view attachment'
-                  iconClassName='h-[26x] w-[23px]'
+                  icon='clock'
+                  label='Time Limit'
+                  value={
+                    calculateTimeLimit(
+                      getTimeString(new Date(quizDetails.startTime)),
+                      getTimeString(new Date(quizDetails.endTime))
+                    ) || "N/A"
+                  }
                 />
               </div>
             </div>
@@ -175,45 +211,45 @@ const AssignmentDetails = () => {
                 Submission Details
               </h2>
 
-              {assignmentDetails.isSubmitted && (
+              {quizDetails.isSubmitted && (
                 <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4'>
                   <CustomDetailCard
                     icon='studentStar'
                     label='Submitted By'
-                    value={assignmentDetails.studentName || "N/A"}
+                    value={quizDetails.studentName || "N/A"}
                   />
                   <CustomDetailCard
                     icon='attachmentDoc'
                     label='Submitted File'
                     className='cursor-pointer'
                     onClick={() => {
-                      if (assignmentDetails.submissionAttachmentUrl) {
+                      if (quizDetails.submissionAttachmentUrl) {
                         window.open(
-                          assignmentDetails.submissionAttachmentUrl,
+                          quizDetails.submissionAttachmentUrl,
                           "_blank"
                         );
                       }
                     }}
-                    value={assignmentDetails.submissionAttachment || "N/A"}
+                    value={quizDetails.submissionAttachment || "N/A"}
                     tooltip='Click to view submitted file'
                     iconClassName='h-[26x] w-[23px]'
                   />
                   <CustomDetailCard
-                    icon='calender'
-                    label='Submission Date'
-                    value={assignmentDetails.submissionDate || "N/A"}
+                    icon='clock'
+                    label='Submission Time'
+                    value={quizDetails.submissionDate || "N/A"}
                   />
                 </div>
               )}
-              {assignmentDetails.isMarked && (
+              {quizDetails.isMarked && (
                 <div className='mt-6'>
                   <div>
                     <label className='block text-sm font-medium text-gray-700 mb-2'>
                       Teacher Comments
                     </label>
                     <textarea
-                      value={assignmentDetails.teacherComments || ""}
-                      placeholder='Enter assignment instructions...'
+                      value={quizDetails.teacherComments || ""}
+                      placeholder='Enter quiz instructions...'
                       rows={6}
                       disabled
                       className='w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-bgprimary focus:border-transparent resize-none text-sm leading-relaxed disabled:bg-gray-50 disabled:text-gray-500'
@@ -226,7 +262,7 @@ const AssignmentDetails = () => {
                       </label>
                       <input
                         type='text'
-                        value={assignmentDetails.grade || ""}
+                        value={quizDetails.grade || ""}
                         placeholder='Grade'
                         disabled
                         className='w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-bgprimary focus:border-transparent resize-none text-sm leading-relaxed disabled:bg-gray-50 disabled:text-gray-500'
@@ -238,7 +274,7 @@ const AssignmentDetails = () => {
                       </label>
                       <input
                         type='text'
-                        value={assignmentDetails.marks || ""}
+                        value={quizDetails.marks || ""}
                         placeholder='Marks'
                         disabled
                         className='w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-bgprimary focus:border-transparent resize-none text-sm leading-relaxed disabled:bg-gray-50 disabled:text-gray-500'
@@ -248,16 +284,16 @@ const AssignmentDetails = () => {
                 </div>
               )}
 
-              {assignmentDetails.isSubmitted === false && (
+              {quizDetails.attachment === "" && (
                 <p className='text-gray-500 text-2xl text-center my-10'>
-                  This assignment has not been submitted yet.
+                  Quiz Time has not started yet.
                 </p>
               )}
 
-              {assignmentDetails.isMarked === false &&
-                assignmentDetails.isSubmitted === true && (
+              {quizDetails.isMarked === false &&
+                quizDetails.isSubmitted === true && (
                   <p className='text-gray-500 text-2xl text-center my-10'>
-                    This assignment has not been graded yet.
+                    This quiz has not been graded yet.
                   </p>
                 )}
             </div>
@@ -265,11 +301,11 @@ const AssignmentDetails = () => {
         </>
       ) : (
         <div className='flex justify-center items-center h-140'>
-          <p className='text-gray-500'>No Assignment details found.</p>
+          <p className='text-gray-500'>No Quiz details found.</p>
         </div>
       )}
     </div>
   );
 };
 
-export default AssignmentDetails;
+export default QuizDetails;

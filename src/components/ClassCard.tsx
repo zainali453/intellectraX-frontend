@@ -11,6 +11,8 @@ export interface ClassData {
   onClick?: () => void;
   isTeacher?: boolean;
   status?: string;
+  showStudentName?: boolean;
+  studentName?: string;
 }
 
 interface ClassCardProps {
@@ -48,6 +50,12 @@ const ClassCard: React.FC<ClassCardProps> = ({ data }) => {
           </span>
         </div>
 
+        {data.showStudentName && (
+          <div className='flex items-center text-sm'>
+            <span className='text-gray-500 font-medium'>{"Child:"}</span>
+            <span className='ml-2 text-gray-800'>{data.studentName}</span>
+          </div>
+        )}
         <div className='flex items-center text-sm'>
           <span className='text-gray-500 font-medium'>
             {data.isTeacher ? "Teacher:" : "Student:"}
