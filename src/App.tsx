@@ -28,6 +28,7 @@ import AdminAssignments from "./pages/admin/Assignments";
 import AdminAssignmentDetails from "./pages/admin/AssignmentDetails";
 import AdminQuizzes from "./pages/admin/Quizzes";
 import AdminQuizDetails from "./pages/admin/QuizDetails";
+import AdminMessages from "./pages/admin/Messages";
 
 // teacher
 import TeacherDashboard from "./pages/teacher/Dashboard";
@@ -298,6 +299,7 @@ function App() {
           <Route path='assignments/:id' element={<AdminAssignmentDetails />} />
           <Route path='quizzes' element={<AdminQuizzes />} />
           <Route path='quizzes/:id' element={<AdminQuizDetails />} />
+          <Route path='messages' element={<AdminMessages />} />
 
           <Route path='*' element={<div>404 Not Found</div>} />
         </Route>

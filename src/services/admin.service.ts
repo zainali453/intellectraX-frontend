@@ -453,5 +453,29 @@ class AdminService {
       throw new Error(error.response?.data?.message || "Failed to fetch quiz");
     }
   }
+
+  async getChats() {
+    try {
+      const response = await apiClient.get(`admin/chats`);
+      return response.data;
+    } catch (error: any) {
+      console.error("Error fetching chats data:", error);
+      throw new Error(
+        error.response?.data?.message || "Failed to fetch chats data"
+      );
+    }
+  }
+
+  async getMessages(chatId: string) {
+    try {
+      const response = await apiClient.get(`admin/chats/${chatId}/messages`);
+      return response.data;
+    } catch (error: any) {
+      console.error("Error fetching messages data:", error);
+      throw new Error(
+        error.response?.data?.message || "Failed to fetch messages data"
+      );
+    }
+  }
 }
 export const adminService = new AdminService();

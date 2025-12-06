@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import Messages, { Chat, Message } from "@/components/Messages";
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { teacherService } from "@/services/teacher.service";
@@ -307,6 +307,7 @@ const MessagesPage = () => {
           onSendMessage={sendMessage}
           selectedChat={selectedChat}
           setSelectedChat={handleSetSelectedChat}
+          setMessagesLoading={setMessagesLoading}
         />
       )}
     </>

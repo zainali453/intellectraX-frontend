@@ -1,5 +1,6 @@
 import TeacherCustomHeader from "@/components/TeacherCustomHeader";
 import { useState, useEffect, useRef } from "react";
+import users from "@/assets/icons/users.png";
 import user from "@/assets/icons/user.png";
 // Types
 export interface Message {
@@ -10,10 +11,12 @@ export interface Message {
 
 export interface Chat {
   _id: string;
-  userId: string;
-  fullName: string;
-  profilePic?: string;
-  online: boolean;
+  senderId: string;
+  receiverId: string;
+  senderName: string;
+  receiverName: string;
+  senderProfilePic: string;
+  receiverProfilePic: string;
   lastMessage: string;
   time: Date | null;
 }
@@ -40,11 +43,12 @@ const Messages = ({
   const [messageInput, setMessageInput] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const previousMessagesLengthRef = useRef<number>(0);
 
   // Filter chats based on search
-  const filteredChats = chats.filter((chat) =>
-    chat.fullName.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredChats = chats.filter(
+    (chat) =>
+      chat.senderName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      chat.receiverName.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   // Auto-scroll to bottom only when new messages arrive (not on initial load)
@@ -59,7 +63,7 @@ const Messages = ({
     console.log("Handle send message called with:", messageInput);
 
     if (selectedChat) {
-      onSendMessage(selectedChat.userId, messageInput);
+      onSendMessage(selectedChat._id, messageInput);
       setMessageInput("");
     }
   };
@@ -216,32 +220,29 @@ const Messages = ({
             ) : (
               filteredChats.map((chat) => (
                 <div
-                  key={chat.userId}
+                  key={chat._id}
                   onClick={() => {
                     setMessagesLoading(true);
                     setSelectedChat(chat);
                   }}
                   className={`flex items-center gap-3 p-4 cursor-pointer transition-colors border-b border-gray-100 hover:bg-gray-50 ${
-                    selectedChat?.userId === chat.userId ? "bg-gray-100" : ""
+                    selectedChat?._id === chat._id ? "bg-gray-100" : ""
                   }`}
                 >
                   {/* Profile Picture with Online Status */}
                   <div className='relative flex-shrink-0'>
                     <img
-                      src={chat.profilePic || user}
-                      alt={chat.fullName}
-                      className='w-10 h-10 rounded-full object-cover'
+                      src={users}
+                      alt={chat.senderName + " & " + chat.receiverName}
+                      className='w-8 h-8  object-contain'
                     />
-                    {chat.online && (
-                      <span className='absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full'></span>
-                    )}
                   </div>
 
                   {/* Chat Info */}
                   <div className='flex-1 min-w-0'>
                     <div className='flex justify-between items-start'>
                       <h3 className='font-medium text-sm text-gray-900 truncate'>
-                        {chat.fullName}
+                        {chat.senderName + " & " + chat.receiverName}
                       </h3>
                       <span className='text-xs text-gray-500 flex-shrink-0 ml-2'>
                         {chat.time
@@ -266,17 +267,19 @@ const Messages = ({
               {/* Chat Header */}
               <div className='flex items-center gap-3 p-4 border-b border-gray-200'>
                 <img
-                  src={selectedChat.profilePic || user}
-                  alt={selectedChat.fullName}
-                  className='w-10 h-10 rounded-full object-cover'
+                  src={users}
+                  alt={
+                    selectedChat.senderName + " & " + selectedChat.receiverName
+                  }
+                  className='w-8 h-8 object-contain'
                 />
+
                 <div className='flex-1'>
                   <h3 className='font-medium text-gray-900'>
-                    {selectedChat.fullName}
+                    {selectedChat.senderName +
+                      " & " +
+                      selectedChat.receiverName}
                   </h3>
-                  <p className='text-xs text-green-500'>
-                    {selectedChat.online ? "Online" : "Offline"}
-                  </p>
                 </div>
               </div>
 
@@ -310,7 +313,7 @@ const Messages = ({
                   <div className='space-y-4'>
                     {messages.map((msg, index) => {
                       const isCurrentUser =
-                        msg.senderId !== selectedChat.userId;
+                        msg.senderId === selectedChat.senderId;
 
                       // Show date separator if this is the first message or if the date changed
                       const showDateSeparator =
@@ -336,33 +339,60 @@ const Messages = ({
                               isCurrentUser ? "justify-end" : "justify-start"
                             }`}
                           >
-                            <div className='flex items-end gap-2 max-w-[70%]'>
-                              {!isCurrentUser && (
+                            {!isCurrentUser && (
+                              <div className='flex items-end gap-2 max-w-[70%]'>
                                 <img
-                                  src={selectedChat.profilePic || user}
-                                  alt={selectedChat.fullName}
+                                  src={selectedChat.receiverProfilePic || user}
+                                  alt={selectedChat.receiverName}
                                   className='w-8 h-8 rounded-full object-cover flex-shrink-0'
                                 />
-                              )}
-                              <div>
-                                <div
-                                  className={`px-4 py-2 rounded-2xl ${
-                                    isCurrentUser
-                                      ? "bg-bgprimary text-white rounded-br-none"
-                                      : "bg-gray-200 text-gray-900 rounded-bl-none"
-                                  }`}
-                                >
-                                  <p className='text-sm'>{msg.message}</p>
+                                <div>
+                                  <div
+                                    className={`px-4 py-2 rounded-2xl ${
+                                      isCurrentUser
+                                        ? "bg-bgprimary text-white rounded-br-none"
+                                        : "bg-gray-200 text-gray-900 rounded-bl-none"
+                                    }`}
+                                  >
+                                    <p className='text-sm'>{msg.message}</p>
+                                  </div>
+                                  <span
+                                    className={`text-xs text-gray-500 mt-1 block ${
+                                      isCurrentUser ? "text-right" : "text-left"
+                                    }`}
+                                  >
+                                    {formatTime(msg.time)}
+                                  </span>
                                 </div>
-                                <span
-                                  className={`text-xs text-gray-500 mt-1 block ${
-                                    isCurrentUser ? "text-right" : "text-left"
-                                  }`}
-                                >
-                                  {formatTime(msg.time)}
-                                </span>
                               </div>
-                            </div>
+                            )}
+                            {isCurrentUser && (
+                              <div className='flex items-end gap-2 max-w-[70%]'>
+                                <div>
+                                  <div
+                                    className={`px-4 py-2 rounded-2xl ${
+                                      isCurrentUser
+                                        ? "bg-bgprimary text-white rounded-br-none"
+                                        : "bg-gray-200 text-gray-900 rounded-bl-none"
+                                    }`}
+                                  >
+                                    <p className='text-sm'>{msg.message}</p>
+                                  </div>
+                                  <span
+                                    className={`text-xs text-gray-500 mt-1 block ${
+                                      isCurrentUser ? "text-right" : "text-left"
+                                    }`}
+                                  >
+                                    {formatTime(msg.time)}
+                                  </span>
+                                </div>
+                                <img
+                                  src={selectedChat.senderProfilePic || user}
+                                  alt={selectedChat.senderName}
+                                  className='w-8 h-8 rounded-full object-cover flex-shrink-0'
+                                />
+                              </div>
+                            )}
                           </div>
                         </div>
                       );
@@ -377,7 +407,8 @@ const Messages = ({
                 <div className='flex items-center gap-3'>
                   <input
                     type='text'
-                    placeholder='Write message'
+                    placeholder='Admin messaging is disabled'
+                    disabled={true}
                     value={messageInput}
                     onChange={(e) => setMessageInput(e.target.value)}
                     onKeyPress={handleKeyPress}
@@ -386,7 +417,7 @@ const Messages = ({
 
                   <button
                     onClick={handleSendMessage}
-                    disabled={!messageInput.trim()}
+                    disabled={true}
                     className='p-3 bg-bgprimary text-white rounded-full hover:bg-opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed'
                     title='Send message'
                   >

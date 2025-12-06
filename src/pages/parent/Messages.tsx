@@ -307,6 +307,7 @@ const MessagesPage = () => {
           onSendMessage={sendMessage}
           selectedChat={selectedChat}
           setSelectedChat={handleSetSelectedChat}
+          setMessagesLoading={setMessagesLoading}
         />
       )}
     </>

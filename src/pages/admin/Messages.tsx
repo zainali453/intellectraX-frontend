@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
-import Messages, { Chat, Message } from "@/components/Messages";
+import Messages, { Chat, Message } from "@/components/AdminMessages";
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
-import { studentService } from "@/services/student.service";
+import { adminService } from "@/services/admin.service";
 import LoadingSpinner from "@/components/LoadingSpinner";
 
 const MessagesPage = () => {
@@ -42,9 +42,9 @@ const MessagesPage = () => {
     if (chat) {
       // Update URL with chatId parameter
       const newSearchParams = new URLSearchParams(searchParams);
-      newSearchParams.set("chatId", chat.userId);
+      newSearchParams.set("chatId", chat._id);
       navigate(
-        { pathname: "/student/messages", search: newSearchParams.toString() },
+        { pathname: "/admin/messages", search: newSearchParams.toString() },
         { replace: true }
       );
     } else {
@@ -52,7 +52,7 @@ const MessagesPage = () => {
       const newSearchParams = new URLSearchParams(searchParams);
       newSearchParams.delete("chatId");
       navigate(
-        { pathname: "/student/messages", search: newSearchParams.toString() },
+        { pathname: "/admin/messages", search: newSearchParams.toString() },
         { replace: true }
       );
     }
@@ -84,7 +84,7 @@ const MessagesPage = () => {
         setLoading(true);
       }
 
-      const response = await studentService.getChats();
+      const response = await adminService.getChats();
       if (response && response.data) {
         const newChats = response.data;
 
@@ -95,10 +95,10 @@ const MessagesPage = () => {
           if (shouldUpdateChats(newChats, currentChats)) {
             if (id) {
               const chat = currentChats.find(
-                (chat: Chat) => chat.userId === id && chat.time === null
+                (chat: Chat) => chat._id === id && chat.time === null
               );
               const isPresentinNewChats = newChats.find(
-                (chat: Chat) => chat.userId === id
+                (chat: Chat) => chat._id === id
               );
               if (chat && !isPresentinNewChats) {
                 handleSetSelectedChat(chat);
@@ -111,7 +111,7 @@ const MessagesPage = () => {
             const currentSelectedChat = selectedChatRef.current;
             if (currentSelectedChat) {
               const updatedSelectedChat = newChats.find(
-                (chat: Chat) => chat.userId === currentSelectedChat.userId
+                (chat: Chat) => chat._id === currentSelectedChat._id
               );
               if (updatedSelectedChat) {
                 setSelectedChat(updatedSelectedChat);
@@ -125,7 +125,7 @@ const MessagesPage = () => {
           // Check if there's a chatId in URL to restore
           if (chatIdFromUrl && isInitialLoadRef.current) {
             const chatToSelect = newChats.find(
-              (chat: Chat) => chat.userId === chatIdFromUrl
+              (chat: Chat) => chat._id === chatIdFromUrl
             );
             if (chatToSelect) {
               setSelectedChat(chatToSelect);
@@ -134,37 +134,37 @@ const MessagesPage = () => {
           }
 
           // Handle id from route params (for direct navigation)
-          if (id) {
-            const chat = newChats.find((chat: Chat) => chat.userId === id);
-            if (chat) {
-              handleSetSelectedChat(chat);
-            } else {
-              const studentDetails = await studentService.getTeacherForChat(id);
-              if (studentDetails && studentDetails.data) {
-                const newChat: Chat = {
-                  _id: studentDetails.data.userId,
-                  userId: studentDetails.data.userId,
-                  fullName: studentDetails.data.fullName,
-                  profilePic: studentDetails.data.profilePic || "",
-                  online: false,
-                  lastMessage: "",
-                  time: null,
-                };
-                setChats((prevChats) => [newChat, ...prevChats]);
-                handleSetSelectedChat(newChat);
+          // if (id) {
+          //   const chat = newChats.find((chat: Chat) => chat.userId === id);
+          //   if (chat) {
+          //     handleSetSelectedChat(chat);
+          //   } else {
+          //     const studentDetails = await adminService.getStudentForChat(id);
+          //     if (studentDetails && studentDetails.data) {
+          //       const newChat: Chat = {
+          //         _id: studentDetails.data.userId, // Add _id field
+          //         userId: studentDetails.data.userId,
+          //         fullName: studentDetails.data.fullName,
+          //         profilePic: studentDetails.data.profilePic || "",
+          //         online: false,
+          //         lastMessage: "",
+          //         time: null,
+          //       };
+          //       setChats((prevChats) => [newChat, ...prevChats]);
+          //       handleSetSelectedChat(newChat);
 
-                const newSearchParams = new URLSearchParams(searchParams);
-                newSearchParams.delete("chatId");
-                navigate(
-                  {
-                    pathname: "/student/messages",
-                    search: newSearchParams.toString(),
-                  },
-                  { replace: true }
-                );
-              }
-            }
-          }
+          //       const newSearchParams = new URLSearchParams(searchParams);
+          //       newSearchParams.delete("chatId");
+          //       navigate(
+          //         {
+          //           pathname: "/admin/messages",
+          //           search: newSearchParams.toString(),
+          //         },
+          //         { replace: true }
+          //       );
+          //     }
+          //   }
+          // }
         }
       }
     } catch (error) {
@@ -193,9 +193,9 @@ const MessagesPage = () => {
     };
   }, []);
 
-  const loadMessages = async (userId: string, isPolling = false) => {
+  const loadMessages = async (chatId: string, isPolling = false) => {
     try {
-      const response = await studentService.getMessages(userId);
+      const response = await adminService.getMessages(chatId);
       if (response && response.data && response.data.messages) {
         const newMessages = response.data.messages;
 
@@ -230,13 +230,13 @@ const MessagesPage = () => {
 
     if (selectedChat) {
       // Load messages initially
-      loadMessages(selectedChat.userId, false);
+      loadMessages(selectedChat._id, false);
 
       // Start polling for messages every 3 seconds
       messagePollingIntervalRef.current = window.setInterval(() => {
         const currentSelectedChat = selectedChatRef.current;
         if (currentSelectedChat) {
-          loadMessages(currentSelectedChat.userId, true);
+          loadMessages(currentSelectedChat._id, true);
         }
       }, 3000);
     } else {
@@ -250,46 +250,44 @@ const MessagesPage = () => {
     };
   }, [selectedChat]);
 
-  const sendMessage = async (userId: string, message: string) => {
-    try {
-      if (!selectedChat) return false;
-
-      // Optimistic update - add message immediately to UI
-      const optimisticMessage = {
-        message: message,
-        time: new Date(),
-        senderId: "currentUser", // This represents the current user
-      };
-
-      // Add to messages immediately
-      setMessages((prevMessages) => [...prevMessages, optimisticMessage]);
-
-      const response = await studentService.sendMessage(userId, message);
-      if (response && response.success) {
-        // Reload messages after a short delay to get the actual message from server
-        setTimeout(() => {
-          loadMessages(userId, true);
-        }, 500);
-        return true;
-      } else {
-        // If sending failed, remove the optimistic message
-        setMessages((prevMessages) =>
-          prevMessages.filter((msg) => msg !== optimisticMessage)
-        );
-        return false;
-      }
-    } catch (error) {
-      console.error("Failed to send message:", error);
-      // Remove optimistic message on error
-      setMessages((prevMessages) =>
-        prevMessages.filter(
-          (msg) =>
-            msg.senderId !== "currentUser" ||
-            msg.time.getTime() < Date.now() - 1000
-        )
-      );
-      return false;
-    }
+  const sendMessage = async (chatId: string, message: string) => {
+    // try {
+    //   if (!selectedChat) return false;
+    //   // Optimistic update - add message immediately to UI
+    //   const optimisticMessage = {
+    //     message: message,
+    //     time: new Date(),
+    //     senderId: "currentUser", // This represents the current user
+    //   };
+    //   // Add to messages immediately
+    //   setMessages((prevMessages) => [...prevMessages, optimisticMessage]);
+    //   const response = await adminService.sendMessage(userId, message);
+    //   if (response && response.success) {
+    //     // Reload messages and chats after a short delay to get actual data from server
+    //     setTimeout(() => {
+    //       loadMessages(userId, true);
+    //       loadChats(true);
+    //     }, 500);
+    //     return true;
+    //   } else {
+    //     // If sending failed, remove the optimistic message
+    //     setMessages((prevMessages) =>
+    //       prevMessages.filter((msg) => msg !== optimisticMessage)
+    //     );
+    //     return false;
+    //   }
+    // } catch (error) {
+    //   console.error("Failed to send message:", error);
+    //   // Remove optimistic message on error
+    //   setMessages((prevMessages) =>
+    //     prevMessages.filter(
+    //       (msg) =>
+    //         msg.senderId !== "currentUser" ||
+    //         msg.time.getTime() < Date.now() - 1000
+    //     )
+    //   );
+    //   return false;
+    // }
   };
 
   return (
