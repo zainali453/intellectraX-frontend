@@ -658,5 +658,57 @@ class TeacherService {
       );
     }
   }
+
+  // Call-related methods
+  async getSubjectsForCalls() {
+    try {
+      const response = await apiClient.get<successResponseWithData<string[]>>(
+        `teacher/calls/subjects`
+      );
+      return response.data;
+    } catch (error: any) {
+      console.error("Error fetching subjects for calls:", error);
+      throw new Error(
+        error.response?.data?.message || "Failed to fetch subjects for calls"
+      );
+    }
+  }
+
+  async getStudentsForCalls(subjectId: string) {
+    try {
+      const response = await apiClient.get<
+        successResponseWithData<StudentForClass[]>
+      >(`teacher/calls/students/${subjectId}`);
+      return response.data;
+    } catch (error: any) {
+      console.error("Error fetching students for calls:", error);
+      throw new Error(
+        error.response?.data?.message || "Failed to fetch students for calls"
+      );
+    }
+  }
+
+  async initiateCall(callData: {
+    callPurpose: string;
+    subject: string;
+    studentId: string;
+    participants: "student" | "parent" | "both";
+  }) {
+    try {
+      const response = await apiClient.post<
+        successResponseWithData<{
+          callId: string;
+          meetingId: string;
+          token: string;
+        }>
+      >(`teacher/calls/initiate`, callData);
+      return response.data;
+    } catch (error: any) {
+      console.error("Error initiating call:", error);
+      throw new Error(
+        error.response?.data?.message || "Failed to initiate call"
+      );
+    }
+  }
 }
 export const teacherService = new TeacherService();

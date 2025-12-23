@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import intellectraxLogo from "../assets/IntellectraX.png";
-import { Bell, LogOut } from "lucide-react";
+import { Bell, LogOut, User } from "lucide-react";
 import { useUser } from "../context/UserContext";
 import logo from "../assets/logo.png";
 import profile from "../assets/icons/user.png";
@@ -16,6 +16,11 @@ export default function Topbar({ main = false }: { main?: boolean }) {
 
   const handleLogoClick = () => {
     navigate("/dashboard");
+  };
+
+  const handleProfileClick = () => {
+    setShowModal(false);
+    navigate("/" + user.role + "/profile");
   };
 
   const handleLogout = () => {
@@ -119,11 +124,20 @@ export default function Topbar({ main = false }: { main?: boolean }) {
                   </div>
                 </div>
 
+                {user.role !== "admin" && (
+                  <button
+                    onClick={handleProfileClick}
+                    className='w-full px-4 cursor-pointer py-2 flex items-center gap-2 text-gray-500 hover:bg-gray-50'
+                  >
+                    <User size={21} strokeWidth={2} />
+                    <span>Profile</span>
+                  </button>
+                )}
                 <button
                   onClick={handleLogout}
-                  className='w-full px-4 cursor-pointer py-2 flex items-center gap-2 text-red-600 hover:bg-gray-50'
+                  className='w-full px-4 cursor-pointer py-2 flex items-center gap-2 text-red-700 hover:bg-gray-50'
                 >
-                  <LogOut size={18} strokeWidth={1.5} />
+                  <LogOut size={18} strokeWidth={2} />
                   <span>Logout</span>
                 </button>
               </div>

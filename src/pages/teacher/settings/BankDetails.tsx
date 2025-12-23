@@ -1,5 +1,5 @@
 import { useState } from "react";
-import InputField from "../InputField";
+import InputField from "@/components/InputField";
 
 interface PricingDetailsType {
   pricingFName: string;
@@ -7,17 +7,16 @@ interface PricingDetailsType {
   pricingSortCode: string;
   pricingAccountNumber: string;
 }
-interface PricingDetailsProps {
-  onChange: (data: PricingDetailsType) => void;
-  data: PricingDetailsType;
-}
 
-const PricingDetails = ({ onChange, data }: PricingDetailsProps) => {
+const BankDetails = () => {
+  const [isUpdated, setIsUpdated] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
   const [formData, setFormData] = useState<PricingDetailsType>({
-    pricingFName: data.pricingFName,
-    pricingLName: data.pricingLName,
-    pricingSortCode: data.pricingSortCode,
-    pricingAccountNumber: data.pricingAccountNumber,
+    pricingFName: "",
+    pricingLName: "",
+    pricingSortCode: "",
+    pricingAccountNumber: "",
   });
 
   const handleInputChange = (
@@ -26,7 +25,7 @@ const PricingDetails = ({ onChange, data }: PricingDetailsProps) => {
   ) => {
     const updatedData = { ...formData, [field]: value };
     setFormData(updatedData);
-    onChange(updatedData);
+    // onChange(updatedData);
   };
 
   // Format sort code with dashes
@@ -82,8 +81,23 @@ const PricingDetails = ({ onChange, data }: PricingDetailsProps) => {
         placeholder='Enter 8-digit account'
         required
       />
+      {isUpdated && (
+        <div className='flex justify-end flex-1 items-end mt-4'>
+          <button
+            type='submit'
+            disabled={isLoading || !isUpdated}
+            className={`py-2 px-4 rounded-3xl font-medium transition-colors duration-200 ${
+              isLoading
+                ? "bg-gray-400 cursor-not-allowed text-white"
+                : "bg-bgprimary hover:bg-teal-600 cursor-pointer text-white"
+            }`}
+          >
+            {isLoading ? "Updating..." : "Save Changes"}
+          </button>
+        </div>
+      )}
     </div>
   );
 };
 
-export default PricingDetails;
+export default BankDetails;

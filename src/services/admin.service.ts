@@ -284,6 +284,37 @@ class AdminService {
       );
     }
   }
+  async getAllParents(currentPage: number) {
+    try {
+      const response = await apiClient.get<{
+        success: boolean;
+        message: string;
+        data: {}[];
+        meta: { pagination: { totalPages: number } };
+      }>(`admin/parents/all?page=${currentPage}`);
+      return response.data;
+    } catch (error: any) {
+      console.error("Error fetching parents:", error);
+      throw new Error(
+        error.response?.data?.message || "Failed to fetch parents"
+      );
+    }
+  }
+  async getParentById(parentId: string) {
+    try {
+      const response = await apiClient.get<{
+        success: boolean;
+        message: string;
+        data: any;
+      }>(`admin/parent/${parentId}`);
+      return response.data;
+    } catch (error: any) {
+      console.error("Error fetching parent:", error);
+      throw new Error(
+        error.response?.data?.message || "Failed to fetch parent"
+      );
+    }
+  }
 
   async getAllStudents(currentPage: number) {
     try {
@@ -474,6 +505,37 @@ class AdminService {
       console.error("Error fetching messages data:", error);
       throw new Error(
         error.response?.data?.message || "Failed to fetch messages data"
+      );
+    }
+  }
+  async updateProfile(profileData: any) {
+    try {
+      const response = await apiClient.put<{
+        success: boolean;
+        message: string;
+        data: any;
+      }>(`admin/profile`, profileData);
+      return response.data;
+    } catch (error: any) {
+      console.error("Error updating profile:", error);
+      throw new Error(
+        error.response?.data?.message || "Failed to update profile"
+      );
+    }
+  }
+
+  async getProfile() {
+    try {
+      const response = await apiClient.get<{
+        success: boolean;
+        message: string;
+        data: any;
+      }>(`admin/profile`);
+      return response.data.data;
+    } catch (error: any) {
+      console.error("Error fetching profile:", error);
+      throw new Error(
+        error.response?.data?.message || "Failed to fetch profile"
       );
     }
   }

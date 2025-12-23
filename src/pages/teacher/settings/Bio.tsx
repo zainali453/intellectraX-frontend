@@ -5,9 +5,9 @@ import React, {
   useImperativeHandle,
   useCallback,
 } from "react";
-import { useUser } from "../../context/UserContext";
-import CustomIcon from "../../components/CustomIcon";
-import { onboardingService } from "../../services/onboarding.service";
+import { useUser } from "@/context/UserContext";
+import CustomIcon from "@/components/CustomIcon";
+import { onboardingService } from "@/services/onboarding.service";
 
 // Type definitions for better code organization
 interface BioQualificationsProps {
@@ -16,7 +16,6 @@ interface BioQualificationsProps {
 }
 
 interface BioData {
-  profilePic: string;
   governmentId: string;
   degreeLinks: string[];
   certificateLinks: string[];
@@ -80,17 +79,18 @@ const extractFileNameFromUrl = (url: string): string => {
 // Generate unique ID for file items
 const generateId = () => Math.random().toString(36).substr(2, 9);
 
-const BioQualifications = ({ data, onChange }: BioQualificationsProps) => {
+const BioQualifications = () => {
   const { updateUserFromCookies } = useUser();
 
+  const data: BioData = {
+    governmentId: "",
+    degreeLinks: [],
+    certificateLinks: [],
+    bio: "",
+  };
   // State management with cleaner structure
   const [formData, setFormData] = useState({
     bio: data.bio || "",
-    profilePic: {
-      file: null as File | null,
-      url: data.profilePic || "",
-      fileName: data.profilePic ? extractFileNameFromUrl(data.profilePic) : "",
-    },
     governmentId: {
       file: null as File | null,
       url: data.governmentId || "",
@@ -126,7 +126,6 @@ const BioQualifications = ({ data, onChange }: BioQualificationsProps) => {
   // Sync data with parent component
   const syncWithParent = useCallback(() => {
     const bioData: BioData = {
-      profilePic: formData.profilePic.url,
       governmentId: formData.governmentId.url,
       degreeLinks: degreeFiles.map((item) => item.url).filter(Boolean),
       certificateLinks: certificateFiles
@@ -135,11 +134,11 @@ const BioQualifications = ({ data, onChange }: BioQualificationsProps) => {
       bio: formData.bio,
     };
 
-    onChange((prev: any) => ({
-      ...prev,
-      ...bioData,
-    }));
-  }, [formData, degreeFiles, certificateFiles, onChange]);
+    // onChange((prev: any) => ({
+    //   ...prev,
+    //   ...bioData,
+    // }));
+  }, [formData, degreeFiles, certificateFiles]);
 
   // Auto-sync when data changes
   useEffect(() => {
@@ -160,7 +159,6 @@ const BioQualifications = ({ data, onChange }: BioQualificationsProps) => {
       if (!response.success || !response.data?.fileUrl) {
         throw new Error(response.message || "Upload failed");
       }
-      if (type === "profilePic") updateUserFromCookies();
       return {
         success: true,
         fileUrl: response.data.fileUrl,
@@ -173,9 +171,9 @@ const BioQualifications = ({ data, onChange }: BioQualificationsProps) => {
     }
   };
 
-  // Handle single file uploads (profile pic, government ID)
+  // Handle single file uploads (government ID)
   const handleSingleFileUpload = async (
-    fileType: "profilePic" | "governmentId",
+    fileType: "governmentId",
     file: File
   ) => {
     try {
@@ -317,11 +315,8 @@ const BioQualifications = ({ data, onChange }: BioQualificationsProps) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
-    if (fileType === "profilePic" || fileType === "governmentId") {
-      await handleSingleFileUpload(
-        fileType as "profilePic" | "governmentId",
-        file
-      );
+    if (fileType === "governmentId") {
+      await handleSingleFileUpload(fileType as "governmentId", file);
     } else if (fileType === "degreeLinks" || fileType === "certificateLinks") {
       await handleMultipleFileAdd(
         fileType as "degreeLinks" | "certificateLinks",
@@ -336,11 +331,8 @@ const BioQualifications = ({ data, onChange }: BioQualificationsProps) => {
     const file = e.dataTransfer.files[0];
     if (!file) return;
 
-    if (fileType === "profilePic" || fileType === "governmentId") {
-      await handleSingleFileUpload(
-        fileType as "profilePic" | "governmentId",
-        file
-      );
+    if (fileType === "governmentId") {
+      await handleSingleFileUpload(fileType as "governmentId", file);
     } else if (fileType === "degreeLinks" || fileType === "certificateLinks") {
       await handleMultipleFileAdd(
         fileType as "degreeLinks" | "certificateLinks",
@@ -353,7 +345,7 @@ const BioQualifications = ({ data, onChange }: BioQualificationsProps) => {
     e.preventDefault();
   };
 
-  // Single file upload component (for profile pic and government ID)
+  // Single file upload component (for government ID)
   const FileUploadArea: React.FC<FileUploadAreaProps> = ({
     fileType,
     label,
@@ -377,59 +369,6 @@ const BioQualifications = ({ data, onChange }: BioQualificationsProps) => {
       file instanceof File
         ? file.name
         : storedFileName || (fileUrl ? getFileName(fileUrl) : "");
-    const isProfilePic = fileType === "profilePic";
-
-    if (isProfilePic) {
-      return (
-        <div className='mb-6'>
-          <label className='block text-sm font-medium text-gray-700 mb-1'>
-            {label}
-          </label>
-          <div className='flex items-center justify-center'>
-            <div
-              className='relative cursor-pointer'
-              onClick={() => {
-                if (!uploading) {
-                  document.getElementById(`${fileType}-input`)?.click();
-                }
-              }}
-            >
-              <div className='w-32 h-32 bg-[#EFF2F7] rounded-full flex items-center justify-center overflow-hidden'>
-                {hasFile ? (
-                  <img
-                    src={typeof file === "string" ? file : fileUrl}
-                    alt='Profile'
-                    className='w-full h-full object-cover'
-                  />
-                ) : (
-                  <CustomIcon name='user' className='w-22 h-22' />
-                )}
-              </div>
-              <div
-                className={`absolute -bottom-1 -right-1 w-12 h-15 rounded-full flex items-center justify-center transition-colors ${
-                  uploading ? "opacity-50 cursor-not-allowed" : ""
-                }`}
-              >
-                <CustomIcon name='camera' />
-              </div>
-              <input
-                id={`${fileType}-input`}
-                type='file'
-                className='hidden'
-                onChange={(e) => onFileUpload(fileType, e)}
-                accept='image/*'
-                disabled={uploading}
-              />
-            </div>
-          </div>
-          {uploading && (
-            <p className='text-sm text-gray-600 text-center mt-2'>
-              Uploading...
-            </p>
-          )}
-        </div>
-      );
-    }
 
     return (
       <div className='mb-6'>
@@ -613,19 +552,6 @@ const BioQualifications = ({ data, onChange }: BioQualificationsProps) => {
           {error}
         </div>
       )}
-
-      {/* Profile Picture Section */}
-      <div className='my-10'>
-        <FileUploadArea
-          fileType='profilePic'
-          file={formData.profilePic.file}
-          fileUrl={formData.profilePic.url}
-          fileName={formData.profilePic.fileName}
-          onFileUpload={handleFileUpload}
-          onFileDrop={handleDrop}
-          uploading={uploading}
-        />
-      </div>
 
       {/* Bio Section */}
       <div className='mb-6'>

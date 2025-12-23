@@ -35,6 +35,11 @@ import calender from "../assets/icons/calendar.png";
 import clock from "../assets/icons/clock.png";
 import openBookFilled from "../assets/icons/openBookFilled.png";
 import attachmentDoc from "../assets/icons/attachmentDoc.png";
+import account from "../assets/icons/account.png";
+import bio from "../assets/icons/bio.png";
+import availability from "../assets/icons/availability.png";
+import parentAccount from "../assets/icons/parentAccount.png";
+import phone from "../assets/icons/phone.png";
 
 import dashboardActive from "../assets/icons/dashboardActive.png";
 import assignmentsActive from "../assets/icons/assignmentsActive.png";
@@ -52,6 +57,10 @@ import verificationsActive from "../assets/icons/verificationsActive.png";
 import pairingActive from "../assets/icons/pairingActive.png";
 import audioVideoActive from "../assets/icons/audioVideoActive.png";
 import cardActive from "../assets/icons/cardActive.png";
+import accountActive from "../assets/icons/accountActive.png";
+import bioActive from "../assets/icons/bioActive.png";
+import availabilityActive from "../assets/icons/availabilityActive.png";
+import parentAccountActive from "../assets/icons/parentAccountActive.png";
 
 const ICONS = {
   openBook,
@@ -89,6 +98,12 @@ const ICONS = {
   clock,
   openBookFilled,
   attachmentDoc,
+  account,
+  bio,
+  availability,
+  parentAccount,
+  parentAccountActive,
+  phone,
 
   dashboardActive,
   assignmentsActive,
@@ -106,6 +121,9 @@ const ICONS = {
   pairingActive,
   audioVideoActive,
   cardActive,
+  accountActive,
+  bioActive,
+  availabilityActive,
 } as const;
 
 export type IconName = keyof typeof ICONS;

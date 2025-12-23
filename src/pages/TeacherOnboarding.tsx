@@ -47,10 +47,6 @@ interface PricingDetailsType {
   pricingAccountNumber: string;
 }
 
-interface AvailabilityScheduleRef {
-  getData: () => AvailabilitySlot[];
-}
-
 const Onboarding = () => {
   const { updateUserFromCookies, user } = useUser();
   const navigate = useNavigate();

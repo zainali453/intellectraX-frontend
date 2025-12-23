@@ -159,6 +159,12 @@ const teacherLinks: {
     size: "w-[13px] h-[20px]",
   },
   {
+    name: "Logs",
+    icon: "assignments",
+    path: "logs",
+    size: "w-[18px] h-[19px]",
+  },
+  {
     name: "Settings",
     icon: "settings",
     path: "settings",
@@ -207,16 +213,11 @@ const studentLinks: {
     path: "messages",
     size: "w-[19px] h-[19px]",
   },
-  {
-    name: "Audio/Video Call",
-    icon: "audioVideo",
-    path: "calls",
-    size: "w-[21px] h-[15px]",
-  },
+
   {
     name: "Payments",
     icon: "earnings",
-    path: "earnings",
+    path: "payments",
     size: "w-[13px] h-[20px]",
   },
   {
@@ -282,7 +283,7 @@ const parentLinks: {
   {
     name: "Payments",
     icon: "earnings",
-    path: "earnings",
+    path: "payments",
     size: "w-[13px] h-[20px]",
   },
   {

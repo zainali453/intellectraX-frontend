@@ -109,7 +109,9 @@ export default function InputField(props: InputFieldProps) {
   const inputEl = (() => {
     if (isTextArea) {
       const { rows = 3 } = props as TextAreaProps;
-      return <textarea {...commonProps} rows={rows} />;
+      return (
+        <textarea {...commonProps} rows={rows} style={{ resize: "none" }} />
+      );
     }
     return <input {...commonProps} type={inputType} />;
   })();
@@ -172,20 +174,20 @@ export default function InputField(props: InputFieldProps) {
       {label && (
         <label
           htmlFor={name}
-          className="block text-sm font-medium text-[#6b727d] mb-2"
+          className='block text-sm font-medium text-[#6b727d] mb-2'
         >
           {label}
-          {required && <span className="text-red-600 ml-1">*</span>}
+          {required && <span className='text-red-600 ml-1'>*</span>}
         </label>
       )}
-      <div className="relative mb-2">
+      <div className='relative mb-2'>
         {inputEl}
         {renderEndAdornment()}
       </div>
       {error ? (
-        <p className="mt-1 text-sm text-red-600">{error}</p>
+        <p className='mt-1 text-sm text-red-600'>{error}</p>
       ) : helpText ? (
-        <p className="mt-1 text-sm text-gray-500">{helpText}</p>
+        <p className='mt-1 text-sm text-gray-500'>{helpText}</p>
       ) : null}
     </div>
   );
